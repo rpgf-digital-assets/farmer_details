@@ -477,7 +477,7 @@ Farmers list
                                 <!--end::Menu item-->
                                 <!--begin::Menu item-->
                                 <div class="menu-item px-3">
-                                    <a href="#" class="menu-link px-3" onclick="delete_farmer('{{farmer.pk}}')" data-kt-users-table-filter="delete_row">Delete</a>
+                                    <a href="#" class="menu-link px-3" data-kt-users-table-filter="delete_row">Delete</a>
                                 </div>
                                 <!--end::Menu item-->
                             </div>
@@ -502,11 +502,81 @@ Farmers list
 
 <script type="text/javascript">
 
-    const delete_farmer = (farmer_pk) => {
-        remove_selected_farmers([farmer_pk])        
-    }
 
     var table = document.getElementById('kt_table_users');
+    var datatable = $(table).DataTable({
+        "info": false,
+        'order': [],
+        'columnDefs': [
+            { orderable: false, targets: 0 }, // Disable ordering on column 0 (checkbox)
+            { orderable: false, targets: 6 }, // Disable ordering on column 6 (actions)
+        ]
+    });
+    datatable.on('draw', function () {
+        initToggleToolbar();
+        handleDeleteRows();
+        toggleToolbars();
+        KTMenu.init(); // reinit KTMenu instances 
+    });
+    // Delete customer
+    var handleDeleteRows = () => {
+        // Select all delete buttons
+        const deleteButtons = table.querySelectorAll('[data-kt-users-table-filter="delete_row"]');
+
+        deleteButtons.forEach(d => {
+            // Delete button on click
+            d.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                // Select parent row
+                const parent = e.target.closest('tr');
+
+                // Get customer name
+                const customerName = parent.querySelectorAll('td')[1].innerText;
+
+                // SweetAlert2 pop up --- official docs reference: https://sweetalert2.github.io/
+                Swal.fire({
+                    text: "Are you sure you want to delete " + customerName + "?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    buttonsStyling: false,
+                    confirmButtonText: "Yes, delete!",
+                    cancelButtonText: "No, cancel",
+                    customClass: {
+                        confirmButton: "btn fw-bold btn-danger",
+                        cancelButton: "btn fw-bold btn-active-light-primary"
+                    }
+                }).then(function (result) {
+                    if (result.value) {
+                        Swal.fire({
+                            text: "You have deleted " + customerName + "!.",
+                            icon: "success",
+                            buttonsStyling: false,
+                            confirmButtonText: "Ok, got it!",
+                            customClass: {
+                                confirmButton: "btn fw-bold btn-primary",
+                            }
+                        }).then(function () {
+                            // Remove current row
+                            remove_selected_farmers([$(parent).find('[type=checkbox]').attr('id')])
+                            
+                        });
+                    } else if (result.dismiss === 'cancel') {
+                        Swal.fire({
+                            text: customerName + " was not deleted.",
+                            icon: "error",
+                            buttonsStyling: false,
+                            confirmButtonText: "Ok, got it!",
+                            customClass: {
+                                confirmButton: "btn fw-bold btn-primary",
+                            }
+                        });
+                    }
+                });
+            })
+        });
+    }
+
     // Toggle toolbars
     const toggleToolbars = () => {
         // Select refreshed checkbox DOM elements 
@@ -582,7 +652,7 @@ Farmers list
                         }
                     }).then(function () {
                         // Remove all selected customers
-                        var selected_farmers = []
+                        var selected_farmers = new Array()
                         checkboxes.forEach(c => {
                             if (c.checked) {
                                 selected_farmers.push(c.id)
@@ -613,15 +683,19 @@ Farmers list
     }
 
     initToggleToolbar()
+    handleDeleteRows()
 
     const remove_selected_farmers = (farmers_list) => {
-        const formData = new FormData();
-        formData.append('farmers_list',farmers_list);
+        console.log(farmers_list)
         let delete_farmers_url = "{% url 'api:api_farmer_admin:farmer_delete_api_view' %}"
         fetch(delete_farmers_url, {
             method: "POST",
+            body: JSON.stringify({
+                farmers_list: farmers_list,
+            }),
             headers: {
                 "X-CSRFToken": getCookie("csrftoken"),
+                "Content-type": "application/json; charset=UTF-8",
             },
             credentials: "include"
         })
@@ -635,7 +709,20 @@ Farmers list
             }
         })
         .then((response) => {
-            console.log(response)
+            if (response.status === 'success' ){
+                const checkboxes = table.querySelectorAll('[type="checkbox"]');
+                
+                checkboxes.forEach(c => {
+                    if (c.checked) {
+                        datatable.row($(parent)).remove().draw();
+                    }
+                });
+
+                if (farmers_list.length === 1) {
+                    datatable.row($(`#${farmers_list[0]}`).parent().parent().parent()).remove().draw();
+                }
+                toastr.success('Successfully deleted farmers')
+            }
         })
     }
 
