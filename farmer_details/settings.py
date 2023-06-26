@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,7 +39,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'users'
+    'rest_framework_simplejwt',
+    'users',
+    'farmer',
+    'farmer_admin',
+    'farmer_details_app',
 ]
 
 MIDDLEWARE = [
@@ -48,6 +54,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware',
 ]
 
 ROOT_URLCONF = 'farmer_details.urls'
@@ -55,7 +62,7 @@ ROOT_URLCONF = 'farmer_details.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -64,6 +71,9 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'libraries': {
+                'base_extras': 'templatetags.base_extras',
+            },
         },
     },
 ]
@@ -116,7 +126,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static_files")
+]
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -127,4 +143,54 @@ AUTH_USER_MODEL = "users.User"
 AUTHENTICATION_BACKENDS = ['users.backends.EmailAuthenticationBackend',
                            'django.contrib.auth.backends.ModelBackend',
                            ]
+LOGIN_REDIRECT_URL = 'farmer_details_app:index'
 LOGOUT_URL = 'users:logout'
+
+######################### MEDIA CONFIGURATION #################
+
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+
+
+
+DEFAULT_PASSWORD = 'Abcd@1234'
+
+
+##################### REST FRAMEWORK SETTINGS ######################
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'api.authenticate.CustomAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
+}
+
+
+##################### SIMPLE JWT SETTINGS ##########################
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=10),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=20),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    # custom
+    # Cookie name. Enables cookies if value is set.
+    'AUTH_COOKIE': 'access_token',
+    # A string like "example.com", or None for standard domain cookie.
+    'AUTH_COOKIE_DOMAIN': None,
+    # Whether the auth cookies should be secure (https:// only).
+    'AUTH_COOKIE_SECURE': False,
+    # Http only cookie flag.It's not fetch by javascript.
+    'AUTH_COOKIE_HTTP_ONLY': True,
+    'AUTH_COOKIE_PATH': '/',        # The path of the auth cookie.
+    # Whether to set the flag restricting cookie leaks on cross-site requests. This can be 'Lax', 'Strict', or None to disable the flag.
+    'AUTH_COOKIE_SAMESITE': 'Lax',
+
+}

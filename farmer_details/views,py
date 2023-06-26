@@ -1,0 +1,11 @@
+from django.views.generic import (
+    FormView,
+    ListView,
+    TemplateView,
+    UpdateView,
+    View
+)
+
+class IndexView(TemplateView):
+    template_name = 'base.html'
+

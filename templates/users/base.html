@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block basecontent %}
+<div class="d-flex flex-column flex-root">
+    <!--begin::Authentication - Sign-in -->
+    <!--begin::Image placeholder-->
+    <style>.auth-page-bg { background-image: url('{% static "assets/media/illustrations/dozzy-1/14.png" %}'); } [data-bs-theme="dark"] .auth-page-bg { background-image: url('{% static "assets/media/illustrations/dozzy-1/14-dark.png" %}'); }</style>
+    <!--end::Image placeholder-->
+    <div class="d-flex flex-column flex-column-fluid bgi-position-y-bottom position-x-center bgi-no-repeat bgi-size-contain bgi-attachment-fixed auth-page-bg">
+        
+        {% block content %}
+        {% endblock content %}
+
+        <!--begin::Footer-->
+        <div class="d-flex flex-center flex-column-auto p-10">
+            <!--begin::Links-->
+            <div class="d-flex align-items-center fw-semibold fs-6">
+                <a href="" class="text-muted text-hover-primary px-2">About</a>
+                <a href="" class="text-muted text-hover-primary px-2">Contact</a>
+                <a href="" class="text-muted text-hover-primary px-2">Contact Us</a>
+            </div>
+            <!--end::Links-->
+        </div>
+        <!--end::Footer-->
+    </div>
+    <!--end::Authentication - Sign-in-->
+</div>
+{% endblock basecontent %}

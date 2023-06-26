@@ -1,11 +1,11 @@
 import uuid
 from django.db import models
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
+from farmer_details_app.models import BaseModel
 
 
 from users.models import User
-from utils import BaseModel
 
 
 # Create your models here.
@@ -27,7 +27,7 @@ class Farmer(BaseModel):
     """
     
     class Meta:
-        verbose_name_plural = _("Individuals")
+        verbose_name_plural = _("Farmers")
 
     user = models.OneToOneField(
         User, on_delete=models.PROTECT, primary_key=True)
@@ -41,7 +41,6 @@ class Farmer(BaseModel):
     ]
     gender = models.CharField(_("Gender"), max_length=30, default=UNDEFINED)
     birth_date = models.DateField(_("BirthDate"))
-    age = models.IntegerField(_("Age"))
     aadhar_number = models.IntegerField(_("Aadhar Number"))
     registration_number = models.IntegerField(_("Farmer Tracnet Registration Number"))
     date_of_joining_of_program = models.DateField(_("Date of Joining of Program"))
@@ -51,7 +50,7 @@ class Farmer(BaseModel):
     state = models.CharField(_("State"), max_length=200)
     country = models.CharField(_("Country"), max_length=100)
     profile_image = models.ImageField(
-        _("Profile Image"), upload_to="farmer_profile_image", default="farmer_profile_image/blank-profile-picture.png", blank=True, null=True)
+        _("Profile Image"), upload_to="farmer_profile_image", default="farmer_profile_image/blank-profile-picture.png")
     objects = DefaultSelectOrPrefetchManager(
         select_related=('user',),
     )
@@ -66,7 +65,6 @@ class Farmer(BaseModel):
 class FarmerProject(BaseModel):
     """Store project information of a farmer
     """
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     ORGANIC = 'ORGANIC'
     SUSTAINABLE = 'SUSTAINABLE'
     UNDEFINED = 'UNDEFINED'
@@ -87,7 +85,7 @@ class FarmerEducation(BaseModel):
 class FarmerSocial(BaseModel):
     """Store social data of a farmer
     """
-    education = models.ForeignKey(FarmerEducation, related_name='farmer_social')
+    education = models.ForeignKey(FarmerEducation, related_name='farmer_social', on_delete=models.PROTECT)
     number_of_members_gt_18 = models.IntegerField(_("Number of members greater than 18"))
     number_of_members_lt_18 = models.IntegerField(_("Number of members less than 18"))
     total_family_members = models.IntegerField(_("Total family members"))
@@ -129,8 +127,8 @@ class FarmerSocial(BaseModel):
     ]
     mobile_phone_type = models.CharField(_("Mobile phone type"), max_length=100, choices=MOBILE_TYPES)
     bank_account_number = models.IntegerField(_("Bank account number"))
-    bank_account_name = models.CharField(_("Bank account name"))
-    bank_ifsc_code = models.CharField(_("Bank ifsc code"))
+    bank_account_name = models.CharField(_("Bank account name"), max_length=100)
+    bank_ifsc_code = models.CharField(_("Bank ifsc code"), max_length=100)
     
     
 class FarmerLivestock(BaseModel):
@@ -145,12 +143,12 @@ class FarmerLivestock(BaseModel):
  
 class SoilTest(BaseModel):
     last_conducted = models.IntegerField(_("Last Soil test conducted in year"))
-    soil_type = models.CharField(_("Soil type"))
-    soil_texture = models.CharField(_("Soil texture"))
-    soil_orgainc_matter = models.CharField(_("Soil orgainc matter"))
-    soil_ph = models.CharField(_("Soil ph"))
-    soil_drainage = models.CharField(_("Soil drainage"))
-    soil_moisture = models.CharField(_("Soil Pressure"))
+    soil_type = models.CharField(_("Soil type"), max_length=200)
+    soil_texture = models.CharField(_("Soil texture"), max_length=200)
+    soil_orgainc_matter = models.CharField(_("Soil orgainc matter"), max_length=200)
+    soil_ph = models.CharField(_("Soil ph"), max_length=200)
+    soil_drainage = models.CharField(_("Soil drainage"), max_length=200)
+    soil_moisture = models.CharField(_("Soil Pressure"), max_length=200)
     
 
 class FarmerLand(BaseModel):
@@ -169,7 +167,7 @@ class FarmerLand(BaseModel):
     IRRIGATION_TYPE_CHOICES = [
         ('OPEN_IRRIGATION', 'Open irrigation'),
         ('SPRINKLER_IRRIGATION', 'Sprinkler irrigation'),
-        ('DRIP_IRRIGATION', 'Drip irrigation')
+        ('DRIP_IRRIGATION', 'Drip irrigation'),
         ('OTHERS', 'Others'),
     ]
     type_of_irrigation = models.CharField(_("Type of irregation"), max_length=100, choices=IRRIGATION_TYPE_CHOICES)
@@ -185,7 +183,7 @@ class FarmerLand(BaseModel):
     latitude = models.IntegerField(_("Latitude of land"))
     longitude = models.IntegerField(_("Longitude of land"))
     survey_number = models.IntegerField(_("Survey Number"))
-    soil_test = models.ForeignKey(SoilTest, related_name="farm_land")
+    soil_test = models.ForeignKey(SoilTest, related_name="farm_land", on_delete=models.PROTECT)
     
     @property
     def total_land(self):

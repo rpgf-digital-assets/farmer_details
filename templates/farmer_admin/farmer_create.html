@@ -1,0 +1,124 @@
+{% extends 'farmer_admin/base.html' %}
+{% load static %}
+
+{% block title %}
+Add a Farmer
+{% endblock title %}
+
+{% block content %}
+<!--begin::Post-->
+<div class="content flex-row-fluid" id="kt_content">
+    <!--begin::Card-->
+    <div class="card">
+        <!--begin::Card header-->
+        <div class="card-header border-0 pt-6">
+        </div>
+        <!--end::Card header-->
+        <!--begin::Card body-->
+        <div class="card-body py-4">
+            <!--begin::Form-->
+            <form class="form" method="POST" id="kt_modal_add_farmer_form" enctype="multipart/form-data">
+                {% csrf_token %}
+                <!--begin::form body-->
+                <div class="row">
+                {% for field in form.visible_fields %}
+                <!--begin::Input group-->
+                {% if farmer_object and field.name == 'profile_image' %}
+                <div class="form-control mb-7 col-xl-6">
+                    <!--begin::Input-->
+                    {{field}}
+                    <!--end::Input-->
+                    <!--begin::Label-->
+                    <label for="{{field.auto_id}}" class="required fs-6 fw-semibold ml-4 mb-2" style="margin-left: 5px;">{{field.label}}</label>
+                    <!--end::Label-->
+                    <div class="text-danger" style="text-align:start">
+                        {{ field.errors }}
+                    </div>
+                </div>
+                {% else %}
+                <div class="form-floating mb-7 col-xl-6">
+                    <!--begin::Input-->
+                    {{field}}
+                    <!--end::Input-->
+                    <!--begin::Label-->
+                    <label for="{{field.auto_id}}" class="required fs-6 fw-semibold ml-4 mb-2" style="margin-left: 5px;">{{field.label}}</label>
+                    <!--end::Label-->
+                    <div class="text-danger" style="text-align:start">
+                        {{ field.errors }}
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% endfor %}
+                {% for field in form.hidden_fields %}
+                <!--begin::Input-->
+                <div class="form-group d-flex my-4">
+                    {{field}}
+                </div>
+                <!--end::Input-->
+                {% endfor %}
+
+                </div>
+                <div class="row">
+                    <ul id="errorlist_ul" class="errorlist">
+                        {% for error in form.non_field_errors %}
+                        <li class="text-danger mt-3" style="text-align:start">
+                            {{error}}
+                        </li>
+                        {% endfor %}
+                    </ul>
+
+                </div>
+                <!--end::form body-->
+                <!--begin::Modal footer-->
+                <div class="modal-footer flex-center">
+                    <!--begin::Button-->
+                    <button type="reset" id="kt_modal_add_customer_cancel" class="btn btn-light me-3">Discard</button>
+                    <!--end::Button-->
+                    <!--begin::Button-->
+                    <button type="submit" id="kt_modal_add_customer_submit" class="btn btn-primary">
+                        <span class="indicator-label">Submit</span>
+                        <span class="indicator-progress">Please wait...
+                        <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
+                    </button>
+                    <!--end::Button-->
+                </div>
+                <!--end::Modal footer-->
+            </form>
+            <!--end::Form-->
+        </div>
+        <!--end::Card body-->
+    </div>
+    <!--end::Card-->
+</div>
+<!--end::Post-->
+
+
+{% endblock content %}
+
+
+{% block js %}
+{{block.super}}
+<script>
+    $("#id_birth_date").daterangepicker({
+        singleDatePicker: true,
+        showDropdowns: true,
+        minYear: 1901,
+        locale: {
+            format: 'YYYY-MM-DD'
+        },
+        maxYear: parseInt(moment().format("YYYY"),12)
+    });
+    $("#id_date_of_joining_of_program").daterangepicker({
+        singleDatePicker: true,
+        showDropdowns: true,
+        minYear: 1901,
+        locale: {
+            format: 'YYYY-MM-DD'
+        },
+        maxYear: parseInt(moment().format("YYYY"),12)
+    });
+    $('id_country').select2()
+
+</script>
+{% endblock js %}

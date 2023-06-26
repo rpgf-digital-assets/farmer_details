@@ -1,0 +1,44 @@
+{% extends "users/base.html" %}
+{% load static %}
+
+{% block title %} Logout {% endblock %}
+
+{% block css %}
+{{ block.super }}
+<!--begin::Page Custom Styles(used by this page)-->
+<link href="{% static 'assets/css/pages/login/login-1.css' %}" rel="stylesheet" type="text/css" />
+<!--end::Page Custom Styles-->
+{% endblock %}
+
+{% block content %}
+<!--begin::Content-->
+<div class="login-content flex-row-fluid d-flex flex-column justify-content-center position-relative overflow-hidden p-7 mx-auto">
+	<!--begin::Content body-->
+	<div class="d-flex flex-column-fluid flex-center">
+		<!--begin::Signin-->
+		<div class="login-form login-signin">
+			<!--begin::Title-->
+			<div class="pb-10 pt-lg-0 pt-5 text-center">									
+				<a href="https://www.nutrifytoday.com/" target="_blank"><img src="{% static 'assets/media/logos/logo.png' %}" class="max-h-75px mb-5" alt="" /></a>
+				<h3 class="font-weight-bolder text-dark font-size-h4 font-size-h1-lg">Logged Out</h3>
+				<p class="text-muted font-weight-bold font-size-h4">You have successfully logged out!</p>
+				<button type="button" id="kt_login" class="btn btn-primary font-weight-bolder font-size-h6 px-8 py-4 my-3 mr-4" onclick="window.location.href=`{% url 'farmer_details_app:index' %}`">Login</button>	
+			</div>
+			<!--begin::Title-->
+		</div>
+		<!--end::Signin-->						
+	</div>
+	<!--end::Content body-->
+	<!--begin::Content footer-->
+	{{block.super}}
+	<!--end::Content footer-->
+</div>
+<!--end::Content-->
+{% endblock %}
+
+{% block js %}
+{{ block.super }}
+	<!--begin::Page Scripts(used by this page)-->
+	<script src="{% static 'assets/js/pages/custom/login/login-general.js' %}"></script>
+	<!--end::Page Scripts-->
+ {% endblock %}
