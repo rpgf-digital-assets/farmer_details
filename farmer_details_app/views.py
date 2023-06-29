@@ -15,6 +15,13 @@ class IndexView(TemplateView):
     def dispatch(self, request, *args, **kwargs):
         if not self.request.user.is_authenticated:
             return redirect('users:login')
+        else:
+            if self.request.user.role == User.SUPER_USER:
+                return redirect('farmer_admin:farmers_list')
+            if self.request.user.role == User.ADMIN:
+                return redirect('farmer_admin:farmers_list')
+            if self.request.user.role == User.FARMER:
+                return 'farmer_admin/base.html'
         return super().dispatch(request, *args, **kwargs)
     
     

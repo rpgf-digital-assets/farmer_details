@@ -31,14 +31,31 @@ from django.forms import (
     FileField
 )
 
-from farmer.models import Farmer
+from farmer.models import Farmer, FarmerEducation, FarmerSocial
 from users.models import User
 from users.validators import validate_name, validate_phonenumber
 from .utils import country_list
 
 from django.db import transaction
 
-class FarmerCreationForm(ModelForm):
+
+class BaseCreationForm(ModelForm):
+    class Meta:
+        abstract = True
+    
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            if visible.field.widget.input_type == 'checkbox':
+                visible.field.widget.attrs['class'] = 'form-check-input'
+            else:
+                visible.field.widget.attrs['class'] = 'form-control'
+            visible.field.widget.attrs['placeholder'] = f'Enter {visible.field.label}'
+    
+
+
+class FarmerCreationForm(BaseCreationForm):
     user = ModelChoiceField(required=False, queryset=User.objects.filter(
         is_active=True), empty_label="Select", disabled=True, widget=HiddenInput())
     
@@ -78,12 +95,6 @@ class FarmerCreationForm(ModelForm):
     #     'data-placeholder': 'select country'
     # }))
     
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        super().__init__(*args, **kwargs)
-        for visible in self.visible_fields():
-            visible.field.widget.attrs['class'] = 'form-control'
-            visible.field.widget.attrs['placeholder'] = f'Enter {visible.field.label}'
     
     class Meta:
         model = Farmer
@@ -130,4 +141,28 @@ class FarmerCreationForm(ModelForm):
         
         if validation_errors: 
             raise ValidationError(validation_errors)
+    
+    
+    
+class FarmerSocialCreationFrom(BaseCreationForm):
+    class Meta:
+        model = FarmerSocial
+        exclude = ['farmer']
+        
+    field_order = ['education', 'number_of_members_gt_18', 'number_of_members_lt_18', 'total_family_members', 
+                   'number_of_members_attending_school', 'housing', 'drinking_water_source',
+                   'distance_from_water_sources', 'electrification', 'is_toilet_available', 'life_or_health_insurance', 'crop_insurance',
+                   'crop_loan_taken', 'agriculture_loan_taken', 'cooking_fuel', 'mobile_phone_type', 
+                   'bank_account_number', 'bank_account_name', 'bank_ifsc_code']
+
+    education = ModelChoiceField(queryset=FarmerEducation.objects.all(), empty_label="Select", 
+        widget=Select(attrs={
+        'class': 'form-control form-select'
+    }))
+    
+    
+    
+
+
+    
     

@@ -445,7 +445,7 @@ Farmers list
                         <td class="d-flex align-items-center">
                             <!--begin:: Avatar -->
                             <div class="symbol symbol-circle symbol-50px overflow-hidden me-3">
-                                <a href="../dist/apps/user-management/users/view.html">
+                                <a href="{% url 'farmer_admin:farmer_overview' farmer.pk %}">
                                     <div class="symbol-label">
                                         <img src="{{farmer.profile_image.url}}" alt="profile image" class="w-100" />
                                     </div>
@@ -454,7 +454,7 @@ Farmers list
                             <!--end::Avatar-->
                             <!--begin::User details-->
                             <div class="d-flex flex-column">
-                                <a href="../dist/apps/user-management/users/view.html" class="text-gray-800 text-hover-primary mb-1">{{farmer.user.user_display_name}}</a>
+                                <a href="{% url 'farmer_admin:farmer_overview' farmer.pk %}" class="text-gray-800 text-hover-primary mb-1">{{farmer.user.user_display_name}}</a>
                                 {% comment %} <span>{{farmer.user.email}}</span> {% endcomment %}
                             </div>
                             <!--begin::User details-->
@@ -502,22 +502,44 @@ Farmers list
 
 <script type="text/javascript">
 
+// Class definition
+var KTFarmersList = function () {
+    // Define shared variables
+    var datatable;
+    var filterMonth;
+    var filterPayment;
+    var table
 
-    var table = document.getElementById('kt_table_users');
-    var datatable = $(table).DataTable({
-        "info": false,
-        'order': [],
-        'columnDefs': [
-            { orderable: false, targets: 0 }, // Disable ordering on column 0 (checkbox)
-            { orderable: false, targets: 6 }, // Disable ordering on column 6 (actions)
-        ]
-    });
-    datatable.on('draw', function () {
-        initToggleToolbar();
-        handleDeleteRows();
-        toggleToolbars();
-        KTMenu.init(); // reinit KTMenu instances 
-    });
+    // Private functions
+    var initCustomerList = function () {
+        // Set date data order
+        const tableRows = table.querySelectorAll('tbody tr');
+
+        tableRows.forEach(row => {
+            const dateRow = row.querySelectorAll('td');
+            const realDate = moment(dateRow[5].innerHTML, "DD MMM YYYY, LT").format(); // select date from 5th column in table
+            dateRow[5].setAttribute('data-order', realDate);
+        });
+
+        // Init datatable --- more info on datatables: https://datatables.net/manual/
+        datatable = $(table).DataTable({
+            "info": false,
+            'order': [],
+            'columnDefs': [
+                { orderable: false, targets: 0 }, // Disable ordering on column 0 (checkbox)
+                { orderable: false, targets: 6 }, // Disable ordering on column 6 (actions)
+            ]
+        });
+
+        // Re-init functions on every table re-draw -- more info: https://datatables.net/reference/event/draw
+        datatable.on('draw', function () {
+            initToggleToolbar();
+            handleDeleteRows();
+            toggleToolbars();
+            KTMenu.init(); // reinit KTMenu instances 
+        });
+    }
+
     // Delete customer
     var handleDeleteRows = () => {
         // Select all delete buttons
@@ -577,6 +599,46 @@ Farmers list
         });
     }
 
+    // Search Datatable --- official docs reference: https://datatables.net/reference/api/search()
+    var handleSearchDatatable = () => {
+        const filterSearch = document.querySelector('[data-kt-user-table-filter="search"]');
+        filterSearch.addEventListener('keyup', function (e) {
+            datatable.search(e.target.value).draw();
+        });
+    }
+
+    // Filter Datatable
+    var handleFilterDatatable = () => {
+        // Select filter options
+        filterMonth = $('[data-kt-user-table-filter="month"]');
+        filterPayment = document.querySelectorAll('[data-kt-user-table-filter="payment_type"] [name="payment_type"]');
+        const filterButton = document.querySelector('[data-kt-user-table-filter="filter"]');
+
+        // Filter datatable on submit
+        filterButton.addEventListener('click', function () {
+            // Get filter values
+            const monthValue = filterMonth.val();
+            let paymentValue = '';
+
+            // Get payment value
+            filterPayment.forEach(r => {
+                if (r.checked) {
+                    paymentValue = r.value;
+                }
+
+                // Reset payment value if "All" is selected
+                if (paymentValue === 'all') {
+                    paymentValue = '';
+                }
+            });
+
+            // Build filter string from filter options
+            const filterString = monthValue + ' ' + paymentValue;
+
+            // Filter datatable --- official docs reference: https://datatables.net/reference/api/search()
+            datatable.search(filterString).draw();
+        });
+    }
     // Toggle toolbars
     const toggleToolbars = () => {
         // Select refreshed checkbox DOM elements 
@@ -630,7 +692,7 @@ Farmers list
         deleteSelected.addEventListener('click', function () {
             // SweetAlert2 pop up --- official docs reference: https://sweetalert2.github.io/
             Swal.fire({
-                text: "Are you sure you want to delete selected customers?",
+                text: "Are you sure you want to delete selected ?",
                 icon: "warning",
                 showCancelButton: true,
                 buttonsStyling: false,
@@ -643,7 +705,7 @@ Farmers list
             }).then(function (result) {
                 if (result.value) {
                     Swal.fire({
-                        text: "You have deleted all selected customers!.",
+                        text: "You have deleted all selected farmers!.",
                         icon: "success",
                         buttonsStyling: false,
                         confirmButtonText: "Ok, got it!",
@@ -651,7 +713,7 @@ Farmers list
                             confirmButton: "btn fw-bold btn-primary",
                         }
                     }).then(function () {
-                        // Remove all selected customers
+                        // Remove all selected farmers
                         var selected_farmers = new Array()
                         checkboxes.forEach(c => {
                             if (c.checked) {
@@ -669,7 +731,7 @@ Farmers list
                     });
                 } else if (result.dismiss === 'cancel') {
                     Swal.fire({
-                        text: "Selected customers was not deleted.",
+                        text: "Selected farmers was not deleted.",
                         icon: "error",
                         buttonsStyling: false,
                         confirmButtonText: "Ok, got it!",
@@ -681,9 +743,6 @@ Farmers list
             });
         });
     }
-
-    initToggleToolbar()
-    handleDeleteRows()
 
     const remove_selected_farmers = (farmers_list) => {
         console.log(farmers_list)
@@ -721,11 +780,35 @@ Farmers list
                 if (farmers_list.length === 1) {
                     datatable.row($(`#${farmers_list[0]}`).parent().parent().parent()).remove().draw();
                 }
-                toastr.success('Successfully deleted farmers')
+                toastr.success('Successfully deleted farmer(s)')
             }
         })
     }
 
+
+    // Public methods
+    return {
+        init: function () {
+            table = document.querySelector('#kt_table_users');
+            
+            if (!table) {
+                return;
+            }
+
+            initCustomerList();
+            initToggleToolbar();
+            handleSearchDatatable();
+            handleFilterDatatable();
+            handleDeleteRows();
+            handleResetForm();
+        }
+    }
+}();
+
+// On document ready
+KTUtil.onDOMContentLoaded(function () {
+    KTFarmersList.init();
+});
 
 </script>
 

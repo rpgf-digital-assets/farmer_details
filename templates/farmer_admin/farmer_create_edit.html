@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-Add a Farmer
+{% if farmer_object %} Edit Farmer {% else %} Add a Farmer{% endif %}
 {% endblock title %}
 
 {% block content %}
@@ -73,7 +73,12 @@ Add a Farmer
                 <!--begin::Modal footer-->
                 <div class="modal-footer flex-center">
                     <!--begin::Button-->
+                    {% if farmer_object %}
+                    <a class="btn btn-light me-3" href="{% url 'farmer_admin:farmers_list' %}">Discard
+                    </a>
+                    {% else %}
                     <button type="reset" id="kt_modal_add_customer_cancel" class="btn btn-light me-3">Discard</button>
+                    {% endif %}
                     <!--end::Button-->
                     <!--begin::Button-->
                     <button type="submit" id="kt_modal_add_customer_submit" class="btn btn-primary">

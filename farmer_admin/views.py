@@ -14,11 +14,12 @@ from django.views.generic import (
     TemplateView,
     CreateView,
     ListView,
-    UpdateView
+    UpdateView,
+    DetailView
 )
 
-from farmer.models import Farmer
-from farmer_admin.forms import FarmerCreationForm
+from farmer.models import Farmer, FarmerSocial
+from farmer_admin.forms import FarmerCreationForm, FarmerSocialCreationFrom
 from users.models import User
 from django.core.files.storage import FileSystemStorage
 
@@ -33,7 +34,7 @@ class FarmersListView(ListView):
 
 class FarmerCreateView(CreateView):
     model = Farmer
-    template_name = 'farmer_admin/farmer_create.html'
+    template_name = 'farmer_admin/farmer_create_edit.html'
     form_class = FarmerCreationForm
     success_url = reverse_lazy('farmer_admin:farmers_list')
     
@@ -70,7 +71,7 @@ class FarmerCreateView(CreateView):
 
 class FarmerUpdateView(UpdateView):
     model = Farmer
-    template_name = 'farmer_admin/farmer_create.html'
+    template_name = 'farmer_admin/farmer_create_edit.html'
     form_class = FarmerCreationForm
     success_url = reverse_lazy('farmer_admin:farmers_list')
     context_object_name = 'farmer_object'
@@ -93,3 +94,49 @@ class FarmerUpdateView(UpdateView):
         user.save()
         return redirect_url
     
+
+class FarmerDetailsView(DetailView):
+    model = Farmer
+    template_name = 'farmer_admin/farmer_overview.html'
+    
+    
+
+class FarmerSocialCreateView(CreateView):
+    model = FarmerSocial
+    template_name = 'farmer_admin/farmer_socials_create_edit.html'
+    form_class = FarmerSocialCreationFrom
+    success_url = reverse_lazy('farmer_admin:farmers_list')
+    
+    def form_valid(self, form):
+        farmer = Farmer.objects.get(user__id=self.kwargs['pk'])
+        form.instance.farmer = farmer 
+        self.object = form.save()
+        return super().form_valid(form)
+
+
+class FarmerSocialUpdateView(UpdateView):
+    model = FarmerSocial
+    template_name = 'farmer_admin/farmer_socials_create_edit.html'
+    form_class = FarmerSocialCreationFrom
+    success_url = reverse_lazy('farmer_admin:farmers_list')
+    context_object_name = 'farmer_social_object'
+    
+    # def get_initial(self):
+    #     initial = super().get_initial()
+    #     farmer = self.get_object()
+    #     initial['first_name'] = farmer.user.first_name
+    #     initial['last_name'] = farmer.user.last_name
+    #     initial['phone'] = farmer.user.phone
+    #     return initial
+        
+    # def form_valid(self, form):
+    #     redirect_url = super(FarmerUpdateView, self).form_valid(form)
+    #     form_data = form.cleaned_data
+    #     user = self.get_object().user
+    #     user.first_name = form_data['first_name']
+    #     user.last_name = form_data['last_name']
+    #     user.phone = form_data['phone']
+    #     user.save()
+    #     return redirect_url
+
+

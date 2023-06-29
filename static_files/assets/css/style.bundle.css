@@ -47378,7 +47378,7 @@ a:hover {
 }
 
 [data-bs-theme=light] {
-  --bs-page-bg: #EBECEE;
+  --bs-page-bg: #EAE5DA;
   --bs-page-card-bg: #F7F8FA;
   --bs-header-desktop-default-border: 1px solid rgba(255, 255, 255, 0.1);
   --bs-header-desktop-fixed-bg-color: #ffffff;
@@ -47487,7 +47487,7 @@ body.page-bg-image-lg {
 }
 
 [data-bs-theme=light] body:not(.auth-bg, .page-auth) {
-  background-image: url("../media/patterns/header-bg.png");
+  background-image: url("../media/patterns/background.jpg");
 }
 
 [data-bs-theme=dark] body:not(.auth-bg, .page-auth) {

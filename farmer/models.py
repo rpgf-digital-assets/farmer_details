@@ -3,6 +3,8 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from farmer_details_app.models import BaseModel
+from datetime import date
+from simple_history.models import HistoricalRecords
 
 
 from users.models import User
@@ -22,7 +24,7 @@ class DefaultSelectOrPrefetchManager(models.Manager):
         super(DefaultSelectOrPrefetchManager, self).__init__(*args, **kwargs)
 
 
-class Farmer(BaseModel):
+class Farmer(models.Model):
     """Stores a single farmer information
     """
     
@@ -54,17 +56,24 @@ class Farmer(BaseModel):
     objects = DefaultSelectOrPrefetchManager(
         select_related=('user',),
     )
+    history = HistoricalRecords()
+    
+    @property
+    def age(self):
+        today = date.today()
+        age = today.year - self.birth_date.year - ((today.month, today.day) < (self.birth_date.month, self.birth_date.day))
+ 
+        return age
     
     def __str__(self):
         return f'{self.user}'
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-
+    
 
 class FarmerProject(BaseModel):
     """Store project information of a farmer
     """
+    farmer = models.ForeignKey(Farmer, related_name='project', on_delete=models.PROTECT)
     ORGANIC = 'ORGANIC'
     SUSTAINABLE = 'SUSTAINABLE'
     UNDEFINED = 'UNDEFINED'
@@ -82,10 +91,14 @@ class FarmerProject(BaseModel):
 class FarmerEducation(BaseModel):
     name = models.CharField(max_length=100)
     
+    def __str__(self):
+        return self.name
+    
 class FarmerSocial(BaseModel):
     """Store social data of a farmer
     """
-    education = models.ForeignKey(FarmerEducation, related_name='farmer_social', on_delete=models.PROTECT)
+    farmer = models.ForeignKey(Farmer, related_name='social', on_delete=models.PROTECT)
+    education = models.ForeignKey(FarmerEducation, verbose_name=_("Education"), related_name='social', on_delete=models.PROTECT)
     number_of_members_gt_18 = models.IntegerField(_("Number of members greater than 18"))
     number_of_members_lt_18 = models.IntegerField(_("Number of members less than 18"))
     total_family_members = models.IntegerField(_("Total family members"))
@@ -132,6 +145,7 @@ class FarmerSocial(BaseModel):
     
     
 class FarmerLivestock(BaseModel):
+    farmer = models.ForeignKey(Farmer, related_name='livestock', on_delete=models.PROTECT)
     cow = models.IntegerField(_("Number of cow"))
     buffalo = models.IntegerField(_("Number of buffalo"))
     bullock = models.IntegerField(_("Number of bullock"))
@@ -142,6 +156,7 @@ class FarmerLivestock(BaseModel):
  
  
 class SoilTest(BaseModel):
+    farmer = models.ForeignKey(Farmer, related_name='soil_test', on_delete=models.PROTECT)
     last_conducted = models.IntegerField(_("Last Soil test conducted in year"))
     soil_type = models.CharField(_("Soil type"), max_length=200)
     soil_texture = models.CharField(_("Soil texture"), max_length=200)
@@ -152,6 +167,7 @@ class SoilTest(BaseModel):
     
 
 class FarmerLand(BaseModel):
+    farmer = models.ForeignKey(Farmer, related_name='land', on_delete=models.PROTECT)
     owned_land = models.IntegerField(_("Owned land in Hectare"))
     leased_land = models.IntegerField(_("Leased land in Hectare"))
     land_under_irrigation = models.IntegerField(_("Land under irrigation in Hectare"))
@@ -191,6 +207,7 @@ class FarmerLand(BaseModel):
     
     
 class OrganicCropDetails(BaseModel):
+    farmer = models.ForeignKey(Farmer, related_name='organic_crop', on_delete=models.PROTECT)
     name = models.CharField(_("Name"), max_length=200)
     TYPE_CHOICES = [
         ("MAIN_CROP", 'Main crop'),
