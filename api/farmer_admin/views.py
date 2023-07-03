@@ -1,8 +1,10 @@
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView
+from api.farmer_admin.serializers import FarmerDetailsSerializer, FarmerLandCoordinatesSerializer
 
-from farmer.models import Farmer
+from farmer.models import Farmer, FarmerLand
 from users.models import User
 
 
@@ -13,8 +15,6 @@ class DeleteFarmerAPIView(APIView):
             'message': ''
         }
         try:
-            farmer_list = request.data['farmers_list']
-            print('a jfahkb fa ', type(farmer_list))
             for farmer_pk in request.data['farmers_list']:
                 Farmer.objects.get(pk=farmer_pk).delete()
                 User.objects.get(pk=farmer_pk).delete()
@@ -25,3 +25,11 @@ class DeleteFarmerAPIView(APIView):
             
         return Response(response)
     
+class FarmerLandCoordinatesAPIView(ListAPIView):
+    serializer_class = FarmerLandCoordinatesSerializer
+    queryset = FarmerLand.objects.all()
+    
+
+class FarmerDetailsAPIView(RetrieveAPIView):
+    serializer_class = FarmerDetailsSerializer
+    queryset = Farmer.objects.all()

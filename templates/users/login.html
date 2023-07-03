@@ -58,6 +58,15 @@
                 <!--end::Input-->
             </div>
             <!--end::Input group-->
+            <div class="row">
+                <ul id="errorlist_ul" class="errorlist">
+                    {% for error in form.non_field_errors %}
+                    <li class="text-danger mt-3" style="text-align:start">
+                        {{error}}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
             <!--begin::Actions-->
             <div class="text-center">
                 <!--begin::Submit button-->

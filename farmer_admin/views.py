@@ -1,5 +1,5 @@
-
 import os 
+import folium
 from PIL import Image
 from io import BytesIO
 from django.conf import settings
@@ -8,8 +8,9 @@ from django.core.files.base import ContentFile
 from django.conf import settings
 from django.db import transaction
 from django.http import HttpResponse
+from django.db.models import Avg
 from django.shortcuts import redirect, render
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.generic import (
     TemplateView,
     CreateView,
@@ -18,8 +19,8 @@ from django.views.generic import (
     DetailView
 )
 
-from farmer.models import Farmer, FarmerSocial
-from farmer_admin.forms import FarmerCreationForm, FarmerSocialCreationFrom
+from farmer.models import Farmer, FarmerLand, FarmerSocial
+from farmer_admin.forms import FarmerCreationForm, FarmerLandDetailsCreationFrom, FarmerSocialCreationFrom
 from users.models import User
 from django.core.files.storage import FileSystemStorage
 
@@ -120,23 +121,52 @@ class FarmerSocialUpdateView(UpdateView):
     form_class = FarmerSocialCreationFrom
     success_url = reverse_lazy('farmer_admin:farmers_list')
     context_object_name = 'farmer_social_object'
+
+
+class FarmerLandDetailCreateView(CreateView):
+    model = FarmerLand
+    template_name = 'farmer_admin/farmer_land_details_create_edit.html'
+    form_class = FarmerLandDetailsCreationFrom
+    success_url = reverse_lazy('farmer_admin:farmers_list')
     
-    # def get_initial(self):
-    #     initial = super().get_initial()
-    #     farmer = self.get_object()
-    #     initial['first_name'] = farmer.user.first_name
-    #     initial['last_name'] = farmer.user.last_name
-    #     initial['phone'] = farmer.user.phone
-    #     return initial
-        
-    # def form_valid(self, form):
-    #     redirect_url = super(FarmerUpdateView, self).form_valid(form)
-    #     form_data = form.cleaned_data
-    #     user = self.get_object().user
-    #     user.first_name = form_data['first_name']
-    #     user.last_name = form_data['last_name']
-    #     user.phone = form_data['phone']
-    #     user.save()
-    #     return redirect_url
+    def form_valid(self, form):
+        farmer = Farmer.objects.get(user__id=self.kwargs['pk'])
+        form.instance.farmer = farmer 
+        self.object = form.save()
+        return super().form_valid(form)
 
 
+class FarmerLandDetailUpdateView(UpdateView):
+    model = FarmerLand
+    template_name = 'farmer_admin/farmer_land_details_create_edit.html'
+    form_class = FarmerLandDetailsCreationFrom
+    success_url = reverse_lazy('farmer_admin:farmers_list')
+    context_object_name = 'farmer_land_object'
+    
+    
+class DashboardFarmerView(TemplateView):
+    template_name = 'farmer_admin/dashboard_farmer.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        map = folium.Map(location=[19.206217, 74.297705], zoom_start=9)
+        farmer_lands = FarmerLand.objects.all()
+        average_latitude = FarmerLand.objects.aggregate(avg=Avg('latitude'))['avg']
+        average_longitude = FarmerLand.objects.aggregate(avg=Avg('longitude'))['avg']
+    
+        for farmer_land in farmer_lands:
+            farmer_details_url = reverse('farmer_admin:farmer_overview', kwargs={'pk': farmer_land.farmer.pk})
+            html = f"""
+            <div class=''>
+                <a target='_blank' href='{farmer_details_url}'> Farmer </a>      
+            </div>
+            """
+            pp = folium.Html(html, script=True)
+            popup = folium.Popup(pp, max_width=400)
+            coordinates = (farmer_land.latitude, farmer_land.longitude)
+            folium.Marker(coordinates, popup=popup).add_to(map)
+        context["map"] = map._repr_html_()
+        context["average_latitude"] = average_latitude
+        context["average_longitude"] = average_longitude
+        return context
+    

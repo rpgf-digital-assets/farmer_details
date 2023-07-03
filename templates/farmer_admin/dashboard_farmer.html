@@ -1,0 +1,135 @@
+{% extends 'farmer_admin/base.html' %}
+{% load static %}
+
+{% block title %}
+Farmers Geotagging
+{% endblock title %}
+
+{% block css %}
+{{block.super}}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+crossorigin=""/>
+
+{% endblock css %}
+
+{% block content %}
+<!--begin::Post-->
+<div class="content flex-row-fluid" id="kt_content">
+    <!--begin::Card-->
+    <div class="card">
+        <!--begin::Card body-->
+        <div class="container card-body">
+            {% comment %} {{map|safe}} {% endcomment %}
+                <div class="row d-flex justify-content-between">
+                    <div class="col-lg-8">
+                        <div id="map" style="height: 500px; width: 100%"></div>
+                    </div>
+                    <div class="col-lg-4 d-flex justify-content-center align-items-center" id="farmer_details_div">
+                        <h4 class="text-center">Select a marker in the map to view the details of the farmer</h4>
+                            
+                    </div>
+                </div>
+
+
+        </div>
+        <!--end::Card body-->
+    </div>
+    <!--end::Card-->
+</div>
+<!--end::Post-->
+{% endblock content %}
+
+{% block js %}
+{{block.super}}
+<!-- Make sure you put this AFTER Leaflet's CSS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+crossorigin=""></script>
+
+<script>
+    var map = L.map('map').setView(["{{average_latitude}}", "{{average_longitude}}"], 8);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    // Fetch farmers land data and add markers to the map
+    window.onload = () => {
+        const farmers_land_data_url = "{% url 'api:api_farmer_admin:farmers_land_coordinates_api_view' %}"
+        fetch(farmers_land_data_url, {
+            method: "GET",
+            credentials: "include",
+        })
+        .then((response) => {
+            if (response.ok != true) {
+                toastr.error(response.statusText);
+                return null
+            }
+            else {
+                return response.json()
+            }
+        })
+        .then(function (data) {
+            console.log(data)
+            if (data.length > 0){
+                data.forEach(coordinate => {
+                    var farmer_land_marker = new L.marker([coordinate.latitude, coordinate.longitude]).addTo(map).on('click', markerOnClick)
+                    farmer_land_marker.farmer_id = coordinate.farmer
+                })
+            }
+
+
+        })
+
+        const markerOnClick = (e) => {
+            const farmer_details_div = document.getElementById('farmer_details_div')
+            farmer_details_div.innerHTML = `
+            <div class="spinner-border" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            `
+            // Get farmer details like name and profile photo
+            const farmer_details_url = "{% url 'api:api_farmer_admin:farmer_details_api_view' request.user.id %}".replace('{{request.user.id}}', e.target.farmer_id)
+            
+            fetch(farmer_details_url, {
+                method: "GET",
+                credentials: "include",
+            })
+            .then((response) => {
+                if (response.ok != true) {
+                    toastr.error(response.statusText);
+                    return null
+                }
+                else {
+                    return response.json()
+                }
+            })
+            .then(function (data) {
+                const profile_url = "{% url 'farmer_admin:farmer_overview' request.user.id %}".replace('{{request.user.id}}', e.target.farmer_id)
+                farmer_details_div.innerHTML = `
+                <!--begin::Summary-->
+                <div class="d-flex flex-center flex-column mb-10">
+                    <!--begin::Avatar-->
+                    <div class="symbol mb-3 symbol-100px symbol-circle">
+                        <img alt="Pic" src="${data.profile_image}" />
+                    </div>
+                    <!--end::Avatar-->
+                    <!--begin::Name-->
+                    <a href="${profile_url}" target="_blank" class="fs-2 text-gray-800 text-hover-primary fw-bold mb-1">${data.user.user_display_name}</a>
+                    <!--end::Name-->
+                    <!--begin::Position-->
+                    <div class="fs-6 fw-semibold text-gray-400 mb-2"></div>
+                    <!--end::Position-->
+                </div>
+                <!--end::Summary-->
+                `
+            })
+
+        }
+    }
+
+</script>
+
+{% endblock js %}

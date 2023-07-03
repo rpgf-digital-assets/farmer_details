@@ -31,7 +31,7 @@ from django.forms import (
     FileField
 )
 
-from farmer.models import Farmer, FarmerEducation, FarmerSocial
+from farmer.models import Farmer, FarmerEducation, FarmerLand, FarmerSocial
 from users.models import User
 from users.validators import validate_name, validate_phonenumber
 from .utils import country_list
@@ -159,6 +159,12 @@ class FarmerSocialCreationFrom(BaseCreationForm):
         widget=Select(attrs={
         'class': 'form-control form-select'
     }))
+    
+    
+class FarmerLandDetailsCreationFrom(BaseCreationForm):
+    class Meta:
+        model = FarmerLand
+        exclude = ['farmer']
     
     
     

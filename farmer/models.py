@@ -155,16 +155,6 @@ class FarmerLivestock(BaseModel):
     total = models.IntegerField(_("Number of total livestock"))
  
  
-class SoilTest(BaseModel):
-    farmer = models.ForeignKey(Farmer, related_name='soil_test', on_delete=models.PROTECT)
-    last_conducted = models.IntegerField(_("Last Soil test conducted in year"))
-    soil_type = models.CharField(_("Soil type"), max_length=200)
-    soil_texture = models.CharField(_("Soil texture"), max_length=200)
-    soil_orgainc_matter = models.CharField(_("Soil orgainc matter"), max_length=200)
-    soil_ph = models.CharField(_("Soil ph"), max_length=200)
-    soil_drainage = models.CharField(_("Soil drainage"), max_length=200)
-    soil_moisture = models.CharField(_("Soil Pressure"), max_length=200)
-    
 
 class FarmerLand(BaseModel):
     farmer = models.ForeignKey(Farmer, related_name='land', on_delete=models.PROTECT)
@@ -196,10 +186,18 @@ class FarmerLand(BaseModel):
     ]
     present_production_system = models.CharField(_("Current Production system"), max_length=100, choices=PRODUCTION_SYSTEM_CHOICES)
     organic_farming_start_year = models.IntegerField(_("Organ Farming Start Year"), )
-    latitude = models.IntegerField(_("Latitude of land"))
-    longitude = models.IntegerField(_("Longitude of land"))
+    latitude = models.FloatField(_("Latitude of land"))
+    longitude = models.FloatField(_("Longitude of land"))
+    image = models.ImageField(verbose_name=_("Image of the land"), upload_to="farmer_land_images")
     survey_number = models.IntegerField(_("Survey Number"))
-    soil_test = models.ForeignKey(SoilTest, related_name="farm_land", on_delete=models.PROTECT)
+    soil_test_conducted = models.BooleanField(_('Is soil testing done?'), )
+    last_conducted = models.IntegerField(_("Last Soil test conducted in year"))
+    soil_type = models.CharField(_("Soil type"), max_length=200)
+    soil_texture = models.CharField(_("Soil texture"), max_length=200)
+    soil_orgainc_matter = models.CharField(_("Soil orgainc matter"), max_length=200)
+    soil_ph = models.CharField(_("Soil ph"), max_length=200)
+    soil_drainage = models.CharField(_("Soil drainage"), max_length=200)
+    soil_moisture = models.CharField(_("Soil Pressure"), max_length=200)
     
     @property
     def total_land(self):

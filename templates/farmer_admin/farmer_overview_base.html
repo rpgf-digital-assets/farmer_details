@@ -161,6 +161,18 @@
                             <!--end::Menu link-->
                         </li>
                         <!--end::Menu item-->
+                        <!--begin::Menu item-->
+                        <li class="menu-item mb-1">
+                            <!--begin::Menu link-->
+                            <a class="menu-link px-6 py-4 left-navigation" href="#land_details_div">
+                                <span class="menu-bullet">
+                                    <span class="bullet"></span>
+                                </span>
+                                <span class="menu-title">Land Details</span>
+                            </a>
+                            <!--end::Menu link-->
+                        </li>
+                        <!--end::Menu item-->
                         {% comment %} <!--begin::Menu item-->
                         <li class="menu-item mb-1">
                             <!--begin::Menu link-->
@@ -397,6 +409,7 @@
                 <!--end::Card body-->
             </div>
             <!--end::details View-->
+            <!--begin::details View-->
             
             <div class="card mb-5 mb-xl-10 page-section" id="social_details_div" >
                 <!--begin::Card header-->
@@ -468,6 +481,67 @@
                     {% endif %}
                 </div>
             </div>
+            <!--end::details View-->
+            <!--begin::details View-->
+            
+            <div class="card mb-5 mb-xl-10 page-section" id="land_details_div" >
+                <!--begin::Card header-->
+                <div class="card-header" >
+                    <!--begin::Card title-->
+                    <div class="card-title m-0">
+                        <h3 class="fw-bold m-0">Land Details</h3>
+                        {% if farmer.land.all.first %}
+                        <!--begin::Action-->
+                        <a href="{% url 'farmer_admin:farmer_land_details_update' farmer.land.all.first.pk %}" class="btn btn-primary align-self-center mx-10">Edit</a>
+                        <!--end::Action-->
+                        {% else %}
+                        <a href="{% url 'farmer_admin:farmer_land_details_create' farmer.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
+                        {% endif %}
+                    </div>
+                    <!--end::Card title-->
+                    <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#land_collapsible">
+                        <div class="card-toolbar rotate-180">    
+                            <i class="ki-duotone ki-down fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+                <!--begin::Card header-->
+                <div id="land_collapsible" class="collapse show">
+                    {% if farmer.land.all.first %}
+                        {% model_to_dict farmer.land.all.first as farmer_land %}
+                        <!--begin::Card body-->
+                        <div class="card-body p-9">
+                            {% for field_name, value in farmer_land.items %}
+                            {% if field_name == 'id' or field_name == 'farmer' %}
+                            {% else %}
+                            <!--begin::Row-->
+                            <div class="row mb-7">
+                                <!--begin::Label-->
+                                <label class="col-lg-4 fw-semibold text-muted">{{field_name}}</label>
+                                <!--end::Label-->
+                                <!--begin::Col-->
+                                <div class="col-lg-8">
+                                    <span class="fw-bold fs-6 text-dark">
+                                        {% if value == True %}
+                                        <i class="fa-solid fa-check"></i>
+                                        {% elif value == False %}
+                                        <i class="fa-solid fa-x"></i>
+                                        {% else %}
+                                        {{value}}
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <!--end::Col-->
+                            </div>
+                            <!--end::Row-->
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                        <!--end::Card body-->
+                    {% endif %}
+                </div>
+            </div>
+            <!--end::details View-->
             
         </div>
         <!--end::Content-->
