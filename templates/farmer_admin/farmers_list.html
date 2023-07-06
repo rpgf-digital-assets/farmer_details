@@ -427,8 +427,8 @@ Farmers list
                             </div>
                         </th>
                         <th class="min-w-125px">User</th>
-                        <th class="min-w-125px">Gender</th>
-                        <th class="min-w-125px">Birth date</th>
+                        <th class="min-w-125px">Village</th>
+                        <th class="min-w-125px">Area of land</th>
                         <th class="min-w-125px">Aadhar </th>
                         <th class="min-w-125px">Date of joining</th>
                         <th class="text-end min-w-100px">Actions</th>
@@ -459,9 +459,9 @@ Farmers list
                             </div>
                             <!--begin::User details-->
                         </td>
-                        <td>{{farmer.gender}}</td>
+                        <td>{{farmer.village}}</td>
                         <td>
-                            <div class="badge badge-light fw-bold">{{farmer.birth_date}}</div>
+                            <div class="badge badge-light fw-bold">{{farmer.land.first.owned_land}}</div>
                         </td>
                         <td>{{farmer.aadhar_number}}</td>
                         <td>{{farmer.date_of_joining_of_program}}</td>

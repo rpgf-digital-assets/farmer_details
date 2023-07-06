@@ -1,5 +1,6 @@
 
-import os 
+import os
+from typing import Any, Dict 
 from PIL import Image
 from io import BytesIO
 from django.conf import settings
@@ -48,9 +49,15 @@ class BaseCreationForm(ModelForm):
         super().__init__(*args, **kwargs)
         for visible in self.visible_fields():
             if visible.field.widget.input_type == 'checkbox':
-                visible.field.widget.attrs['class'] = 'form-check-input'
+                try:
+                    visible.field.widget.attrs['class'] = f'{visible.field.widget.attrs["class"]} form-check-input'
+                except KeyError:
+                    visible.field.widget.attrs['class'] = 'form-check-input'
             else:
-                visible.field.widget.attrs['class'] = 'form-control'
+                try:
+                    visible.field.widget.attrs['class'] = f'{visible.field.widget.attrs["class"]} form-control'
+                except KeyError:
+                    visible.field.widget.attrs['class'] = 'form-control'
             visible.field.widget.attrs['placeholder'] = f'Enter {visible.field.label}'
     
 
@@ -162,11 +169,63 @@ class FarmerSocialCreationFrom(BaseCreationForm):
     
     
 class FarmerLandDetailsCreationFrom(BaseCreationForm):
+    last_conducted = CharField(required=False, widget=TextInput(attrs={
+        'class': 'soil-testing-inputs'
+    }))
+    soil_type = CharField(required=False, widget=TextInput(attrs={
+        'class': 'soil-testing-inputs'
+    }))
+    soil_texture = CharField(required=False, widget=TextInput(attrs={
+        'class': 'soil-testing-inputs'
+    }))
+    soil_organic_matter = CharField(required=False, widget=TextInput(attrs={
+        'class': 'soil-testing-inputs'
+    }))
+    soil_ph = CharField(required=False, widget=TextInput(attrs={
+        'class': 'soil-testing-inputs'
+    }))
+    soil_drainage = CharField(required=False, widget=TextInput(attrs={
+        'class': 'soil-testing-inputs'
+    }))
+    soil_moisture = CharField(required=False, widget=TextInput(attrs={
+        'class': 'soil-testing-inputs'
+    }))
+    
     class Meta:
         model = FarmerLand
         exclude = ['farmer']
-    
-    
+        
+    def clean(self):
+        cleaned_data = super().clean()
+        validation_errors = []
+        
+        soil_test_conducted = cleaned_data.get('soil_test_conducted')
+        last_conducted = cleaned_data.get('last_conducted')
+        soil_type = cleaned_data.get('soil_type')
+        soil_texture = cleaned_data.get('soil_texture')
+        soil_organic_matter = cleaned_data.get('soil_organic_matter')
+        soil_ph = cleaned_data.get('soil_ph')
+        soil_drainage = cleaned_data.get('soil_drainage')
+        soil_moisture = cleaned_data.get('soil_moisture')
+        
+        if soil_test_conducted == True:
+            if ('' in [last_conducted, soil_type, soil_texture, soil_organic_matter, soil_ph, soil_drainage, soil_moisture]):
+                validation_errors.append(ValidationError('Soil testing inputs are required if soil test is conducted.', 'soil_test_required'))
+        # else:
+        #     self.data = self.data.copy()
+        #     self.data['last_conducted'] = None
+        #     self.data['soil_type'] = None
+        #     self.data['soil_texture'] = None
+        #     self.data['soil_organic_matter'] = None
+        #     self.data['soil_ph'] = None
+        #     self.data['soil_drainage'] = None
+        #     self.data['soil_moisture'] = None
+        #     self.data['image'] = self.cleaned_data['image']
+        
+        if validation_errors: 
+            raise ValidationError(validation_errors)
+        
+        
     
 
 

@@ -5,3 +5,28 @@
 Farmer Land Details {% if farmer_land_object %} Edit {% else %} Create {% endif %}
 {% endblock title %}
 
+
+{% block js %}
+{{block.super}}
+<script>
+
+    const toggleSoilTestingFormInputs = (isChecked) => {
+        if (isChecked){
+            $('.soil-testing-inputs').parent().css('display', 'block')
+        }
+        else{
+            $('.soil-testing-inputs').parent().css('display', 'none')
+        }
+    }
+
+    $(document).ready(function() {
+        
+        const initialVal = $('#id_soil_test_conducted').prop('checked')
+        toggleSoilTestingFormInputs(initialVal)
+
+        $('#id_soil_test_conducted').change(function() {
+            toggleSoilTestingFormInputs(this.checked)
+        });
+    })
+</script>
+{% endblock js %}

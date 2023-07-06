@@ -28,9 +28,10 @@ from django.core.files.storage import FileSystemStorage
 # Create your views here.
 
 class FarmersListView(ListView):
-    queryset = Farmer.objects.all()
+    queryset = Farmer.objects.prefetch_related('land')
     context_object_name = 'farmers'
     template_name = 'farmer_admin/farmers_list.html'
+    
     
 
 class FarmerCreateView(CreateView):
@@ -131,7 +132,16 @@ class FarmerLandDetailCreateView(CreateView):
     
     def form_valid(self, form):
         farmer = Farmer.objects.get(user__id=self.kwargs['pk'])
-        form.instance.farmer = farmer 
+        form.instance.farmer = farmer
+        print("🐍 File: farmer_admin/views.py | Line: 137 | form_valid ~ form.cleaned_data['soil_test_conducted']",form.cleaned_data['soil_test_conducted'])
+        if not form.cleaned_data['soil_test_conducted']:
+            form.instance.last_conducted = None
+            form.instance.soil_type = None
+            form.instance.soil_texture = None
+            form.instance.soil_organic_matter = None
+            form.instance.soil_ph = None
+            form.instance.soil_drainage = None
+            form.instance.soil_moisture = None
         self.object = form.save()
         return super().form_valid(form)
 
@@ -143,29 +153,41 @@ class FarmerLandDetailUpdateView(UpdateView):
     success_url = reverse_lazy('farmer_admin:farmers_list')
     context_object_name = 'farmer_land_object'
     
+    def form_valid(self, form):
+        if not form.cleaned_data['soil_test_conducted']:
+            form.instance.last_conducted = None
+            form.instance.soil_type = None
+            form.instance.soil_texture = None
+            form.instance.soil_organic_matter = None
+            form.instance.soil_ph = None
+            form.instance.soil_drainage = None
+            form.instance.soil_moisture = None
+        self.object = form.save()
+        return super().form_valid(form)
+
     
 class DashboardFarmerView(TemplateView):
     template_name = 'farmer_admin/dashboard_farmer.html'
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        map = folium.Map(location=[19.206217, 74.297705], zoom_start=9)
-        farmer_lands = FarmerLand.objects.all()
+        # map = folium.Map(location=[19.206217, 74.297705], zoom_start=9)
+        # farmer_lands = FarmerLand.objects.all()
         average_latitude = FarmerLand.objects.aggregate(avg=Avg('latitude'))['avg']
         average_longitude = FarmerLand.objects.aggregate(avg=Avg('longitude'))['avg']
     
-        for farmer_land in farmer_lands:
-            farmer_details_url = reverse('farmer_admin:farmer_overview', kwargs={'pk': farmer_land.farmer.pk})
-            html = f"""
-            <div class=''>
-                <a target='_blank' href='{farmer_details_url}'> Farmer </a>      
-            </div>
-            """
-            pp = folium.Html(html, script=True)
-            popup = folium.Popup(pp, max_width=400)
-            coordinates = (farmer_land.latitude, farmer_land.longitude)
-            folium.Marker(coordinates, popup=popup).add_to(map)
-        context["map"] = map._repr_html_()
+        # for farmer_land in farmer_lands:
+        #     farmer_details_url = reverse('farmer_admin:farmer_overview', kwargs={'pk': farmer_land.farmer.pk})
+        #     html = f"""
+        #     <div class=''>
+        #         <a target='_blank' href='{farmer_details_url}'> Farmer </a>      
+        #     </div>
+        #     """
+        #     pp = folium.Html(html, script=True)
+        #     popup = folium.Popup(pp, max_width=400)
+        #     coordinates = (farmer_land.latitude, farmer_land.longitude)
+        #     folium.Marker(coordinates, popup=popup).add_to(map)
+        # context["map"] = map._repr_html_()
         context["average_latitude"] = average_latitude
         context["average_longitude"] = average_longitude
         return context

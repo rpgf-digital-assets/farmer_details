@@ -21,18 +21,14 @@ crossorigin=""/>
     <div class="card">
         <!--begin::Card body-->
         <div class="container card-body">
-            {% comment %} {{map|safe}} {% endcomment %}
-                <div class="row d-flex justify-content-between">
-                    <div class="col-lg-8">
-                        <div id="map" style="height: 500px; width: 100%"></div>
-                    </div>
-                    <div class="col-lg-4 d-flex justify-content-center align-items-center" id="farmer_details_div">
-                        <h4 class="text-center">Select a marker in the map to view the details of the farmer</h4>
-                            
-                    </div>
+            <div class="row d-flex justify-content-between">
+                <div class="col-lg-8">
+                    <div id="map" style="height: 500px; width: 100%"></div>
                 </div>
-
-
+                <div class="col-lg-4 d-flex justify-content-center align-items-start" id="farmer_details_div">
+                    <h4 class="text-center">Select a marker in the map to view the details of the farmer</h4>
+                </div>
+            </div>
         </div>
         <!--end::Card body-->
     </div>
@@ -50,10 +46,17 @@ crossorigin=""></script>
 
 <script>
     var map = L.map('map').setView(["{{average_latitude}}", "{{average_longitude}}"], 8);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(map);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: ''
+    }).addTo(map)
+
+    L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-hybrid/{z}/{x}/{y}{r}.{ext}', {
+        attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        subdomains: 'abcd',
+        minZoom: 0,
+        maxZoom: 20,
+        ext: 'png'
+    }).addTo(map)
 
     // Fetch farmers land data and add markers to the map
     window.onload = () => {
@@ -110,18 +113,62 @@ crossorigin=""></script>
                 const profile_url = "{% url 'farmer_admin:farmer_overview' request.user.id %}".replace('{{request.user.id}}', e.target.farmer_id)
                 farmer_details_div.innerHTML = `
                 <!--begin::Summary-->
-                <div class="d-flex flex-center flex-column mb-10">
-                    <!--begin::Avatar-->
-                    <div class="symbol mb-3 symbol-100px symbol-circle">
-                        <img alt="Pic" src="${data.profile_image}" />
+                <div class="d-flex flex-center flex-column w-100">
+
+                    <div class="d-flex flex-column w-100">
+                        <div class="d-flex"
+                        style="background: url('${data.land[0].image}'); 
+                        height: 100px;
+                        width: 100%;
+                        background-repeat: no-repeat;
+                        background-size: cover;">
+
+                        </div>
+                        <div class="row">
+                            <div class="col-xl-4">
+                                <!--begin::Avatar-->
+                                <div class="symbol mb-3 symbol-100px symbol-circle ms-5" style="margin-top: -100px;">
+                                    <img alt="Pic" src="${data.profile_image}" />
+                                </div>
+                                <!--end::Avatar-->
+                            </div>
+                            <div class="col-xl-8 d-flex flex-column justify-content-center align-items-start">
+                                <a href="${profile_url}" target="_blank" class="fs-2 text-gray-800 text-hover-primary mb-1 w-100">${data.user.user_display_name}</a>    
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xl-4 d-flex align-items-center" style="border-bottom: 1px solid #1B4441;">
+                                <div class="symbol symbol-50px me-4" style="align-self: center;">
+                                    <img src="{% static 'assets/media/icons/custom/crop.png' %}" alt=""/>
+                                </div>
+                                <div class="flex-column">
+                                    <span class="fs-4 fw-bolder text-gray-800">Crop</span>
+                                    <span class="fs-5 text-gray-800">${data.organic_crop[0]?.name || ''}</span>
+                                </div>
+                            </div>
+                            <div class="col-xl-8 d-flex align-items-center" style="border-bottom: 1px solid #1A4441;border-left: 1px solid #1A4441;">
+                                <div class="symbol symbol-50px me-4" style="align-self: center;">
+                                    <img src="{% static 'assets/media/icons/custom/map.png' %}" alt=""/>
+                                </div>
+                                <div class="d-flex flex-column">
+                                    <span class="fs-4 fw-bolder text-gray-800">Total area under Production (Ha)</span>
+                                    <span class="fs-5 text-gray-800">${data.organic_crop[0]?.area || ''}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <!--end::Avatar-->
-                    <!--begin::Name-->
-                    <a href="${profile_url}" target="_blank" class="fs-2 text-gray-800 text-hover-primary fw-bold mb-1">${data.user.user_display_name}</a>
-                    <!--end::Name-->
-                    <!--begin::Position-->
-                    <div class="fs-6 fw-semibold text-gray-400 mb-2"></div>
-                    <!--end::Position-->
+                    <div class="row my-3 w-100" style="border-bottom: 1px solid #1A4441; ">
+                        <div class="col-xl-6 d-flex flex-column align-items-start">
+                            <h5>Farm Name</h5>
+                            <p></p>
+                        </div>
+                        <div class="col-xl-6 d-flex flex-column align-items-start">
+                            <h5>Village Name</h5>
+                            <p>${data.village}</p>
+                        </div>
+                    </div>
+
+                   
                 </div>
                 <!--end::Summary-->
                 `

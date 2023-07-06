@@ -4,6 +4,12 @@
 {% block content %}
 <!--begin::Content-->
 <div class="d-flex flex-center flex-column flex-column-fluid p-10 pb-lg-20">
+    <!--begin::Logo-->
+    <a href="#" class="mb-12">
+        <img alt="Logo" src="{% static 'assets/media/logos/logo.svg' %}" class="h-30px theme-light-show" />
+        <img alt="Logo" src="{% static 'assets/media/logos/logo.svg' %}" class="h-30px theme-dark-show" />
+    </a>
+    <!--end::Logo-->
     <!--begin::Wrapper-->
     <div class="w-lg-500px bg-body rounded shadow-sm p-10 p-lg-15 mx-auto">
         <!--begin::Form-->
@@ -14,10 +20,6 @@
                 <!--begin::Title-->
                 <h1 class="text-dark mb-3">Sign In</h1>
                 <!--end::Title-->
-                <!--begin::Link-->
-                <div class="text-gray-400 fw-semibold fs-4">New Here?
-                <a href="../dist/authentication/sign-up/basic.html" class="link-primary fw-bold">Create an Account</a></div>
-                <!--end::Link-->
             </div>
             <!--begin::Heading-->
             <!--begin::Input group-->

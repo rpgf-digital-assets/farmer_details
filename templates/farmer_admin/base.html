@@ -22,14 +22,14 @@
                         </div>
                     </div>
                     <!--end::Heaeder menu toggle-->
-                    {% comment %} <!--begin::Header Logo-->
+                    <!--begin::Header Logo-->
                     <div class="header-logo me-5 me-md-10 flex-grow-1 flex-lg-grow-0">
-                        <a href="../dist/index.html">
-                            <img alt="Logo" src="{% static 'assets/media/logos/default-dark.svg' %}" class="h-15px h-lg-20px logo-default" />
-                            <img alt="Logo" src="{% static 'assets/media/logos/default.svg' %}" class="h-15px h-lg-20px logo-sticky" />
+                        <a href="#">
+                            <img alt="Logo" src="{% static 'assets/media/logos/logo.svg' %}" class="h-15px h-lg-20px logo-default" />
+                            <img alt="Logo" src="{% static 'assets/media/logos/logo.svg' %}" class="h-15px h-lg-20px logo-sticky" />
                         </a>
                     </div>
-                    <!--end::Header Logo--> {% endcomment %}
+                    <!--end::Header Logo-->
                     <!--begin::Wrapper-->
                     <div class="d-flex align-items-stretch justify-content-between flex-lg-grow-1">
                         <!--begin::Navbar-->
@@ -38,6 +38,45 @@
                             <div class="header-menu align-items-stretch" data-kt-drawer="true" data-kt-drawer-name="header-menu" data-kt-drawer-activate="{default: true, lg: false}" data-kt-drawer-overlay="true" data-kt-drawer-width="{default:'200px', '300px': '225px'}" data-kt-drawer-direction="start" data-kt-drawer-toggle="#kt_header_menu_mobile_toggle" data-kt-swapper="true" data-kt-swapper-mode="prepend" data-kt-swapper-parent="{default: '#kt_body', lg: '#kt_header_nav'}">
                                 <!--begin::Menu-->
                                 <div class="menu menu-rounded menu-column menu-lg-row menu-active-bg menu-title-gray-700 menu-state-primary menu-arrow-gray-400 fw-semibold my-5 my-lg-0 px-4 px-lg-0 align-items-stretch" id="#kt_header_menu" data-kt-menu="true">
+                                    
+                                    <!--begin:Menu item-->
+                                    <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" class="menu-item menu-lg-down-accordion me-lg-1">
+                                        <!--begin:Menu link-->
+                                        <span class="menu-link py-3">
+                                            <span class="menu-title">Dashboard</span>
+                                            <span class="menu-arrow d-lg-none"></span>
+                                        </span>
+                                        <!--end:Menu link-->
+                                        <!--begin:Menu sub-->
+                                        <div class="menu-sub menu-sub-lg-down-accordion menu-sub-lg-dropdown px-lg-2 py-lg-4 w-lg-200px">
+                                            <!--begin:Menu item-->
+                                            <div class="menu-item">
+                                                <!--begin:Menu link-->
+                                                <a class="menu-link py-3" href="{% url 'farmer_admin:dashboard_farmer_view' %}">
+                                                    <span class="menu-bullet">
+                                                        <span class="bullet bullet-dot"></span>
+                                                    </span>
+                                                    <span class="menu-title">Farmer</span>
+                                                </a>
+                                                <!--end:Menu link-->
+                                            </div>
+                                            <!--end:Menu item-->
+                                            <!--begin:Menu item-->
+                                            <div class="menu-item">
+                                                <!--begin:Menu link-->
+                                                <a class="menu-link py-3" href="">
+                                                    <span class="menu-bullet">
+                                                        <span class="bullet bullet-dot"></span>
+                                                    </span>
+                                                    <span class="menu-title">Vendor</span>
+                                                </a>
+                                                <!--end:Menu link-->
+                                            </div>
+                                            <!--end:Menu item-->
+                                        </div>
+                                        <!--end:Menu sub-->
+                                    </div>
+                                    <!--end:Menu item-->
                                     <!--begin:Menu item-->
                                     <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" class="menu-item menu-lg-down-accordion me-lg-1">
                                         <!--begin:Menu link-->
@@ -156,44 +195,6 @@
                                                 <!--end:Menu link-->
                                             </div>
                                             <!--end:Menu item--> {% endcomment %}
-                                        </div>
-                                        <!--end:Menu sub-->
-                                    </div>
-                                    <!--end:Menu item-->
-                                    <!--begin:Menu item-->
-                                    <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" class="menu-item menu-lg-down-accordion me-lg-1">
-                                        <!--begin:Menu link-->
-                                        <span class="menu-link py-3">
-                                            <span class="menu-title">Dashboard</span>
-                                            <span class="menu-arrow d-lg-none"></span>
-                                        </span>
-                                        <!--end:Menu link-->
-                                        <!--begin:Menu sub-->
-                                        <div class="menu-sub menu-sub-lg-down-accordion menu-sub-lg-dropdown px-lg-2 py-lg-4 w-lg-200px">
-                                            <!--begin:Menu item-->
-                                            <div class="menu-item">
-                                                <!--begin:Menu link-->
-                                                <a class="menu-link py-3" href="{% url 'farmer_admin:dashboard_farmer_view' %}">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
-                                                    <span class="menu-title">Farmer</span>
-                                                </a>
-                                                <!--end:Menu link-->
-                                            </div>
-                                            <!--end:Menu item-->
-                                            <!--begin:Menu item-->
-                                            <div class="menu-item">
-                                                <!--begin:Menu link-->
-                                                <a class="menu-link py-3" href="">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
-                                                    <span class="menu-title">Vendor</span>
-                                                </a>
-                                                <!--end:Menu link-->
-                                            </div>
-                                            <!--end:Menu item-->
                                         </div>
                                         <!--end:Menu sub-->
                                     </div>

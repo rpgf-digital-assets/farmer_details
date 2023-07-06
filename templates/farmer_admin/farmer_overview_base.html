@@ -27,7 +27,7 @@
                         <button class="btn btn-sm btn-icon btn-bg-light btn-active-color-primary" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-start">
                             <i class="bi bi-three-dots fs-3"></i>
                         </button>
-                        <!--begin::Menu 3-->
+                        {% comment %} <!--begin::Menu 3-->
                         <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg-light-primary fw-semibold w-200px py-3" data-kt-menu="true">
                             <!--begin::Heading-->
                             <div class="menu-item px-3">
@@ -108,7 +108,7 @@
                             </div>
                             <!--end::Menu item-->
                         </div>
-                        <!--end::Menu 3-->
+                        <!--end::Menu 3--> {% endcomment %}
                     </div>
                     <!--end::Toolbar-->
                 </div>
@@ -512,7 +512,7 @@
                         <!--begin::Card body-->
                         <div class="card-body p-9">
                             {% for field_name, value in farmer_land.items %}
-                            {% if field_name == 'id' or field_name == 'farmer' %}
+                            {% if field_name == 'id' or field_name == 'farmer' or value is None %}
                             {% else %}
                             <!--begin::Row-->
                             <div class="row mb-7">
@@ -522,9 +522,9 @@
                                 <!--begin::Col-->
                                 <div class="col-lg-8">
                                     <span class="fw-bold fs-6 text-dark">
-                                        {% if value == True %}
+                                        {% if value is True %}
                                         <i class="fa-solid fa-check"></i>
-                                        {% elif value == False %}
+                                        {% elif value is False %}
                                         <i class="fa-solid fa-x"></i>
                                         {% else %}
                                         {{value}}

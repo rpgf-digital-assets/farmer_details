@@ -191,13 +191,13 @@ class FarmerLand(BaseModel):
     image = models.ImageField(verbose_name=_("Image of the land"), upload_to="farmer_land_images")
     survey_number = models.IntegerField(_("Survey Number"))
     soil_test_conducted = models.BooleanField(_('Is soil testing done?'), )
-    last_conducted = models.IntegerField(_("Last Soil test conducted in year"))
-    soil_type = models.CharField(_("Soil type"), max_length=200)
-    soil_texture = models.CharField(_("Soil texture"), max_length=200)
-    soil_orgainc_matter = models.CharField(_("Soil orgainc matter"), max_length=200)
-    soil_ph = models.CharField(_("Soil ph"), max_length=200)
-    soil_drainage = models.CharField(_("Soil drainage"), max_length=200)
-    soil_moisture = models.CharField(_("Soil Pressure"), max_length=200)
+    last_conducted = models.IntegerField(_("Last Soil test conducted in year"), null=True, blank=True)
+    soil_type = models.CharField(_("Soil type"), max_length=200, null=True, blank=True)
+    soil_texture = models.CharField(_("Soil texture"), max_length=200, null=True, blank=True)
+    soil_organic_matter = models.CharField(_("Soil organic matter"), max_length=200, null=True, blank=True)
+    soil_ph = models.CharField(_("Soil ph"), max_length=200, null=True, blank=True)
+    soil_drainage = models.CharField(_("Soil drainage"), max_length=200, null=True, blank=True)
+    soil_moisture = models.CharField(_("Soil Pressure"), max_length=200, null=True, blank=True)
     
     @property
     def total_land(self):
@@ -213,12 +213,124 @@ class OrganicCropDetails(BaseModel):
         ("COVER_CROP", 'Cover crop'),
         ("MIXED_CROP", 'Mixed crop'),
     ]
-    type = models.CharField(_("Type of soil"), max_length=200, choices=TYPE_CHOICES)
+    type = models.CharField(_("Type of crop"), max_length=100, choices=TYPE_CHOICES)
     area = models.IntegerField(_("Area of land in hectare"))
     date_of_sowing = models.DateField(_("Date of sowing of crop"))
     expected_date_of_harvesting = models.DateField(_("Expected date of harvest"))
     expected_yield = models.IntegerField(_("Expected yield in kg"))
     expected_productivity = models.IntegerField(_("Expected productivity in kg/ha"))
+    
+    
+class SeedDetails(BaseModel):
+    farmer = models.ForeignKey(Farmer, related_name='seed', on_delete=models.PROTECT)
+    type = models.CharField(_("Type of crop"), max_length=100, choices=OrganicCropDetails.TYPE_CHOICES)
+    date_of_purchase = models.DateField(_("Date of purchase"))
+    name_of_supplier = models.CharField(_("Name of supplier"), max_length=200)
+    seed_for_sowing = models.IntegerField(_("Amount of seed used for sowing (Kg)"))
+    variety = models.CharField(_("Name of variety"), max_length=500)
+    SEED_TYPES = [
+        ('HYBRID', 'Hybrid'),
+        ('VARIETY', 'Variety'),
+        ('DESI', 'Desi'),
+    ]
+    seed_type = models.CharField(_("Seed Type"), max_length=100, choices=SEED_TYPES)
+    SEED_SOURCES = [
+        ('OWN', 'Own'),
+        ('MARKET_SELF_BOUGHT', 'Market Self Bought'),
+        ('MARKET_THROUGH_PROGRAMME', 'Market Through Programme'),
+        ('FPC_FPO_FARMER_COLLECTIVE', 'FPC/FPO/farmer Collective'),
+    ]
+    source_of_seed = models.CharField(_("Main Source of Seed"), max_length=100, choices=SEED_SOURCES)
+    treatment = models.CharField(_("Details of seed treatment"), max_length=500)
+    no_of_plants = models.IntegerField(_("No of plants (Perennial crops)"))
+    
+
+
+class NutrientManagement(BaseModel):
+    farmer = models.ForeignKey(Farmer, related_name='nutrient', on_delete=models.PROTECT)
+    crop_name = models.CharField(_("Name of crop"), max_length=100)
+    TYPE_CHOICES = [
+        ('FYM', 'FYM'),
+        ('COMPOST', 'Compost'),
+        ('VERMICOMPOST', 'Vermicompost'),
+    ]
+    type = models.CharField(_("Type of fertiliser used"), max_length=100, choices=TYPE_CHOICES)
+    SOURCE_CHOICES = [
+        ('ON_FARM', 'on farm'),
+        ('OUTSOURCED', 'outsourced'),
+    ]
+    souce_of_fertilizer = models.CharField(_("Source of fertiliser"), max_length=100, choices=SOURCE_CHOICES)
+    quantity_of_fertilizer = models.IntegerField(_("Qty of fertiliser applied (Kg)"))
+    date_of_application = models.DateField(_("Date of application"))
+    APPLICATION_CHOICES = [
+        ('BROADCASTING', 'Broadcasting'),
+        ('FERTIGATION', 'fertigation'),
+        ('INCORPORATE', 'incorporate'),
+        ('DRENCHING', 'drenching'),
+    ]
+    type_of_application = models.CharField(_("Type of application"), max_length=100, choices=APPLICATION_CHOICES)
+    no_of_workdays_required = models.IntegerField(_("No of workdays required for activity"))
+    
+    # on farm inputs
+    type_of_raw_material = models.CharField(_("Type of raw material used"), max_length=500, null=True, blank=True)
+    quantity_used = models.IntegerField(_("No of workdays required for activity"), null=True, blank=True)
+    starting_date = models.DateField(_("Starting date of preparation"), null=True, blank=True)
+    date_of_manure = models.DateField(_("Date of manure ready"), null=True, blank=True)
+    quantity_obtained = models.IntegerField(_("Qty obtained (Kg)"), null=True, blank=True)
+    no_of_workdays_used = models.IntegerField(_("No of workdays used for activity"), null=True, blank=True)
+    # Off Farm inputs
+    sourcing_date = models.DateField(_("Date of sourcing"), null=True, blank=True)
+    quantity_sourced = models.IntegerField(_("Qty sourced (Kg)"), null=True, blank=True)
+    supplier_name = models.CharField(_("Name of supplier"), max_length=500, null=True, blank=True)
+    
+    
+
+class PestDiseaseManagement(BaseModel):
+    farmer = models.ForeignKey(Farmer, related_name='pest_disease', on_delete=models.PROTECT)
+    crop_name = models.CharField(_("Name of crop"), max_length=100)
+    name_of_input = models.CharField(_("Name of input used"), max_length=200)
+    quantity_of_input = models.IntegerField(_("Qty of input used (Kg or lit)"))
+    souce_of_input = models.CharField(_("Source of input"), max_length=100, choices=NutrientManagement.SOURCE_CHOICES)
+    date_of_application = models.DateField(_("Date of application"))
+    APPLICATION_CHOICES = [
+        ('BRAODCASTING', 'Braodcasting'),
+        ('SPRAYING', 'spraying'),
+        ('FERTIGATION', 'fertigation'),
+        ('DRENCHING', 'drenching'),
+    ]
+    type_of_application = models.CharField(_("Type of application"), max_length=100, choices=APPLICATION_CHOICES)
+    targeted_pest_diseases = models.CharField(_("Targeted pest/disease"), max_length=200)
+    
+    # on farm inputs
+    type_of_raw_material = models.CharField(_("Type of raw material used"), max_length=500, null=True, blank=True)
+    quantity_used = models.IntegerField(_("No of workdays required for activity"), null=True, blank=True)
+    starting_date = models.DateField(_("Starting date of preparation"), null=True, blank=True)
+    date_of_manure = models.DateField(_("Date of manure ready"), null=True, blank=True)
+    quantity_obtained = models.IntegerField(_("Qty obtained (Kg)"), null=True, blank=True)
+    no_of_workdays_used = models.IntegerField(_("No of workdays used for activity"), null=True, blank=True)
+    # Off Farm inputs
+    sourcing_date = models.DateField(_("Date of sourcing"), null=True, blank=True)
+    quantity_sourced = models.IntegerField(_("Qty sourced (Kg)"), null=True, blank=True)
+    supplier_name = models.CharField(_("Name of supplier"), max_length=500, null=True, blank=True)
+    
+    
+    
+    
+class WeedManagement(BaseModel):
+    farmer = models.ForeignKey(Farmer, related_name='weed', on_delete=models.PROTECT)
+    activity_name = models.CharField(_("Name of activity carried out"), max_length=200)
+    date_of_activity = models.DateField(_("Date of activity"))
+    METHOD_CHOICES = [
+        ('MANUAL', 'Manual'),
+        ('ANIMAL', 'Animal'),
+        ('MACHINERY', 'Machinery'),
+    ]
+    method = models.CharField(_("Method of activity"), max_length=100, choices=METHOD_CHOICES)
+    workdays_utilized = models.IntegerField(_("No of workdays utilised for activity"))
+    
+    
+    
+    
     
     
     
