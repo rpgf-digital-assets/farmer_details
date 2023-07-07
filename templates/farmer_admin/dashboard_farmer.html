@@ -23,7 +23,7 @@ crossorigin=""/>
         <div class="container card-body">
             <div class="row d-flex justify-content-between">
                 <div class="col-lg-8">
-                    <div id="map" style="height: 500px; width: 100%"></div>
+                    <div id="map" style="height: 600px; width: 100%"></div>
                 </div>
                 <div class="col-lg-4 d-flex justify-content-center align-items-start" id="farmer_details_div">
                     <h4 class="text-center">Select a marker in the map to view the details of the farmer</h4>
@@ -143,7 +143,7 @@ crossorigin=""></script>
                                 </div>
                                 <div class="flex-column">
                                     <span class="fs-4 fw-bolder text-gray-800">Crop</span>
-                                    <span class="fs-5 text-gray-800">${data.organic_crop[0]?.name || ''}</span>
+                                    <span class="fs-5 text-gray-800">${data.organic_crop[0]?.name || 'Wheat'}</span>
                                 </div>
                             </div>
                             <div class="col-xl-8 d-flex align-items-center" style="border-bottom: 1px solid #1A4441;border-left: 1px solid #1A4441;">
@@ -152,7 +152,7 @@ crossorigin=""></script>
                                 </div>
                                 <div class="d-flex flex-column">
                                     <span class="fs-4 fw-bolder text-gray-800">Total area under Production (Ha)</span>
-                                    <span class="fs-5 text-gray-800">${data.organic_crop[0]?.area || ''}</span>
+                                    <span class="fs-5 text-gray-800">${data.organic_crop[0]?.area || '123'}</span>
                                 </div>
                             </div>
                         </div>
@@ -166,6 +166,31 @@ crossorigin=""></script>
                             <h5>Village Name</h5>
                             <p>${data.village}</p>
                         </div>
+                    </div>
+                    <div class="row my-3 w-100" style="border-bottom: 1px solid #1A4441; ">
+                        <div class="col-xl-6 d-flex flex-column align-items-start">
+                            <h5>Taluka</h5>
+                            <p>${data.taluka}</p>
+                        </div>
+                        <div class="col-xl-6 d-flex flex-column align-items-start">
+                            <h5>Yield (Kgs)</h5>
+                            <p>123</p>
+                        </div>
+                    </div>
+
+                    <div class="row my-3 w-100" style="border-bottom: 1px solid #1A4441; ">
+                        <div class="col-xl-6 d-flex flex-column align-items-start">
+                            <h5>Season</h5>
+                            <p>Rabi</p>
+                        </div>
+                        <div class="col-xl-6 d-flex flex-column align-items-start">
+                            <h5>Estimated Harvest date</h5>
+                            <p>23-04-2024</p>
+                        </div>
+                    </div>
+
+                    <div class="row my-3 w-100 align-items-center">
+                        <a  href="${profile_url}" class="btn btn-primary" target="_blank"> View More </a>
                     </div>
 
                    

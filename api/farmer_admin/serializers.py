@@ -36,7 +36,7 @@ class FarmerDetailsSerializer(DynamicFieldsCategorySerializer):
     organic_crop = FarmerOrganicCropSerializer(many=True)
     class Meta:
         model = Farmer
-        fields = ('user', 'profile_image', 'village', 'land', 'organic_crop')
+        fields = ('user', 'profile_image', 'village', 'taluka', 'land', 'organic_crop')
     
     # def get_land(self, obj):
     #     return obj.land.all().first()
