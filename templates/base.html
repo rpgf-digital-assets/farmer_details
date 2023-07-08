@@ -125,6 +125,14 @@ License: For each use you must have a valid license purchased only from above li
 				}
 				return "";
 			}
+
+			
+			{% for message in messages %}
+				toastr.{{message.tags}}('{{message|escapejs}}')
+			{% endfor %}
+
+
+
 			
 			function checkResponse(response){
 				let login_url = '{% url "users:login" %}'
@@ -135,6 +143,17 @@ License: For each use you must have a valid license purchased only from above li
 					localStorage['status'] = 'Unauthorized'
 					window.location.replace(login_url)
 				}
+			}
+			
+			status = localStorage['status']
+			console.log('status', status)
+			if(status=='Unauthorized'){
+				toastr.warning("You do not have permission to view this page or Session expired")
+				localStorage.removeItem("status");
+			}
+			if(status=='Not Found'){
+				toastr.error("Resource Not found. Please try again later.")
+				localStorage.removeItem("status");
 			}
 		</script>
 

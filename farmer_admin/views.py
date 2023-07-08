@@ -1,5 +1,3 @@
-import os 
-import folium
 from PIL import Image
 from io import BytesIO
 from django.conf import settings
@@ -19,22 +17,33 @@ from django.views.generic import (
     DetailView
 )
 
-from farmer.models import Farmer, FarmerLand, FarmerSocial
-from farmer_admin.forms import FarmerCreationForm, FarmerLandDetailsCreationFrom, FarmerSocialCreationFrom
+from farmer.models import ContaminationControl, CostOfCultivation, Farmer, FarmerLand, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, PestDiseaseManagement, SeedDetails, WeedManagement
+from farmer_admin.forms import ContaminationControlForm, CostOfCultivationForm, FarmerCreationForm, FarmerLandDetailsCreationFrom, FarmerNutritionManagementForm, FarmerOrganicCropDetailForm, FarmerPestDiseaseManagementForm, FarmerSeedDetailsForm, FarmerSocialCreationFrom, HarvestAndIncomeDetailForm, WeedManagementForm
+from farmer_admin.mixins import AdminRequiredMixin
+from farmer_details_app.mixins import CustomLoginRequiredMixin
 from users.models import User
 from django.core.files.storage import FileSystemStorage
 
 
 # Create your views here.
 
-class FarmersListView(ListView):
+class BaseFarmerDetailsCreateView(CreateView):
+    
+    def form_valid(self, form):
+        farmer = Farmer.objects.get(user__id=self.kwargs['pk'])
+        form.instance.farmer = farmer 
+        self.object = form.save()
+        return super().form_valid(form)
+    
+
+class FarmersListView(CustomLoginRequiredMixin, AdminRequiredMixin, ListView):
     queryset = Farmer.objects.prefetch_related('land')
     context_object_name = 'farmers'
     template_name = 'farmer_admin/farmers_list.html'
     
     
 
-class FarmerCreateView(CreateView):
+class FarmerCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = Farmer
     template_name = 'farmer_admin/farmer_create_edit.html'
     form_class = FarmerCreationForm
@@ -71,7 +80,7 @@ class FarmerCreateView(CreateView):
         return redirect('farmer_admin:farmers_list')
 
 
-class FarmerUpdateView(UpdateView):
+class FarmerUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
     model = Farmer
     template_name = 'farmer_admin/farmer_create_edit.html'
     form_class = FarmerCreationForm
@@ -103,20 +112,14 @@ class FarmerDetailsView(DetailView):
     
     
 
-class FarmerSocialCreateView(CreateView):
+class FarmerSocialCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, BaseFarmerDetailsCreateView):
     model = FarmerSocial
     template_name = 'farmer_admin/farmer_socials_create_edit.html'
     form_class = FarmerSocialCreationFrom
     success_url = reverse_lazy('farmer_admin:farmers_list')
-    
-    def form_valid(self, form):
-        farmer = Farmer.objects.get(user__id=self.kwargs['pk'])
-        form.instance.farmer = farmer 
-        self.object = form.save()
-        return super().form_valid(form)
 
 
-class FarmerSocialUpdateView(UpdateView):
+class FarmerSocialUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
     model = FarmerSocial
     template_name = 'farmer_admin/farmer_socials_create_edit.html'
     form_class = FarmerSocialCreationFrom
@@ -124,7 +127,7 @@ class FarmerSocialUpdateView(UpdateView):
     context_object_name = 'farmer_social_object'
 
 
-class FarmerLandDetailCreateView(CreateView):
+class FarmerLandDetailCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = FarmerLand
     template_name = 'farmer_admin/farmer_land_details_create_edit.html'
     form_class = FarmerLandDetailsCreationFrom
@@ -133,7 +136,6 @@ class FarmerLandDetailCreateView(CreateView):
     def form_valid(self, form):
         farmer = Farmer.objects.get(user__id=self.kwargs['pk'])
         form.instance.farmer = farmer
-        print("🐍 File: farmer_admin/views.py | Line: 137 | form_valid ~ form.cleaned_data['soil_test_conducted']",form.cleaned_data['soil_test_conducted'])
         if not form.cleaned_data['soil_test_conducted']:
             form.instance.last_conducted = None
             form.instance.soil_type = None
@@ -146,7 +148,7 @@ class FarmerLandDetailCreateView(CreateView):
         return super().form_valid(form)
 
 
-class FarmerLandDetailUpdateView(UpdateView):
+class FarmerLandDetailUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
     model = FarmerLand
     template_name = 'farmer_admin/farmer_land_details_create_edit.html'
     form_class = FarmerLandDetailsCreationFrom
@@ -165,6 +167,171 @@ class FarmerLandDetailUpdateView(UpdateView):
         self.object = form.save()
         return super().form_valid(form)
 
+
+
+class FarmerOrganicCropDetailCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, BaseFarmerDetailsCreateView):
+    model = OrganicCropDetails
+    template_name = 'farmer_admin/farmer_organic_crop_create_edit.html'
+    form_class = FarmerOrganicCropDetailForm
+    success_url = reverse_lazy('farmer_admin:farmers_list')
+
+
+class FarmerOrganicCropDetailUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
+    model = OrganicCropDetails
+    template_name = 'farmer_admin/farmer_organic_crop_create_edit.html'
+    form_class = FarmerOrganicCropDetailForm
+    success_url = reverse_lazy('farmer_admin:farmers_list')
+    context_object_name = 'farmer_organic_object'
+
+
+
+class FarmerSeedDetailCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, BaseFarmerDetailsCreateView):
+    model = SeedDetails
+    template_name = 'farmer_admin/farmer_seed_detail_create_edit.html'
+    form_class = FarmerSeedDetailsForm
+    success_url = reverse_lazy('farmer_admin:farmers_list')
+
+
+class FarmerSeedDetailUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
+    model = SeedDetails
+    template_name = 'farmer_admin/farmer_seed_detail_create_edit.html'
+    form_class = FarmerSeedDetailsForm
+    success_url = reverse_lazy('farmer_admin:farmers_list')
+    context_object_name = 'farmer_seed_object'
+
+
+    
+
+class FarmerNutrientDetailCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, CreateView):
+    model = NutrientManagement
+    template_name = 'farmer_admin/farmer_nutrient_create_edit.html'
+    form_class = FarmerNutritionManagementForm
+    success_url = reverse_lazy('farmer_admin:farmers_list')
+    source_field_name = 'souce_of_fertilizer'
+    
+    def form_valid(self, form):
+        farmer = Farmer.objects.get(user__id=self.kwargs['pk'])
+        form.instance.farmer = farmer 
+        if form.cleaned_data[self.source_field_name] == NutrientManagement.ON_FARM:
+            form.instance.sourcing_date = None
+            form.instance.quantity_sourced = None
+            form.instance.supplier_name = None
+        elif form.cleaned_data[self.source_field_name] == NutrientManagement.OUTSOURCED:
+            form.instance.type_of_raw_material = None
+            form.instance.quantity_used = None
+            form.instance.starting_date = None
+            form.instance.date_of_manure = None
+            form.instance.quantity_obtained = None
+            form.instance.no_of_workdays_used = None
+        self.object = form.save()
+        return super().form_valid(form)
+
+
+class FarmerNutrientDetailUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
+    model = NutrientManagement
+    template_name = 'farmer_admin/farmer_nutrient_create_edit.html'
+    form_class = FarmerNutritionManagementForm
+    success_url = reverse_lazy('farmer_admin:farmers_list')
+    context_object_name = 'farmer_nutrient_object'
+    source_field_name = 'souce_of_fertilizer'
+    
+    def form_valid(self, form):
+        if form.cleaned_data[self.source_field_name] == NutrientManagement.ON_FARM:
+            form.instance.sourcing_date = None
+            form.instance.quantity_sourced = None
+            form.instance.supplier_name = None
+        elif form.cleaned_data[self.source_field_name] == NutrientManagement.OUTSOURCED:
+            form.instance.type_of_raw_material = None
+            form.instance.quantity_used = None
+            form.instance.starting_date = None
+            form.instance.date_of_manure = None
+            form.instance.quantity_obtained = None
+            form.instance.no_of_workdays_used = None
+        self.object = form.save()
+        return super().form_valid(form)
+
+
+class FarmerPestDiseaseManagementCreateView(FarmerNutrientDetailCreateView):
+    model = PestDiseaseManagement
+    template_name = 'farmer_admin/farmer_pest_management_create_update.html'
+    form_class = FarmerPestDiseaseManagementForm
+    success_url = reverse_lazy('farmer_admin:farmers_list')
+    source_field_name = 'souce_of_input'
+
+
+class FarmerPestDiseaseManagementUpdateView(FarmerNutrientDetailUpdateView):
+    model = PestDiseaseManagement
+    template_name = 'farmer_admin/farmer_pest_management_create_update.html'
+    form_class = FarmerPestDiseaseManagementForm
+    success_url = reverse_lazy('farmer_admin:farmers_list')
+    context_object_name = 'farmer_pest_object'
+    source_field_name = 'souce_of_input'
+
+    
+
+class FarmerWeedManagementCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, BaseFarmerDetailsCreateView):
+    model = WeedManagement
+    template_name = 'farmer_admin/farmer_weed_create_update.html'
+    form_class = WeedManagementForm
+    success_url = reverse_lazy('farmer_admin:farmers_list')
+    
+
+class FarmerWeedManagementUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
+    model = WeedManagement
+    template_name = 'farmer_admin/farmer_weed_create_update.html'
+    form_class = WeedManagementForm
+    success_url = reverse_lazy('farmer_admin:farmers_list')
+    context_object_name = 'farmer_weed_object'
+
+    
+
+class FarmerHarvestIncomeCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, BaseFarmerDetailsCreateView):
+    model = HarvestAndIncomeDetails
+    template_name = 'farmer_admin/farmer_harvest_create_update.html'
+    form_class = HarvestAndIncomeDetailForm
+    success_url = reverse_lazy('farmer_admin:farmers_list')
+    
+
+class FarmerHarvestIncomeUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
+    model = HarvestAndIncomeDetails
+    template_name = 'farmer_admin/farmer_harvest_create_update.html'
+    form_class = HarvestAndIncomeDetailForm
+    success_url = reverse_lazy('farmer_admin:farmers_list')
+    context_object_name = 'farmer_harvest_object'
+
+    
+    
+class FarmerCostOfCultivationCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, BaseFarmerDetailsCreateView):
+    model = CostOfCultivation
+    template_name = 'farmer_admin/farmer_cost_cultivation_create_update.html'
+    form_class = CostOfCultivationForm
+    success_url = reverse_lazy('farmer_admin:farmers_list')
+    
+
+class FarmerCostOfCultivationUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
+    model = CostOfCultivation
+    template_name = 'farmer_admin/farmer_cost_cultivation_create_update.html'
+    form_class = CostOfCultivationForm
+    success_url = reverse_lazy('farmer_admin:farmers_list')
+    context_object_name = 'farmer_cost_object'
+
+    
+class FarmerContaminationControlCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, BaseFarmerDetailsCreateView):
+    model = ContaminationControl
+    template_name = 'farmer_admin/farmer_contamination_control_create_update.html'
+    form_class = ContaminationControlForm
+    success_url = reverse_lazy('farmer_admin:farmers_list')
+    
+
+class FarmerContaminationControlUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
+    model = ContaminationControl
+    template_name = 'farmer_admin/farmer_contamination_control_create_update.html'
+    form_class = ContaminationControlForm
+    success_url = reverse_lazy('farmer_admin:farmers_list')
+    context_object_name = 'farmer_contamination_object'
+
+    
+    
     
 class DashboardFarmerView(TemplateView):
     template_name = 'farmer_admin/dashboard_farmer.html'

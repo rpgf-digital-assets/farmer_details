@@ -2,14 +2,14 @@
 {% load static %}
 
 {% block title %}
-{% if farmer_object %} Edit Farmer {% else %} Add a Farmer{% endif %}
+Farmer Harvest and Income {% if farmer_harvest_object %} Edit {% else %} Create {% endif %}
 {% endblock title %}
 
 
 {% block js %}
 {{block.super}}
 <script>
-    $("#id_birth_date").daterangepicker({
+    $("#id_first_harvest_date").daterangepicker({
         singleDatePicker: true,
         showDropdowns: true,
         minYear: 1901,
@@ -18,7 +18,7 @@
         },
         maxYear: parseInt(moment().format("YYYY"),12)
     });
-    $("#id_date_of_joining_of_program").daterangepicker({
+    $("#id_second_harvest_date").daterangepicker({
         singleDatePicker: true,
         showDropdowns: true,
         minYear: 1901,
@@ -27,7 +27,16 @@
         },
         maxYear: parseInt(moment().format("YYYY"),12)
     });
-    $('id_country').select2()
+    $("#id_third_harvest_date").daterangepicker({
+        singleDatePicker: true,
+        showDropdowns: true,
+        minYear: 1901,
+        locale: {
+            format: 'YYYY-MM-DD'
+        },
+        maxYear: parseInt(moment().format("YYYY"),12)
+    });
+    
 
 </script>
 {% endblock js %}

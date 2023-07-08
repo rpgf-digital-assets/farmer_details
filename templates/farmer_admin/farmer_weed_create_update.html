@@ -1,0 +1,22 @@
+{% extends 'farmer_admin/base_create_edit.html' %}
+{% load static %}
+
+{% block title %}
+Farmer Weed Details {% if farmer_weed_object %} Edit {% else %} Create {% endif %}
+{% endblock title %}
+
+
+{% block js %}
+{{block.super}}
+<script>
+    $("#id_date_of_activity").daterangepicker({
+        singleDatePicker: true,
+        showDropdowns: true,
+        minYear: 1901,
+        locale: {
+            format: 'YYYY-MM-DD'
+        },
+        maxYear: parseInt(moment().format("YYYY"),12)
+    });
+</script>
+{% endblock js %}

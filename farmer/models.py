@@ -50,7 +50,7 @@ class Farmer(models.Model):
     taluka = models.CharField(_("Taluka"), max_length=200)
     district = models.CharField(_("District"), max_length=200)
     state = models.CharField(_("State"), max_length=200)
-    country = models.CharField(_("Country"), max_length=100)
+    country = models.CharField(_("Country"), max_length=100, null=True, blank=True)
     profile_image = models.ImageField(
         _("Profile Image"), upload_to="farmer_profile_image", default="farmer_profile_image/blank-profile-picture.png")
     objects = DefaultSelectOrPrefetchManager(
@@ -255,6 +255,9 @@ class NutrientManagement(BaseModel):
         ('VERMICOMPOST', 'Vermicompost'),
     ]
     type = models.CharField(_("Type of fertiliser used"), max_length=100, choices=TYPE_CHOICES)
+    
+    ON_FARM = 'ON_FARM'
+    OUTSOURCED = 'OUTSOURCED'
     SOURCE_CHOICES = [
         ('ON_FARM', 'on farm'),
         ('OUTSOURCED', 'outsourced'),
@@ -326,9 +329,90 @@ class WeedManagement(BaseModel):
         ('MACHINERY', 'Machinery'),
     ]
     method = models.CharField(_("Method of activity"), max_length=100, choices=METHOD_CHOICES)
-    workdays_utilized = models.IntegerField(_("No of workdays utilised for activity"))
+    workdays_utilized = models.IntegerField(_("No of workdays utilized for activity"))
     
     
+class HarvestAndIncomeDetails(BaseModel): 
+    farmer = models.ForeignKey(Farmer, related_name='harvest_income', on_delete=models.PROTECT)
+    name = models.CharField(verbose_name=_('Name of crop'), max_length=500)
+    TYPE_CHOICES = [
+        ('SINGLE', 'Single'),
+        ('MULTIPLE', 'Multiple'),
+    ]
+    type = models.CharField(verbose_name=_('Type of harvest (Single/multiple)'), max_length=100, choices=TYPE_CHOICES)
+    first_harvest = models.CharField(verbose_name=_('First harvest'), max_length=200)
+    first_harvest_date = models.DateField(verbose_name=_('First harvest date'))
+    second_harvest = models.CharField(verbose_name=_('Second harvest'), max_length=200)
+    second_harvest_date = models.DateField(verbose_name=_('Second harvest date'))
+    third_harvest = models.CharField(verbose_name=_('Third harvest'), max_length=200)
+    third_harvest_date = models.DateField(verbose_name=_('Third harvest date'))
+    total_crop_harvested = models.IntegerField(_('Total Actual organic crop harvested (kg)'))
+    actual_crop_production = models.IntegerField(_('Actual organic crop productivity (kg/ha)'))
+    
+    quantity_sold_fpo = models.IntegerField(_('Quantity Sold through FPO (Kg)'))
+    buyer_name = models.CharField(verbose_name=_('Name of Buyer'), max_length=500)
+    price_paid_fpo = models.IntegerField(_('Unit Sale Price paid by FPO Rs/kg'))
+    premium_paid_fpo = models.IntegerField(_('Premium paid by FPO(Rs/kg)'))
+    total_price_received_fpo = models.IntegerField(_('Total price received (Rs/Kg) including premium'))
+    total_organic_sale_fpo = models.IntegerField(_('Total income from sale of organic product through FPO'))
+    
+    quantity_sold_outside = models.IntegerField(_('Quantity Sold Outside (Kg)'))
+    outside_buyer_name = models.CharField(verbose_name=_('Name of Buyer outside'), max_length=500)
+    price_paid_outside = models.IntegerField(_('Unit Sale Price outside Rs/kg'))
+    premium_paid_outside = models.IntegerField(_('Premium paid outside (Rs/kg)'))
+    total_price_received_outside = models.IntegerField(_('Total price received (Rs/Kg) including premium'))
+    total_organic_sale_outside = models.IntegerField(_('Total income from sale of organic product outside'))
+    
+    gross_income = models.IntegerField(_('Gross Income from sale of Organic crop (Rs) {sum of column U & P)'))
+    payment_mode = models.CharField(verbose_name=_('Mode of payment'), max_length=500)
+    payment_reference_number = models.IntegerField(verbose_name=_('Payment Reference number '))
+    unsold_quantity = models.IntegerField(_('Quantity of organic harvest unsold/Balance (kg)'))
+    
+    
+    
+class CostOfCultivation(BaseModel):
+    farmer = models.ForeignKey(Farmer, related_name='cost_of_cultivation', on_delete=models.PROTECT)
+    name = models.CharField(verbose_name=_('Name of crop'), max_length=500)
+    area = models.IntegerField(verbose_name=_('Crop Area (Ha)'))
+    input_source = models.CharField(verbose_name=_('Source of Input'), max_length=500)
+    manure_preparation_cost = models.IntegerField(verbose_name=_('Cost of Manure Preparation'))
+    biofertilizer_preparation_cost = models.IntegerField(verbose_name=_('Cost of Biofertilizer Preparation'))
+    biopesticide_preparation_cost = models.IntegerField(verbose_name=_('Cost of Bio pesticide Preparation'))
+    seed_purchase_cost = models.IntegerField(verbose_name=_('Seed Purchase Costs'))
+    irrigation_cost = models.IntegerField(verbose_name=_('Irrigation Costs'))
+    machinery_cost = models.IntegerField(verbose_name=_('Machinery charges - owned & Hired'))
+    input_cost = models.IntegerField(verbose_name=_('Input Costs '))
+    animal_labour_cost = models.IntegerField(verbose_name=_('Animal labour cost - owned & hired'))
+    land_preparation_labour_cost = models.IntegerField(verbose_name=_('Labour Cost for land preparation'))
+    sowing_labour_cost = models.IntegerField(verbose_name=_('Labour Cost for Sowing'))
+    weed_management_labour_cost = models.IntegerField(verbose_name=_('Labour Cost for Weed management'))
+    manure_application_labour_cost = models.IntegerField(verbose_name=_('Labour Cost for Manure Application'))
+    biofertilizer_application_labour_cost = models.IntegerField(verbose_name=_('Labour Cost for Biofertilizer Application'))
+    biopesticide_application_labour_cost = models.IntegerField(verbose_name=_('Labour Cost for Bio pesticide Application'))
+    harvest_labour_cost = models.IntegerField(verbose_name=_('Labour Cost for Harvest'))
+    total_labour_hiring_cost = models.IntegerField(verbose_name=_('Total Labour Hiring Costs'))
+    other_cost = models.IntegerField(verbose_name=_('Other Costs (E.g Transport to Gin, Equipment Purchase etc.)'))
+    total_cost = models.IntegerField(verbose_name=_('Total Cost'))
+    
+    
+    
+class ContaminationControl(BaseModel):
+    farmer = models.ForeignKey(Farmer, related_name='contamination_control', on_delete=models.PROTECT)
+    CHANCES_CHOICES = [
+        ('Seed', 'Seed'),
+        ('machinery', 'machinery'),
+        ('Water', 'Water'),
+        ('Air', 'Air'),
+        ('Neighbouring_field', 'Neighbouring field'),
+        ('Drift_control_and_buffer_zone', 'Drift control & Buffer zone'),
+        ('Storage', 'Storage'),
+        ('Other', 'Other'),
+    ]
+    chances = models.CharField(verbose_name=_('Chances of contamination'), max_length=500, choices=CHANCES_CHOICES)
+    details = models.CharField(verbose_name=_('Details of contamination'), max_length=500)
+    preventive_measure_details = models.CharField(verbose_name=_('Details of Preventive measure taken'), max_length=500)
+    control_measures_details = models.CharField(verbose_name=_('Details of control measures taken'), max_length=500)
+    remark = models.CharField(verbose_name=_('Remark'), max_length=500)
     
     
     

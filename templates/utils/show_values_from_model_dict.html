@@ -1,0 +1,29 @@
+<!--begin::Card body-->
+<div class="card-body p-9">
+    {% for field_name, value in model_dict %}
+    {% if field_name == 'id' or field_name == 'farmer' or value is None %}
+    {% else %}
+    <!--begin::Row-->
+    <div class="row mb-7">
+        <!--begin::Label-->
+        <label class="col-lg-4 fw-semibold text-muted">{{field_name}}</label>
+        <!--end::Label-->
+        <!--begin::Col-->
+        <div class="col-lg-8">
+            <span class="fw-bold fs-6 text-dark">
+                {% if value is True %}
+                <i class="fa-solid fa-check"></i>
+                {% elif value is False %}
+                <i class="fa-solid fa-x"></i>
+                {% else %}
+                {{value}}
+                {% endif %}
+            </span>
+        </div>
+        <!--end::Col-->
+    </div>
+    <!--end::Row-->
+    {% endif %}
+    {% endfor %}
+</div>
+<!--end::Card body-->

@@ -38,6 +38,7 @@ class FarmerDetailsSerializer(DynamicFieldsCategorySerializer):
         model = Farmer
         fields = ('user', 'profile_image', 'village', 'taluka', 'land', 'organic_crop')
     
-    # def get_land(self, obj):
-    #     return obj.land.all().first()
+    
+
+
         

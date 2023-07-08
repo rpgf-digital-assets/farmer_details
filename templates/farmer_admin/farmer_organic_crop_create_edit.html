@@ -2,14 +2,14 @@
 {% load static %}
 
 {% block title %}
-{% if farmer_object %} Edit Farmer {% else %} Add a Farmer{% endif %}
+Farmer Organic Crop {% if farmer_organic_object %} Edit {% else %} Create {% endif %}
 {% endblock title %}
 
 
 {% block js %}
 {{block.super}}
 <script>
-    $("#id_birth_date").daterangepicker({
+    $("#id_date_of_sowing").daterangepicker({
         singleDatePicker: true,
         showDropdowns: true,
         minYear: 1901,
@@ -18,7 +18,7 @@
         },
         maxYear: parseInt(moment().format("YYYY"),12)
     });
-    $("#id_date_of_joining_of_program").daterangepicker({
+    $("#id_expected_date_of_harvesting").daterangepicker({
         singleDatePicker: true,
         showDropdowns: true,
         minYear: 1901,
@@ -27,7 +27,7 @@
         },
         maxYear: parseInt(moment().format("YYYY"),12)
     });
-    $('id_country').select2()
+    
 
 </script>
 {% endblock js %}

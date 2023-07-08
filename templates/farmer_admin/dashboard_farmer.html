@@ -68,6 +68,7 @@ crossorigin=""></script>
         .then((response) => {
             if (response.ok != true) {
                 toastr.error(response.statusText);
+                checkResponse(response)
                 return null
             }
             else {
@@ -94,7 +95,7 @@ crossorigin=""></script>
             </div>
             `
             // Get farmer details like name and profile photo
-            const farmer_details_url = "{% url 'api:api_farmer_admin:farmer_details_api_view' request.user.id %}".replace('{{request.user.id}}', e.target.farmer_id)
+            const farmer_details_url = "{% url 'api:api_farmer_admin:farmer_details_api_view' 'fc56edbe-d4a1-4269-9902-a300062be0b7' %}".replace('fc56edbe-d4a1-4269-9902-a300062be0b7', e.target.farmer_id)
             
             fetch(farmer_details_url, {
                 method: "GET",
@@ -103,6 +104,7 @@ crossorigin=""></script>
             .then((response) => {
                 if (response.ok != true) {
                     toastr.error(response.statusText);
+                    checkResponse(response)
                     return null
                 }
                 else {
@@ -110,7 +112,7 @@ crossorigin=""></script>
                 }
             })
             .then(function (data) {
-                const profile_url = "{% url 'farmer_admin:farmer_overview' request.user.id %}".replace('{{request.user.id}}', e.target.farmer_id)
+                const profile_url = "{% url 'farmer_admin:farmer_overview' 'fc56edbe-d4a1-4269-9902-a300062be0b7' %}".replace('fc56edbe-d4a1-4269-9902-a300062be0b7', e.target.farmer_id)
                 farmer_details_div.innerHTML = `
                 <!--begin::Summary-->
                 <div class="d-flex flex-center flex-column w-100">
@@ -143,7 +145,7 @@ crossorigin=""></script>
                                 </div>
                                 <div class="flex-column">
                                     <span class="fs-4 fw-bolder text-gray-800">Crop</span>
-                                    <span class="fs-5 text-gray-800">${data.organic_crop[0]?.name || 'Wheat'}</span>
+                                    <span class="fs-5 text-gray-800">${data.organic_crop[0]?.name || ''}</span>
                                 </div>
                             </div>
                             <div class="col-xl-8 d-flex align-items-center" style="border-bottom: 1px solid #1A4441;border-left: 1px solid #1A4441;">
@@ -152,7 +154,7 @@ crossorigin=""></script>
                                 </div>
                                 <div class="d-flex flex-column">
                                     <span class="fs-4 fw-bolder text-gray-800">Total area under Production (Ha)</span>
-                                    <span class="fs-5 text-gray-800">${data.organic_crop[0]?.area || '123'}</span>
+                                    <span class="fs-5 text-gray-800">${data.organic_crop[0]?.area || ''}</span>
                                 </div>
                             </div>
                         </div>

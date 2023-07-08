@@ -32,7 +32,7 @@ from django.forms import (
     FileField
 )
 
-from farmer.models import Farmer, FarmerEducation, FarmerLand, FarmerSocial
+from farmer.models import ContaminationControl, CostOfCultivation, Farmer, FarmerEducation, FarmerLand, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, PestDiseaseManagement, SeedDetails, WeedManagement
 from users.models import User
 from users.validators import validate_name, validate_phonenumber
 from .utils import country_list
@@ -48,6 +48,7 @@ class BaseCreationForm(ModelForm):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         for visible in self.visible_fields():
+            print("🐍 File: farmer_admin/forms.py | Line: 52 | __init__ ~ visible.field.widget.input_type",visible.field.widget.input_type)
             if visible.field.widget.input_type == 'checkbox':
                 try:
                     visible.field.widget.attrs['class'] = f'{visible.field.widget.attrs["class"]} form-check-input'
@@ -61,7 +62,6 @@ class BaseCreationForm(ModelForm):
             visible.field.widget.attrs['placeholder'] = f'Enter {visible.field.label}'
     
 
-
 class FarmerCreationForm(BaseCreationForm):
     user = ModelChoiceField(required=False, queryset=User.objects.filter(
         is_active=True), empty_label="Select", disabled=True, widget=HiddenInput())
@@ -71,7 +71,6 @@ class FarmerCreationForm(BaseCreationForm):
     }))
     
     last_name = CharField(label='Last Name',validators=[validate_name], widget=TextInput(attrs={
-        'class': 'form-control form-control-solid form-control-lg w-auto',
         'placeholder': 'Last Name'
     }))
 
@@ -90,17 +89,9 @@ class FarmerCreationForm(BaseCreationForm):
         'class': 'form-control form-select'
     }))
     phone = CharField(label='Business Phone', validators=[validate_phonenumber],
-        widget=TextInput(attrs={'class': 'form-control form-control-lg form-control-solid w-auto',
+        widget=TextInput(attrs={
         'placeholder': 'Business Phone',
     }))
-    
-    # country = CharField(label='Country', widget=Select(
-    #     choices=country_list,
-    #     attrs={
-    #     'class': 'form-control form-select',
-    #     'data-control': 'select2',
-    #     'data-placeholder': 'select country'
-    # }))
     
     
     class Meta:
@@ -148,7 +139,6 @@ class FarmerCreationForm(BaseCreationForm):
         
         if validation_errors: 
             raise ValidationError(validation_errors)
-    
     
     
 class FarmerSocialCreationFrom(BaseCreationForm):
@@ -211,23 +201,166 @@ class FarmerLandDetailsCreationFrom(BaseCreationForm):
         if soil_test_conducted == True:
             if ('' in [last_conducted, soil_type, soil_texture, soil_organic_matter, soil_ph, soil_drainage, soil_moisture]):
                 validation_errors.append(ValidationError('Soil testing inputs are required if soil test is conducted.', 'soil_test_required'))
-        # else:
-        #     self.data = self.data.copy()
-        #     self.data['last_conducted'] = None
-        #     self.data['soil_type'] = None
-        #     self.data['soil_texture'] = None
-        #     self.data['soil_organic_matter'] = None
-        #     self.data['soil_ph'] = None
-        #     self.data['soil_drainage'] = None
-        #     self.data['soil_moisture'] = None
-        #     self.data['image'] = self.cleaned_data['image']
         
         if validation_errors: 
             raise ValidationError(validation_errors)
         
         
+class FarmerOrganicCropDetailForm(BaseCreationForm):
+    date_of_sowing = DateField(input_formats=['%Y-%m-%d'], widget=DateInput(attrs={
+        'class': 'form-control datetimepicker-input w-auto',
+        'placeholder': 'Enter date in YYYY-MM-DD',
+        'data-target': '#kt_datetimepicker_3'
+    }))
+    expected_date_of_harvesting = DateField(input_formats=['%Y-%m-%d'], widget=DateInput(attrs={
+        'class': 'form-control datetimepicker-input w-auto',
+        'placeholder': 'Enter date in YYYY-MM-DD',
+        'data-target': '#kt_datetimepicker_3'
+    }))
+    
+    class Meta:
+        model = OrganicCropDetails
+        exclude = ['farmer']
+        
+        
+        
+        
+class FarmerSeedDetailsForm(BaseCreationForm):
+    date_of_purchase = DateField(input_formats=['%Y-%m-%d'], widget=DateInput(attrs={
+        'class': 'form-control datetimepicker-input w-auto',
+        'placeholder': 'Enter date in YYYY-MM-DD',
+        'data-target': '#kt_datetimepicker_3'
+    }))
+    
+    class Meta:
+        model = SeedDetails
+        exclude = ['farmer']
+        
+        
+        
+class FarmerNutritionManagementForm(BaseCreationForm):
+    source_field_name = 'souce_of_fertilizer'
+    
+    type_of_raw_material = CharField(required=False, widget=TextInput(attrs={
+        'class': 'on-farm-input'
+    }))
+    quantity_used = IntegerField(required=False, widget=NumberInput(attrs={
+        'class': 'on-farm-input',
+    }))
+    starting_date = DateField(input_formats=['%Y-%m-%d'], widget=DateInput(attrs={
+        'class': 'on-farm-input datetimepicker-input w-auto',
+        'placeholder': 'Enter date in YYYY-MM-DD',
+        'data-target': '#kt_datetimepicker_3'
+    }))
+    date_of_manure = DateField(input_formats=['%Y-%m-%d'], widget=DateInput(attrs={
+        'class': 'on-farm-input datetimepicker-input w-auto',
+        'placeholder': 'Enter date in YYYY-MM-DD',
+        'data-target': '#kt_datetimepicker_3'
+    }))
+    quantity_obtained = IntegerField(required=False, widget=NumberInput(attrs={
+        'class': 'on-farm-input',
+    }))
+    no_of_workdays_used = IntegerField(required=False, widget=NumberInput(attrs={
+        'class': 'on-farm-input',
+    }))
+    # Off Farm inputs
+    sourcing_date = DateField(input_formats=['%Y-%m-%d'], widget=DateInput(attrs={
+        'class': 'off-farm-input datetimepicker-input w-auto',
+        'placeholder': 'Enter date in YYYY-MM-DD',
+        'data-target': '#kt_datetimepicker_3'
+    }))
+    quantity_sourced = IntegerField(required=False, widget=NumberInput(attrs={
+        'class': 'off-farm-input',
+    }))
+    supplier_name = CharField(required=False, widget=TextInput(attrs={
+        'class': 'off-farm-input'
+    }))
+    class Meta:
+        model = NutrientManagement
+        exclude = ['farmer']
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        validation_errors = []
+        
+        source_field_name = cleaned_data.get(self.source_field_name)
+        
+        type_of_raw_material = cleaned_data.get('type_of_raw_material')
+        quantity_used = cleaned_data.get('quantity_used')
+        starting_date = cleaned_data.get('starting_date')
+        date_of_manure = cleaned_data.get('date_of_manure')
+        quantity_obtained = cleaned_data.get('quantity_obtained')
+        no_of_workdays_used = cleaned_data.get('no_of_workdays_used')
+        sourcing_date = cleaned_data.get('sourcing_date')
+        quantity_sourced = cleaned_data.get('quantity_sourced')
+        supplier_name = cleaned_data.get('supplier_name')
+        
+        if source_field_name == NutrientManagement.ON_FARM:
+            if ('' in [type_of_raw_material, quantity_used, starting_date, date_of_manure, quantity_obtained, no_of_workdays_used]):
+                validation_errors.append(ValidationError('ON farm inputs are required if souce is ON farm.', 'on_farm_required'))
+        elif source_field_name == NutrientManagement.OUTSOURCED:
+            if ('' in [sourcing_date, quantity_sourced, supplier_name]):
+                validation_errors.append(ValidationError('OFF farm inputs are required if souce is OFF farm.', 'off_farm_required'))
+
+        
+        if validation_errors: 
+            raise ValidationError(validation_errors)
+    
+    
+    
+class FarmerPestDiseaseManagementForm(FarmerNutritionManagementForm):
+    source_field_name = 'souce_of_input'
+    
+    class Meta: 
+        model = PestDiseaseManagement
+        exclude = ['farmer']
+    
+    
+class WeedManagementForm(BaseCreationForm):
+    date_of_activity = DateField(input_formats=['%Y-%m-%d'], widget=DateInput(attrs={
+        'class': 'off-farm-input datetimepicker-input w-auto',
+        'placeholder': 'Enter date in YYYY-MM-DD',
+        'data-target': '#kt_datetimepicker_3'
+    }))
+    class Meta:
+        model = WeedManagement
+        exclude = ['farmer']
+
+
+class HarvestAndIncomeDetailForm(BaseCreationForm):
+    first_harvest_date = DateField(input_formats=['%Y-%m-%d'], widget=DateInput(attrs={
+        'class': 'off-farm-input datetimepicker-input w-auto',
+        'placeholder': 'Enter date in YYYY-MM-DD',
+        'data-target': '#kt_datetimepicker_3'
+    }))
+    second_harvest_date = DateField(input_formats=['%Y-%m-%d'], widget=DateInput(attrs={
+            'class': 'off-farm-input datetimepicker-input w-auto',
+            'placeholder': 'Enter date in YYYY-MM-DD',
+            'data-target': '#kt_datetimepicker_3'
+        }))
+    third_harvest_date = DateField(input_formats=['%Y-%m-%d'], widget=DateInput(attrs={
+        'class': 'off-farm-input datetimepicker-input w-auto',
+        'placeholder': 'Enter date in YYYY-MM-DD',
+        'data-target': '#kt_datetimepicker_3'
+    }))
+    class Meta:
+        model = HarvestAndIncomeDetails
+        exclude = ['farmer']
+
+
+
+class CostOfCultivationForm(BaseCreationForm):
+    class Meta:
+        model = CostOfCultivation
+        exclude = ['farmer']
+
     
 
+class ContaminationControlForm(BaseCreationForm):
+    class Meta:
+        model = ContaminationControl
+        exclude = ['farmer']
 
+    
     
     

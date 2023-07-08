@@ -1,0 +1,77 @@
+{% extends 'farmer_admin/base_create_edit.html' %}
+{% load static %}
+
+{% block title %}
+Farmer Pest Disease Management {% if farmer_pest_object %} Edit {% else %} Create {% endif %}
+{% endblock title %}
+
+
+{% block js %}
+{{block.super}}
+<script>
+    $("#id_date_of_application").daterangepicker({
+        singleDatePicker: true,
+        showDropdowns: true,
+        minYear: 1901,
+        locale: {
+            format: 'YYYY-MM-DD'
+        },
+        maxYear: parseInt(moment().format("YYYY"),12)
+    });
+    $("#id_starting_date").daterangepicker({
+        singleDatePicker: true,
+        showDropdowns: true,
+        minYear: 1901,
+        locale: {
+            format: 'YYYY-MM-DD'
+        },
+        maxYear: parseInt(moment().format("YYYY"),12)
+    });
+    $("#id_date_of_manure").daterangepicker({
+        singleDatePicker: true,
+        showDropdowns: true,
+        minYear: 1901,
+        locale: {
+            format: 'YYYY-MM-DD'
+        },
+        maxYear: parseInt(moment().format("YYYY"),12)
+    });
+    $("#id_sourcing_date").daterangepicker({
+        singleDatePicker: true,
+        showDropdowns: true,
+        minYear: 1901,
+        locale: {
+            format: 'YYYY-MM-DD'
+        },
+        maxYear: parseInt(moment().format("YYYY"),12)
+    });
+    $(document).ready(function() {
+        
+        const initialVal = $('#id_souce_of_input').val()
+        toggleSourcingFields(initialVal)
+
+        $('#id_souce_of_input').on('change', function() {
+            const sourcing = $(this).find(":selected").val()
+            toggleSourcingFields(sourcing)
+        })
+    })
+
+    const toggleSourcingFields = (sourcing) => {
+        if (sourcing === 'ON_FARM'){
+            $('.on-farm-input').parent().css('display', 'block')
+            $('.off-farm-input').parent().css('display', 'none')
+        }
+        else if (sourcing === 'OUTSOURCED'){
+            $('.on-farm-input').parent().css('display', 'none')
+            $('.off-farm-input').parent().css('display', 'block')
+        }
+        else{
+            // hide both
+            $('.on-farm-input').parent().css('display', 'none')
+            $('.off-farm-input').parent().css('display', 'none')
+        }
+    }
+
+    
+</script>
+{% endblock js %}
