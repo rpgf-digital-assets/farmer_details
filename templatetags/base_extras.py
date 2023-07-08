@@ -13,19 +13,14 @@ def model_to_dict(instance):
 
 
 @register.simple_tag
-def navactive(request, device, url, *args, **kwargs):
+def navactive(request, url, *args, **kwargs):
     """
     Checks if the navbar element corresponds to the current url or not
     params: request - request
-            device - add new device and corresponding return value to return_values dict 
             url - url name
             args - add url params ONLY
             kwargs - get_vars: exact get vars string eg 'var1=test&var2=123'
     """
-    return_values = {
-        'mobile': 'menu-item-active',
-        'desktop': 'active'
-    }
     check_url = reverse(url, args=args)
     get_confirmed = True
     get_vars = kwargs.get('get_vars')
@@ -36,7 +31,7 @@ def navactive(request, device, url, *args, **kwargs):
             if request.GET.get(k) != v:
                 get_confirmed = False
     if request.path == check_url and get_confirmed:
-        return return_values[device]
+        return 'active'
     return ""
 
 

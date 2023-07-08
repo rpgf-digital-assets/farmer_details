@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load base_extras %}
 
 {% block basecontent %}
 <!--begin::Root-->
@@ -42,7 +43,7 @@
                                     <!--begin:Menu item-->
                                     <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" class="menu-item menu-lg-down-accordion me-lg-1">
                                         <!--begin:Menu link-->
-                                        <span class="menu-link py-3">
+                                        <span class="menu-link py-3 {% navactive request 'farmer_admin:dashboard_farmer_view' %} ">
                                             <span class="menu-title">Dashboard</span>
                                             <span class="menu-arrow d-lg-none"></span>
                                         </span>
@@ -52,7 +53,7 @@
                                             <!--begin:Menu item-->
                                             <div class="menu-item">
                                                 <!--begin:Menu link-->
-                                                <a class="menu-link py-3" href="{% url 'farmer_admin:dashboard_farmer_view' %}">
+                                                <a class="menu-link py-3 {% navactive request 'farmer_admin:dashboard_farmer_view' %}" href="{% url 'farmer_admin:dashboard_farmer_view' %}">
                                                     <span class="menu-bullet">
                                                         <span class="bullet bullet-dot"></span>
                                                     </span>
@@ -80,7 +81,7 @@
                                     <!--begin:Menu item-->
                                     <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" class="menu-item menu-lg-down-accordion me-lg-1">
                                         <!--begin:Menu link-->
-                                        <span class="menu-link py-3 active">
+                                        <span class="menu-link py-3 {% navactive request 'farmer_admin:farmers_list' %}">
                                             <span class="menu-title">Farmer</span>
                                             <span class="menu-arrow d-lg-none"></span>
                                         </span>
@@ -90,7 +91,7 @@
                                             <!--begin:Menu item-->
                                             <div class="menu-item">
                                                 <!--begin:Menu link-->
-                                                <a class="menu-link py-3" href="{% url 'farmer_admin:farmers_list' %}">
+                                                <a class="menu-link py-3 {% navactive request 'farmer_admin:farmers_list' %}" href="{% url 'farmer_admin:farmers_list' %}">
                                                     <span class="menu-bullet">
                                                         <span class="bullet bullet-dot"></span>
                                                     </span>
