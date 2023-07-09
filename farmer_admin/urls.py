@@ -37,6 +37,16 @@ urlpatterns = [
     path('farmer/<uuid:pk>/contamination_control/create/', views.FarmerContaminationControlCreateView.as_view(), name="farmer_contamination_control_create"),
     path('farmer/contamination_control/<uuid:pk>/update/', views.FarmerContaminationControlUpdateView.as_view(), name="farmer_contamination_control_update"),
     
+    
+    path('vendor/list/', views.VendorListView.as_view(), name="vendor_list"),
+    path('vendor/create/', views.VendorCreateView.as_view(), name="vendor_create"),
+    path('vendor/<uuid:pk>/update/', views.VendorUpdateView.as_view(), name="vendor_update"),
+    
+    
+    path('traceability/ginning_mapping/create/', views.GinningMappingCreateWizardView.as_view(), name="traceability_ginning_mapping_create"),
+    
+    
     path('dashboard/farmer/', views.DashboardFarmerView.as_view(), name="dashboard_farmer_view"),
     
+    path('dashboard/vendor/', views.DashboardVendorView.as_view(), name="dashboard_vendor"),
 ]

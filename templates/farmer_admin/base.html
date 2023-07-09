@@ -65,7 +65,7 @@
                                             <!--begin:Menu item-->
                                             <div class="menu-item">
                                                 <!--begin:Menu link-->
-                                                <a class="menu-link py-3" href="">
+                                                <a class="menu-link py-3" href="{% url 'farmer_admin:dashboard_vendor' %}">
                                                     <span class="menu-bullet">
                                                         <span class="bullet bullet-dot"></span>
                                                     </span>
@@ -100,102 +100,6 @@
                                                 <!--end:Menu link-->
                                             </div>
                                             <!--end:Menu item-->
-                                            {% comment %} <!--begin:Menu item-->
-                                            <div class="menu-item">
-                                                <!--begin:Menu link-->
-                                                <a class="menu-link py-3" href="../dist/account/settings.html">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
-                                                    <span class="menu-title">Settings</span>
-                                                </a>
-                                                <!--end:Menu link-->
-                                            </div>
-                                            <!--end:Menu item-->
-                                            <!--begin:Menu item-->
-                                            <div class="menu-item">
-                                                <!--begin:Menu link-->
-                                                <a class="menu-link py-3" href="../dist/account/security.html">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
-                                                    <span class="menu-title">Security</span>
-                                                </a>
-                                                <!--end:Menu link-->
-                                            </div>
-                                            <!--end:Menu item-->
-                                            <!--begin:Menu item-->
-                                            <div class="menu-item">
-                                                <!--begin:Menu link-->
-                                                <a class="menu-link py-3" href="../dist/account/activity.html">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
-                                                    <span class="menu-title">Activity</span>
-                                                </a>
-                                                <!--end:Menu link-->
-                                            </div>
-                                            <!--end:Menu item-->
-                                            <!--begin:Menu item-->
-                                            <div class="menu-item">
-                                                <!--begin:Menu link-->
-                                                <a class="menu-link py-3" href="../dist/account/billing.html">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
-                                                    <span class="menu-title">Billing</span>
-                                                </a>
-                                                <!--end:Menu link-->
-                                            </div>
-                                            <!--end:Menu item-->
-                                            <!--begin:Menu item-->
-                                            <div class="menu-item">
-                                                <!--begin:Menu link-->
-                                                <a class="menu-link py-3" href="../dist/account/statements.html">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
-                                                    <span class="menu-title">Statements</span>
-                                                </a>
-                                                <!--end:Menu link-->
-                                            </div>
-                                            <!--end:Menu item-->
-                                            <!--begin:Menu item-->
-                                            <div class="menu-item">
-                                                <!--begin:Menu link-->
-                                                <a class="menu-link py-3" href="../dist/account/referrals.html">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
-                                                    <span class="menu-title">Referrals</span>
-                                                </a>
-                                                <!--end:Menu link-->
-                                            </div>
-                                            <!--end:Menu item-->
-                                            <!--begin:Menu item-->
-                                            <div class="menu-item">
-                                                <!--begin:Menu link-->
-                                                <a class="menu-link py-3" href="../dist/account/api-keys.html">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
-                                                    <span class="menu-title">API Keys</span>
-                                                </a>
-                                                <!--end:Menu link-->
-                                            </div>
-                                            <!--end:Menu item-->
-                                            <!--begin:Menu item-->
-                                            <div class="menu-item">
-                                                <!--begin:Menu link-->
-                                                <a class="menu-link py-3" href="../dist/account/logs.html">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
-                                                    <span class="menu-title">Logs</span>
-                                                </a>
-                                                <!--end:Menu link-->
-                                            </div>
-                                            <!--end:Menu item--> {% endcomment %}
                                         </div>
                                         <!--end:Menu sub-->
                                     </div>
@@ -203,7 +107,7 @@
                                     <!--begin:Menu item-->
                                     <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" class="menu-item menu-lg-down-accordion me-lg-1">
                                         <!--begin:Menu link-->
-                                        <span class="menu-link py-3">
+                                        <span class="menu-link py-3 {% navactive request 'farmer_admin:vendor_list' %} {% if vendor_object %}{% navactive request 'farmer_admin:vendor_update' vendor_object.pk %}{% endif %} ">
                                             <span class="menu-title">Vendor</span>
                                             <span class="menu-arrow d-lg-none"></span>
                                         </span>
@@ -213,23 +117,11 @@
                                             <!--begin:Menu item-->
                                             <div class="menu-item">
                                                 <!--begin:Menu link-->
-                                                <a class="menu-link py-3" href="#">
+                                                <a class="menu-link py-3 {% navactive request 'farmer_admin:vendor_list' %} {% if vendor_object %}{% navactive request 'farmer_admin:vendor_update' vendor_object.pk %}{% endif %} " href="{% url 'farmer_admin:vendor_list' %}">
                                                     <span class="menu-bullet">
                                                         <span class="bullet bullet-dot"></span>
                                                     </span>
-                                                    <span class="menu-title">Spinning</span>
-                                                </a>
-                                                <!--end:Menu link-->
-                                            </div>
-                                            <!--end:Menu item-->
-                                            <!--begin:Menu item-->
-                                            <div class="menu-item">
-                                                <!--begin:Menu link-->
-                                                <a class="menu-link py-3" href="">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
-                                                    <span class="menu-title">Ginning</span>
+                                                    <span class="menu-title">Manage Vendor</span>
                                                 </a>
                                                 <!--end:Menu link-->
                                             </div>
@@ -242,209 +134,27 @@
                                     <!--begin:Menu item-->
                                     <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" class="menu-item menu-lg-down-accordion me-lg-1">
                                         <!--begin:Menu link-->
-                                        <span class="menu-link py-3">
+                                        <span class="menu-link py-3 {% navactive request 'farmer_admin:traceability_ginning_mapping_create' %}">
                                             <span class="menu-title">Traceability </span>
                                             <span class="menu-arrow d-lg-none"></span>
                                         </span>
                                         <!--end:Menu link-->
-                                        {% comment %} <!--begin:Menu sub-->
-                                        <div class="menu-sub menu-sub-lg-down-accordion menu-sub-lg-dropdown p-0 w-lg-600px">
-                                            <!--begin:Pages menu-->
-                                            <div class="menu-state-bg p-4 p-lg-8">
-                                                <!--begin:Row-->
-                                                <div class="row">
-                                                    <!--begin:Col-->
-                                                    <div class="col-lg-4 mb-6 mb-lg-0">
-                                                        <!--begin:Menu section-->
-                                                        <div class="mb-0">
-                                                            <!--begin:Menu heading-->
-                                                            <h4 class="fs-6 fs-lg-4 fw-bold mb-3 ms-4">Login</h4>
-                                                            <!--end:Menu heading-->
-                                                            <!--begin:Menu item-->
-                                                            <div class="menu-item p-0 m-0">
-                                                                <!--begin:Menu link-->
-                                                                <a href="../dist/authentication/sign-in/basic.html" class="menu-link">
-                                                                    <span class="menu-title">Sign In Basic</span>
-                                                                </a>
-                                                                <!--end:Menu link-->
-                                                            </div>
-                                                            <!--end:Menu item-->
-                                                            <!--begin:Menu item-->
-                                                            <div class="menu-item p-0 m-0">
-                                                                <!--begin:Menu link-->
-                                                                <a href="../dist/authentication/sign-up/basic.html" class="menu-link">
-                                                                    <span class="menu-title">Sign Up Basic</span>
-                                                                </a>
-                                                                <!--end:Menu link-->
-                                                            </div>
-                                                            <!--end:Menu item-->
-                                                            <!--begin:Menu item-->
-                                                            <div class="menu-item p-0 m-0">
-                                                                <!--begin:Menu link-->
-                                                                <a href="../dist/authentication/sign-up/multi-steps.html" class="menu-link">
-                                                                    <span class="menu-title">Sign Up Multi-steps</span>
-                                                                </a>
-                                                                <!--end:Menu link-->
-                                                            </div>
-                                                            <!--end:Menu item-->
-                                                            <!--begin:Menu item-->
-                                                            <div class="menu-item p-0 m-0">
-                                                                <!--begin:Menu link-->
-                                                                <a href="../dist/authentication/sign-in/password-reset.html" class="menu-link">
-                                                                    <span class="menu-title">Password Reset</span>
-                                                                </a>
-                                                                <!--end:Menu link-->
-                                                            </div>
-                                                            <!--end:Menu item-->
-                                                            <!--begin:Menu item-->
-                                                            <div class="menu-item p-0 m-0">
-                                                                <!--begin:Menu link-->
-                                                                <a href="../dist/authentication/sign-in/new-password.html" class="menu-link">
-                                                                    <span class="menu-title">New Password</span>
-                                                                </a>
-                                                                <!--end:Menu link-->
-                                                            </div>
-                                                            <!--end:Menu item-->
-                                                            <!--begin:Menu item-->
-                                                            <div class="menu-item p-0 m-0">
-                                                                <!--begin:Menu link-->
-                                                                <a href="../dist/authentication/sign-up/free-trial.html" class="menu-link">
-                                                                    <span class="menu-title">Free Trial</span>
-                                                                </a>
-                                                                <!--end:Menu link-->
-                                                            </div>
-                                                            <!--end:Menu item-->
-                                                        </div>
-                                                        <!--end:Menu section-->
-                                                    </div>
-                                                    <!--end:Col-->
-                                                    <!--begin:Col-->
-                                                    <div class="col-lg-4 mb-6 mb-lg-0">
-                                                        <!--begin:Menu section-->
-                                                        <div class="mb-0">
-                                                            <!--begin:Menu heading-->
-                                                            <h4 class="fs-6 fs-lg-4 fw-bold mb-3 ms-4">General</h4>
-                                                            <!--end:Menu heading-->
-                                                            <!--begin:Menu item-->
-                                                            <div class="menu-item p-0 m-0">
-                                                                <!--begin:Menu link-->
-                                                                <a href="../dist/authentication/sign-up/coming-soon.html" class="menu-link">
-                                                                    <span class="menu-title">Coming Soon</span>
-                                                                </a>
-                                                                <!--end:Menu link-->
-                                                            </div>
-                                                            <!--end:Menu item-->
-                                                            <!--begin:Menu item-->
-                                                            <div class="menu-item p-0 m-0">
-                                                                <!--begin:Menu link-->
-                                                                <a href="../dist/authentication/general/welcome.html" class="menu-link">
-                                                                    <span class="menu-title">Welcome Message</span>
-                                                                </a>
-                                                                <!--end:Menu link-->
-                                                            </div>
-                                                            <!--end:Menu item-->
-                                                            <!--begin:Menu item-->
-                                                            <div class="menu-item p-0 m-0">
-                                                                <!--begin:Menu link-->
-                                                                <a href="../dist/authentication/general/verify-email.html" class="menu-link">
-                                                                    <span class="menu-title">Verify Email</span>
-                                                                </a>
-                                                                <!--end:Menu link-->
-                                                            </div>
-                                                            <!--end:Menu item-->
-                                                            <!--begin:Menu item-->
-                                                            <div class="menu-item p-0 m-0">
-                                                                <!--begin:Menu link-->
-                                                                <a href="../dist/authentication/general/password-confirmation.html" class="menu-link">
-                                                                    <span class="menu-title">Password&nbsp;Confirmation</span>
-                                                                </a>
-                                                                <!--end:Menu link-->
-                                                            </div>
-                                                            <!--end:Menu item-->
-                                                            <!--begin:Menu item-->
-                                                            <div class="menu-item p-0 m-0">
-                                                                <!--begin:Menu link-->
-                                                                <a href="../dist/authentication/general/deactivation.html" class="menu-link">
-                                                                    <span class="menu-title">Account Deactivation</span>
-                                                                </a>
-                                                                <!--end:Menu link-->
-                                                            </div>
-                                                            <!--end:Menu item-->
-                                                            <!--begin:Menu item-->
-                                                            <div class="menu-item p-0 m-0">
-                                                                <!--begin:Menu link-->
-                                                                <a href="../dist/authentication/general/error-404.html" class="menu-link">
-                                                                    <span class="menu-title">Error 404</span>
-                                                                </a>
-                                                                <!--end:Menu link-->
-                                                            </div>
-                                                            <!--end:Menu item-->
-                                                            <!--begin:Menu item-->
-                                                            <div class="menu-item p-0 m-0">
-                                                                <!--begin:Menu link-->
-                                                                <a href="../dist/authentication/general/error-500.html" class="menu-link">
-                                                                    <span class="menu-title">Error 500</span>
-                                                                </a>
-                                                                <!--end:Menu link-->
-                                                            </div>
-                                                            <!--end:Menu item-->
-                                                        </div>
-                                                        <!--end:Menu section-->
-                                                    </div>
-                                                    <!--end:Col-->
-                                                    <!--begin:Col-->
-                                                    <div class="col-lg-4 mb-6 mb-lg-0">
-                                                        <!--begin:Menu section-->
-                                                        <div class="mb-0">
-                                                            <!--begin:Menu heading-->
-                                                            <h4 class="fs-6 fs-lg-4 fw-bold mb-3 ms-4">Email Templates</h4>
-                                                            <!--end:Menu heading-->
-                                                            <!--begin:Menu item-->
-                                                            <div class="menu-item p-0 m-0">
-                                                                <!--begin:Menu link-->
-                                                                <a href="../dist/authentication/email/verify-email.html" class="menu-link">
-                                                                    <span class="menu-title">Verify Email</span>
-                                                                </a>
-                                                                <!--end:Menu link-->
-                                                            </div>
-                                                            <!--end:Menu item-->
-                                                            <!--begin:Menu item-->
-                                                            <div class="menu-item p-0 m-0">
-                                                                <!--begin:Menu link-->
-                                                                <a href="../dist/authentication/email/invitation.html" class="menu-link">
-                                                                    <span class="menu-title">Account Invitation</span>
-                                                                </a>
-                                                                <!--end:Menu link-->
-                                                            </div>
-                                                            <!--end:Menu item-->
-                                                            <!--begin:Menu item-->
-                                                            <div class="menu-item p-0 m-0">
-                                                                <!--begin:Menu link-->
-                                                                <a href="../dist/authentication/email/password-reset.html" class="menu-link">
-                                                                    <span class="menu-title">Password Reset</span>
-                                                                </a>
-                                                                <!--end:Menu link-->
-                                                            </div>
-                                                            <!--end:Menu item-->
-                                                            <!--begin:Menu item-->
-                                                            <div class="menu-item p-0 m-0">
-                                                                <!--begin:Menu link-->
-                                                                <a href="../dist/authentication/email/password-change.html" class="menu-link">
-                                                                    <span class="menu-title">Password Changed</span>
-                                                                </a>
-                                                                <!--end:Menu link-->
-                                                            </div>
-                                                            <!--end:Menu item-->
-                                                        </div>
-                                                        <!--end:Menu section-->
-                                                    </div>
-                                                    <!--end:Col-->
-                                                </div>
-                                                <!--end:Row-->
+                                        <!--begin:Menu sub-->
+                                        <div class="menu-sub menu-sub-lg-down-accordion menu-sub-lg-dropdown px-lg-2 py-lg-4 w-lg-200px">
+                                            <!--begin:Menu item-->
+                                            <div class="menu-item">
+                                                <!--begin:Menu link-->
+                                                <a class="menu-link py-3 {% navactive request 'farmer_admin:traceability_ginning_mapping_create' %}" href="{% url 'farmer_admin:traceability_ginning_mapping_create' %}">
+                                                    <span class="menu-bullet">
+                                                        <span class="bullet bullet-dot"></span>
+                                                    </span>
+                                                    <span class="menu-title">Add Ginning Request</span>
+                                                </a>
+                                                <!--end:Menu link-->
                                             </div>
-                                            <!--end:Pages menu-->
+                                            <!--end:Menu item-->
                                         </div>
-                                        <!--end:Menu sub--> {% endcomment %}
+                                        <!--end:Menu sub-->
                                     </div>
                                     <!--end:Menu item-->
                                     <!--begin:Menu item-->

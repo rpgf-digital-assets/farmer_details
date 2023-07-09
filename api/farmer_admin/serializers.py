@@ -27,7 +27,7 @@ class FarmerLandSerializer(DynamicFieldsCategorySerializer):
 class FarmerOrganicCropSerializer(DynamicFieldsCategorySerializer):
     class Meta:
         model = OrganicCropDetails
-        fields = ('name', 'area')
+        fields = ('name', 'type', 'area', 'expected_yield', 'expected_date_of_harvesting')
         
         
 class FarmerDetailsSerializer(DynamicFieldsCategorySerializer):

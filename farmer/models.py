@@ -2,12 +2,12 @@ import uuid
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from farmer_details_app.models import BaseModel
 from datetime import date
 from simple_history.models import HistoricalRecords
 
 
 from users.models import User
+from utils.helpers import BaseModel
 
 
 # Create your models here.

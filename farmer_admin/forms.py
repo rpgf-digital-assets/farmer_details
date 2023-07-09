@@ -8,6 +8,7 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 
 from django.forms import (
+    BaseFormSet,
     CharField,
     EmailField,
     EmailInput,
@@ -29,10 +30,12 @@ from django.forms import (
     IntegerField,
     NumberInput,
     Textarea,
-    FileField
+    FileField,
+    formset_factory
 )
 
 from farmer.models import ContaminationControl, CostOfCultivation, Farmer, FarmerEducation, FarmerLand, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, PestDiseaseManagement, SeedDetails, WeedManagement
+from farmer_details_app.models import GinningMapping, SelectedGinningFarmer, Vendor
 from users.models import User
 from users.validators import validate_name, validate_phonenumber
 from .utils import country_list
@@ -360,7 +363,95 @@ class ContaminationControlForm(BaseCreationForm):
     class Meta:
         model = ContaminationControl
         exclude = ['farmer']
+    
+    
+class VendorCreateForm(BaseCreationForm):
+    class Meta:
+        model = Vendor
+        exclude = ['id']
 
+
+
+class SelectedGinningFarmerForm(ModelForm): 
+    farmer = ModelChoiceField(required=False, queryset=Farmer.objects.all(), widget=Select(
+        attrs={
+            'class': 'form-control'
+        }
+    ))
+    farmer_name = CharField(required=False, widget=TextInput(
+        attrs={
+            'class': 'form-control'
+        }
+    ))
+    quantity = IntegerField(widget=NumberInput(attrs={
+        'class': 'form-control'
+    }))
+    
+    class Meta:
+        model = SelectedGinningFarmer
+        exclude = ['id']
+        
+    def clean(self):
+        cleaned_data = super().clean()
+        validation_errors = []
+
+        farmer = cleaned_data.get('farmer')
+        farmer_name = cleaned_data.get('farmer_name')
+        
+        if not farmer and not farmer_name:
+            validation_errors.append(ValidationError('Select a farmer or type the farmer name', 'farmer_required'))
+        if farmer and farmer_name:
+            validation_errors.append(ValidationError('Select either farmer or type the farmer name', 'farmer_required'))
+        
+        if validation_errors: 
+            raise ValidationError(validation_errors)
+        
+        
+class BaseArticleFormSet(BaseFormSet):
+    def clean(self):
+        """Checks that no two selected ginning farmer are same."""
+        if any(self.errors):
+            # Don't bother validating the formset unless each form is valid on its own
+            return
+        selected_farmer_list = []
+        for form in self.forms:
+            if self.can_delete and self._should_delete_form(form):
+                continue
+            farmer = form.cleaned_data.get("farmer")
+            farmer_name = form.cleaned_data.get("farmer_name")
+            quantity = form.cleaned_data.get("quantity")
+            print("🐍 File: farmer_admin/forms.py | Line: 424 | clean ~ (farmer, farmer_name, quantity)",(farmer, farmer_name, quantity))
+            if (farmer, farmer_name, quantity) in selected_farmer_list:
+                raise ValidationError("Selected farmers in a set must be distinct.")
+            selected_farmer_list.append((farmer, farmer_name, quantity))
+        
+        
+        
+SelectedGinningFarmerFormSet = formset_factory(SelectedGinningFarmerForm, extra=1, formset=BaseArticleFormSet, min_num=1)
+
+
+class GinningMappingForm(Form):
+
+    vendor = ModelChoiceField(required=True, queryset=Vendor.objects.all(), widget=Select(
+        attrs={
+            'class': 'form-control'
+        }
+    ))
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     

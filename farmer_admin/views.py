@@ -5,6 +5,7 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.conf import settings
 from django.db import transaction
+from django.forms import Form
 from django.http import HttpResponse
 from django.db.models import Avg
 from django.shortcuts import redirect, render
@@ -18,12 +19,15 @@ from django.views.generic import (
 )
 
 from farmer.models import ContaminationControl, CostOfCultivation, Farmer, FarmerLand, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, PestDiseaseManagement, SeedDetails, WeedManagement
-from farmer_admin.forms import ContaminationControlForm, CostOfCultivationForm, FarmerCreationForm, FarmerLandDetailsCreationFrom, FarmerNutritionManagementForm, FarmerOrganicCropDetailForm, FarmerPestDiseaseManagementForm, FarmerSeedDetailsForm, FarmerSocialCreationFrom, HarvestAndIncomeDetailForm, WeedManagementForm
+from farmer_admin.forms import ContaminationControlForm, CostOfCultivationForm, FarmerCreationForm, FarmerLandDetailsCreationFrom, FarmerNutritionManagementForm, FarmerOrganicCropDetailForm, FarmerPestDiseaseManagementForm, FarmerSeedDetailsForm, FarmerSocialCreationFrom, GinningMappingForm, HarvestAndIncomeDetailForm, SelectedGinningFarmerForm, SelectedGinningFarmerFormSet, VendorCreateForm, WeedManagementForm
 from farmer_admin.mixins import AdminRequiredMixin
 from farmer_details_app.mixins import CustomLoginRequiredMixin
+from farmer_details_app.models import GinningMapping, SelectedGinningFarmer, Vendor
 from users.models import User
 from django.core.files.storage import FileSystemStorage
 
+from django.shortcuts import render
+from formtools.wizard.views import SessionWizardView
 
 # Create your views here.
 
@@ -330,8 +334,94 @@ class FarmerContaminationControlUpdateView(CustomLoginRequiredMixin, AdminRequir
     success_url = reverse_lazy('farmer_admin:farmers_list')
     context_object_name = 'farmer_contamination_object'
 
+
+
+class VendorListView(CustomLoginRequiredMixin, AdminRequiredMixin, ListView):
+    template_name = 'farmer_admin/vendor_list.html'
+    queryset = Vendor.objects.all()
+    context_object_name = 'vendors'
     
     
+    
+class VendorCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, CreateView):
+    template_name = 'farmer_admin/vendor_create_edit.html'
+    form_class = VendorCreateForm
+    success_url = reverse_lazy('farmer_admin:vendor_list')
+    
+    
+    
+class VendorUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
+    template_name = 'farmer_admin/vendor_create_edit.html'
+    queryset = Vendor.objects.all()
+    form_class = VendorCreateForm
+    success_url = reverse_lazy('farmer_admin:vendor_list')
+    context_object_name = 'vendor_object'
+    
+    
+    
+class GinningMappingCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, CreateView):
+    template_name = 'farmer_admin/ginning_mapping_create.html'
+    form_class = GinningMappingForm
+    success_url = reverse_lazy('farmer_admin:vendor_list')
+    
+
+class GinningMappingCreateWizardView(CustomLoginRequiredMixin, AdminRequiredMixin, SessionWizardView):
+    form_list = [SelectedGinningFarmerFormSet, GinningMappingForm, Form]
+    template_name = 'farmer_admin/ginning_mapping_wizard_base.html'
+    instance = []
+    
+    # def get_form(self, step=None, data=None, files=None):
+    #     form = super().get_form(step, data, files)
+    #     self.instance.append(form)
+    #     print("🐍 File: farmer_admin/views.py | Line: 376 | get_form ~ self.instance",self.instance)
+        
+    #     return form
+    def process_step(self, form):
+        print("🐍 File: farmer_admin/views.py | Line: 381 | process_step ~ self.get_form_step_data(form)",self.get_form_step_data(form))
+        return self.get_form_step_data(form)
+
+    def get_context_data(self, form, **kwargs):
+        context = super().get_context_data(form=form, **kwargs)
+        if self.steps.current == '2':
+            context.update({
+                'form_1_data': self.get_cleaned_data_for_step('0'),
+                'form_2_data': self.get_cleaned_data_for_step('1')
+            })
+        return context
+    
+
+    def done(self, form_list, **kwargs):
+        all_cleaned_data = [form.cleaned_data for form in form_list]
+        print("🐍 File: farmer_admin/views.py | Line: 374 | done ~ all_cleaned_data",all_cleaned_data)
+        cleaned_data_form_1 = all_cleaned_data[0]
+        cleaned_data_form_2 = all_cleaned_data[1]
+        with transaction.atomic():
+            ginning_mapping = GinningMapping.objects.create(vendor=cleaned_data_form_2['vendor'], status=GinningMapping.IN_PROGRESS)
+            for cleaned_data in cleaned_data_form_1:
+                try:
+                    cleaned_data['quantity']
+                    ginning_mapping.selected_farmers.add(SelectedGinningFarmer.objects.create(**cleaned_data))
+                except KeyError:
+                    pass
+            
+        return render(self.request, 'farmer_admin/ginning_mapping_wizard_done.html', {
+            'form_data': [form.cleaned_data for form in form_list],
+            'completed': True,
+        })
+    
+class DashboardVendorView(CustomLoginRequiredMixin, AdminRequiredMixin, ListView):
+    template_name = 'farmer_admin/dashboard_vendor.html'
+    queryset = GinningMapping.objects.all()
+    context_object_name = 'ginning_mappings'
+    
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["spinning_mapping"] = []
+        return context
+    
+    
+
     
 class DashboardFarmerView(TemplateView):
     template_name = 'farmer_admin/dashboard_farmer.html'
