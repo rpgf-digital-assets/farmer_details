@@ -324,16 +324,20 @@
                     <!--begin::Card title-->
                     <div class="card-title m-0">
                         <h3 class="fw-bold m-0">Profile Details</h3>
+                        
+                    </div>
+                    <!--end::Card title-->
+                    <div class="card-toolbar">
                         <!--begin::Action-->
                         <a href="{% url 'farmer_admin:farmer_update' farmer.pk %}" class="btn btn-primary align-self-center mx-10">Edit</a>
                         <!--end::Action-->
-                    </div>
-                    <!--end::Card title-->
-                    <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#profile_collapsible">
-                        <div class="card-toolbar rotate-180">    
-                            <i class="ki-duotone ki-down fs-1"></i>
+                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#profile_collapsible">
+                            <div class="rotate-180">    
+                                <i class="ki-duotone ki-down fs-1"></i>
+                            </div>
                         </div>
-                    </div>
+                    </div> 
+                    
                 </div>
                 <!--begin::Card header-->
                 <!--begin::Card body-->
@@ -522,6 +526,11 @@
                     <!--begin::Card title-->
                     <div class="card-title m-0">
                         <h3 class="fw-bold m-0">Social Details</h3>
+                        
+                    </div>
+                    <!--end::Card title-->
+                    <div class="card-toolbar">
+                        <!--begin::Action-->
                         {% if farmer.social.all.first %}
                         <!--begin::Action-->
                         <a href="{% url 'farmer_admin:farmer_social_update' farmer.social.all.first.pk %}" class="btn btn-primary align-self-center mx-10">Edit</a>
@@ -529,13 +538,14 @@
                         {% else %}
                         <a href="{% url 'farmer_admin:farmer_social_create' farmer.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
                         {% endif %}
-                    </div>
-                    <!--end::Card title-->
-                    <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#socials_collapsible">
-                        <div class="card-toolbar rotate-180">    
-                            <i class="ki-duotone ki-down fs-1"></i>
+                        <!--end::Action-->
+                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#socials_collapsible">
+                            <div class="card-toolbar rotate-180">    
+                                <i class="ki-duotone ki-down fs-1"></i>
+                            </div>
                         </div>
-                    </div>
+                    </div> 
+                    
                 </div>
                 <!--begin::Card header-->
                 <div id="socials_collapsible" class="collapse show">
@@ -595,6 +605,11 @@
                     <!--begin::Card title-->
                     <div class="card-title m-0">
                         <h3 class="fw-bold m-0">Land Details</h3>
+                        
+                    </div>
+                    <!--end::Card title-->
+                    <div class="card-toolbar">
+                        <!--begin::Action-->
                         {% if farmer.land.all.first %}
                         <!--begin::Action-->
                         <a href="{% url 'farmer_admin:farmer_land_details_update' farmer.land.all.first.pk %}" class="btn btn-primary align-self-center mx-10">Edit</a>
@@ -602,13 +617,13 @@
                         {% else %}
                         <a href="{% url 'farmer_admin:farmer_land_details_create' farmer.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
                         {% endif %}
-                    </div>
-                    <!--end::Card title-->
-                    <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#land_collapsible">
-                        <div class="card-toolbar rotate-180">    
-                            <i class="ki-duotone ki-down fs-1"></i>
+                        <!--end::Action-->
+                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#land_collapsible">
+                            <div class="card-toolbar rotate-180">    
+                                <i class="ki-duotone ki-down fs-1"></i>
+                            </div>
                         </div>
-                    </div>
+                    </div> 
                 </div>
                 <!--begin::Card header-->
                 <div id="land_collapsible" class="collapse show">
@@ -627,6 +642,11 @@
                     <!--begin::Card title-->
                     <div class="card-title m-0">
                         <h3 class="fw-bold m-0">Organic Crop Details</h3>
+                        
+                    </div>
+                    <!--end::Card title-->
+                    <div class="card-toolbar">
+                        <!--begin::Action-->
                         {% if farmer.organic_crop.all.first %}
                         <!--begin::Action-->
                         <a href="{% url 'farmer_admin:farmer_organic_crop_update' farmer.organic_crop.all.first.pk %}" class="btn btn-primary align-self-center mx-10">Edit</a>
@@ -634,11 +654,11 @@
                         {% else %}
                         <a href="{% url 'farmer_admin:farmer_organic_crop_create' farmer.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
                         {% endif %}
-                    </div>
-                    <!--end::Card title-->
-                    <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#organic_crop_collapsible">
-                        <div class="card-toolbar rotate-180">
-                            <i class="ki-duotone ki-down fs-1"></i>
+                        <!--end::Action-->
+                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#organic_crop_collapsible">
+                            <div class="rotate-180">    
+                                <i class="ki-duotone ki-down fs-1"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -659,6 +679,11 @@
                     <!--begin::Card title-->
                     <div class="card-title m-0">
                         <h3 class="fw-bold m-0">Seed Details</h3>
+                        
+                    </div>
+                    <!--end::Card title-->
+                    <div class="card-toolbar">
+                        <!--begin::Action-->
                         {% if farmer.seed.all.first %}
                         <!--begin::Action-->
                         <a href="{% url 'farmer_admin:farmer_seed_details_update' farmer.seed.all.first.pk %}" class="btn btn-primary align-self-center mx-10">Edit</a>
@@ -666,13 +691,13 @@
                         {% else %}
                         <a href="{% url 'farmer_admin:farmer_seed_details_create' farmer.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
                         {% endif %}
-                    </div>
-                    <!--end::Card title-->
-                    <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#seed_collapsible">
-                        <div class="card-toolbar rotate-180">    
-                            <i class="ki-duotone ki-down fs-1"></i>
+                        <!--end::Action-->
+                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#seed_collapsible">
+                            <div class="card-toolbar rotate-180">    
+                                <i class="ki-duotone ki-down fs-1"></i>
+                            </div>
                         </div>
-                    </div>
+                    </div> 
                 </div>
                 <!--begin::Card header-->
                 <div id="seed_collapsible" class="collapse show">
@@ -691,6 +716,11 @@
                     <!--begin::Card title-->
                     <div class="card-title m-0">
                         <h3 class="fw-bold m-0">Nutrient Details</h3>
+                        
+                    </div>
+                    <!--end::Card title-->
+                    <div class="card-toolbar">
+                        <!--begin::Action-->
                         {% if farmer.nutrient.all.first %}
                         <!--begin::Action-->
                         <a href="{% url 'farmer_admin:farmer_nutrient_details_update' farmer.nutrient.all.first.pk %}" class="btn btn-primary align-self-center mx-10">Edit</a>
@@ -698,11 +728,11 @@
                         {% else %}
                         <a href="{% url 'farmer_admin:farmer_nutrient_details_create' farmer.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
                         {% endif %}
-                    </div>
-                    <!--end::Card title-->
-                    <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#nutrient_collapsible">
-                        <div class="card-toolbar rotate-180">    
-                            <i class="ki-duotone ki-down fs-1"></i>
+                        <!--end::Action-->
+                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#nutrient_collapsible">
+                            <div class="rotate-180">    
+                                <i class="ki-duotone ki-down fs-1"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -723,6 +753,11 @@
                     <!--begin::Card title-->
                     <div class="card-title m-0">
                         <h3 class="fw-bold m-0">Pest Disease Management</h3>
+                        
+                    </div>
+                    <!--end::Card title-->
+                    <div class="card-toolbar">
+                        <!--begin::Action-->
                         {% if farmer.pest_disease.all.first %}
                         <!--begin::Action-->
                         <a href="{% url 'farmer_admin:farmer_pest_disease_management_update' farmer.pest_disease.all.first.pk %}" class="btn btn-primary align-self-center mx-10">Edit</a>
@@ -730,11 +765,11 @@
                         {% else %}
                         <a href="{% url 'farmer_admin:farmer_pest_disease_management_create' farmer.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
                         {% endif %}
-                    </div>
-                    <!--end::Card title-->
-                    <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#pest_disease_management_collapsible">
-                        <div class="card-toolbar rotate-180">    
-                            <i class="ki-duotone ki-down fs-1"></i>
+                        <!--end::Action-->
+                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#pest_disease_management_collapsible">
+                            <div class="rotate-180">    
+                                <i class="ki-duotone ki-down fs-1"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -755,6 +790,11 @@
                     <!--begin::Card title-->
                     <div class="card-title m-0">
                         <h3 class="fw-bold m-0">Weed Management</h3>
+                        
+                    </div>
+                    <!--end::Card title-->
+                    <div class="card-toolbar">
+                        <!--begin::Action-->
                         {% if farmer.weed.all.first %}
                         <!--begin::Action-->
                         <a href="{% url 'farmer_admin:farmer_weed_management_update' farmer.weed.all.first.pk %}" class="btn btn-primary align-self-center mx-10">Edit</a>
@@ -762,13 +802,13 @@
                         {% else %}
                         <a href="{% url 'farmer_admin:farmer_weed_management_create' farmer.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
                         {% endif %}
-                    </div>
-                    <!--end::Card title-->
-                    <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#weed_management_collapsible">
-                        <div class="card-toolbar rotate-180">    
-                            <i class="ki-duotone ki-down fs-1"></i>
+                        <!--end::Action-->
+                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#weed_management_collapsible">
+                            <div class="rotate-180">    
+                                <i class="ki-duotone ki-down fs-1"></i>
+                            </div>
                         </div>
-                    </div>
+                    </div> 
                 </div>
                 <!--begin::Card header-->
                 <div id="weed_management_collapsible" class="collapse show">
@@ -787,6 +827,10 @@
                     <!--begin::Card title-->
                     <div class="card-title m-0">
                         <h3 class="fw-bold m-0">Harvest & Income</h3>
+                    </div>
+                    <!--end::Card title-->
+                    <div class="card-toolbar">
+                        <!--begin::Action-->
                         {% if farmer.harvest_income.all.first %}
                         <!--begin::Action-->
                         <a href="{% url 'farmer_admin:farmer_harvest_income_update' farmer.harvest_income.all.first.pk %}" class="btn btn-primary align-self-center mx-10">Edit</a>
@@ -794,11 +838,11 @@
                         {% else %}
                         <a href="{% url 'farmer_admin:farmer_harvest_income_create' farmer.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
                         {% endif %}
-                    </div>
-                    <!--end::Card title-->
-                    <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#harvest_income_collapsible">
-                        <div class="card-toolbar rotate-180">    
-                            <i class="ki-duotone ki-down fs-1"></i>
+                        <!--end::Action-->
+                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#harvest_income_collapsible">
+                            <div class="rotate-180">    
+                                <i class="ki-duotone ki-down fs-1"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -819,6 +863,11 @@
                     <!--begin::Card title-->
                     <div class="card-title m-0">
                         <h3 class="fw-bold m-0">Cost Of Cultivation</h3>
+                        
+                    </div>
+                    <!--end::Card title-->
+                    <div class="card-toolbar">
+                        <!--begin::Action-->
                         {% if farmer.cost_of_cultivation.all.first %}
                         <!--begin::Action-->
                         <a href="{% url 'farmer_admin:farmer_cost_of_cultivation_update' farmer.cost_of_cultivation.all.first.pk %}" class="btn btn-primary align-self-center mx-10">Edit</a>
@@ -826,11 +875,11 @@
                         {% else %}
                         <a href="{% url 'farmer_admin:farmer_cost_of_cultivation_create' farmer.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
                         {% endif %}
-                    </div>
-                    <!--end::Card title-->
-                    <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#cost_of_cultivation_collapsible">
-                        <div class="card-toolbar rotate-180">    
-                            <i class="ki-duotone ki-down fs-1"></i>
+                        <!--end::Action-->
+                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#cost_of_cultivation_collapsible">
+                            <div class="rotate-180">    
+                                <i class="ki-duotone ki-down fs-1"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -846,20 +895,21 @@
             
             <!--begin::details View-->
             <div class="card mb-5 mb-xl-10 page-section" id="contamination_control_div">
-                
-
-
                 <!--begin::Card header-->
                 <div class="card-header" >
                     <!--begin::Card title-->
                     <div class="card-title m-0">
                         <h3 class="fw-bold m-0">Contamination Control</h3>
-                        <a href="{% url 'farmer_admin:farmer_contamination_control_create' farmer.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
                     </div>
                     <!--end::Card title-->
-                    <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#contamination_control_collapsible">
-                        <div class="card-toolbar rotate-180">    
-                            <i class="ki-duotone ki-down fs-1"></i>
+                    <div class="card-toolbar">
+                        <!--begin::Action-->
+                        <a href="{% url 'farmer_admin:farmer_contamination_control_create' farmer.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
+                        <!--end::Action-->
+                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#contamination_control_collapsible">
+                            <div class="card-toolbar rotate-180">    
+                                <i class="ki-duotone ki-down fs-1"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
