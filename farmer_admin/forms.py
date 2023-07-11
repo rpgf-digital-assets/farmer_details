@@ -35,8 +35,8 @@ from django.forms import (
 )
 
 from farmer.models import ContaminationControl, CostOfCultivation, Farmer, FarmerEducation, FarmerLand, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, PestDiseaseManagement, SeedDetails, WeedManagement
-from farmer_details_app.models import GinningMapping, SelectedGinningFarmer, Vendor
-from users.models import User
+from farmer_details_app.models import GinningMapping, Season, SelectedGinningFarmer, Vendor
+from users.models import User, validate_unique_phone
 from users.validators import validate_name, validate_phonenumber
 from .utils import country_list
 
@@ -125,13 +125,14 @@ class FarmerCreationForm(BaseCreationForm):
             # Check if user phone numer changed
             try:
                 if self.initial['phone'] != phone:
-                    User.objects.get(phone=phone)
+                    user = User.objects.get(is_active=True, phone=f'{phone}')
+                    print("🐍 File: farmer_admin/forms.py | Line: 130 | clean ~ user",user, phone)
                     validation_errors.append(ValidationError(
                         'User already exists with the same phone number',
                         'user_already_exists'
                     ))
             except KeyError:
-                User.objects.get(phone=phone)
+                User.objects.get(is_active=True, phone=phone)
                 validation_errors.append(ValidationError(
                     'User already exists with the same phone number',
                     'user_already_exists'
@@ -415,6 +416,7 @@ class BaseArticleFormSet(BaseFormSet):
             return
         selected_farmer_list = []
         for form in self.forms:
+            
             if self.can_delete and self._should_delete_form(form):
                 continue
             farmer = form.cleaned_data.get("farmer")
@@ -424,7 +426,8 @@ class BaseArticleFormSet(BaseFormSet):
             if (farmer, farmer_name, quantity) in selected_farmer_list:
                 raise ValidationError("Selected farmers in a set must be distinct.")
             selected_farmer_list.append((farmer, farmer_name, quantity))
-        
+            if not farmer and not farmer_name and not quantity:
+                raise ValidationError("Cannot submit an empty form")
         
         
 SelectedGinningFarmerFormSet = formset_factory(SelectedGinningFarmerForm, extra=1, formset=BaseArticleFormSet, min_num=1)
@@ -439,6 +442,11 @@ class GinningMappingForm(Form):
     ))
 
     
+    
+class SeasonCreateForm(BaseCreationForm):
+    class Meta:
+        model = Season
+        fields = '__all__'
     
     
     

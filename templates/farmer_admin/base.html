@@ -160,36 +160,8 @@
                                     <!--begin:Menu item-->
                                     <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" class="menu-item menu-lg-down-accordion me-lg-1">
                                         <!--begin:Menu link-->
-                                        <span class="menu-link py-3">
+                                        <span class="menu-link py-3 {% navactive request 'farmer_admin:season_list' %}">
                                             <span class="menu-title">Seasons</span>
-                                            <span class="menu-arrow d-lg-none"></span>
-                                        </span>
-                                        <!--end:Menu link-->
-                                        <!--begin:Menu sub-->
-                                        <div class="menu-sub menu-sub-lg-down-accordion menu-sub-lg-dropdown px-lg-2 py-lg-4 w-lg-200px">
-                                            <!--begin:Menu item-->
-                                            <div data-kt-menu-trigger="{default:'click', lg: 'hover'}" data-kt-menu-placement="right-start" class="menu-item menu-lg-down-accordion">
-                                                <!--begin:Menu link-->
-                                                <span class="menu-link py-3">
-                                                    <span class="menu-icon">
-                                                        <i class="ki-duotone ki-handcart fs-2"></i>
-                                                    </span>
-                                                    <span class="menu-title">Add season</span>
-                                                    <span class="menu-arrow"></span>
-                                                </span>
-                                                <!--end:Menu link-->
-                                            </div>
-                                            <!--end:Menu item-->
-                                        </div>
-                                        <!--end:Menu sub-->
-                                    </div>
-                                    <!--end:Menu item-->
-                                    {% comment %} 
-                                    <!--begin:Menu item-->
-                                    <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" class="menu-item menu-lg-down-accordion me-lg-1">
-                                        <!--begin:Menu link-->
-                                        <span class="menu-link py-3">
-                                            <span class="menu-title">Crops</span>
                                             <span class="menu-arrow d-lg-none"></span>
                                         </span>
                                         <!--end:Menu link-->
@@ -198,24 +170,19 @@
                                             <!--begin:Menu item-->
                                             <div class="menu-item">
                                                 <!--begin:Menu link-->
-                                                <a class="menu-link py-3" href="https://preview.keenthemes.com/html/ceres-html-pro/docs/base/utilities" target="_blank" title="Check out over 200 in-house components, plugins and ready for use solutions" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-dismiss="click" data-bs-placement="right">
+                                                <a class="menu-link py-3 {% navactive request 'farmer_admin:season_list' %}" href="{% url 'farmer_admin:season_list' %}">
                                                     <span class="menu-icon">
-                                                        <i class="ki-duotone ki-element-8 fs-2">
-                                                            <span class="path1"></span>
-                                                            <span class="path2"></span>
-                                                        </i>
+                                                        <i class="ki-duotone ki-handcart fs-2"></i>
                                                     </span>
-                                                    <span class="menu-title">Add Crops</span>
+                                                    <span class="menu-title">Manage Season</span>
                                                 </a>
                                                 <!--end:Menu link-->
                                             </div>
                                             <!--end:Menu item-->
-                                            
                                         </div>
                                         <!--end:Menu sub-->
                                     </div>
-                                    <!--end:Menu item--> 
-                                    {% endcomment %}
+                                    <!--end:Menu item-->
                                 </div>
                                 <!--end::Menu-->
                             </div>

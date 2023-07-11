@@ -744,11 +744,11 @@ var KTFarmersList = function () {
 
     const remove_selected_farmers = (farmers_list) => {
         console.log(farmers_list)
-        let delete_farmers_url = "{% url 'api:api_farmer_admin:farmer_delete_api_view' %}"
+        let delete_farmers_url = "{% url 'api:api_farmer_admin:vendor_delete_api_view' %}"
         fetch(delete_farmers_url, {
             method: "POST",
             body: JSON.stringify({
-                farmers_list: farmers_list,
+                object_pk_list: farmers_list,
             }),
             headers: {
                 "X-CSRFToken": getCookie("csrftoken"),

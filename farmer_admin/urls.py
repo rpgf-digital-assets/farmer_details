@@ -46,6 +46,12 @@ urlpatterns = [
     path('traceability/ginning_mapping/create/', views.GinningMappingCreateWizardView.as_view(), name="traceability_ginning_mapping_create"),
     
     
+    path('season/list/', views.SeasonListView.as_view(), name="season_list"),
+    path('season/create/', views.SeasonCreateView.as_view(), name="season_create"),
+    path('season/<uuid:pk>/update/', views.SeasonUpdateView.as_view(), name="season_update"),
+    
+    
+    
     path('dashboard/farmer/', views.DashboardFarmerView.as_view(), name="dashboard_farmer_view"),
     
     path('dashboard/vendor/', views.DashboardVendorView.as_view(), name="dashboard_vendor"),

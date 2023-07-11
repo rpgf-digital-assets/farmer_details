@@ -19,10 +19,10 @@ from django.views.generic import (
 )
 
 from farmer.models import ContaminationControl, CostOfCultivation, Farmer, FarmerLand, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, PestDiseaseManagement, SeedDetails, WeedManagement
-from farmer_admin.forms import ContaminationControlForm, CostOfCultivationForm, FarmerCreationForm, FarmerLandDetailsCreationFrom, FarmerNutritionManagementForm, FarmerOrganicCropDetailForm, FarmerPestDiseaseManagementForm, FarmerSeedDetailsForm, FarmerSocialCreationFrom, GinningMappingForm, HarvestAndIncomeDetailForm, SelectedGinningFarmerForm, SelectedGinningFarmerFormSet, VendorCreateForm, WeedManagementForm
+from farmer_admin.forms import ContaminationControlForm, CostOfCultivationForm, FarmerCreationForm, FarmerLandDetailsCreationFrom, FarmerNutritionManagementForm, FarmerOrganicCropDetailForm, FarmerPestDiseaseManagementForm, FarmerSeedDetailsForm, FarmerSocialCreationFrom, GinningMappingForm, HarvestAndIncomeDetailForm, SeasonCreateForm, SelectedGinningFarmerForm, SelectedGinningFarmerFormSet, VendorCreateForm, WeedManagementForm
 from farmer_admin.mixins import AdminRequiredMixin
 from farmer_details_app.mixins import CustomLoginRequiredMixin
-from farmer_details_app.models import GinningMapping, SelectedGinningFarmer, Vendor
+from farmer_details_app.models import GinningMapping, Season, SelectedGinningFarmer, Vendor
 from users.models import User
 from django.core.files.storage import FileSystemStorage
 
@@ -41,7 +41,7 @@ class BaseFarmerDetailsCreateView(CreateView):
     
 
 class FarmersListView(CustomLoginRequiredMixin, AdminRequiredMixin, ListView):
-    queryset = Farmer.objects.prefetch_related('land')
+    queryset = Farmer.objects.filter(user__is_active=True).prefetch_related('land')
     context_object_name = 'farmers'
     template_name = 'farmer_admin/farmers_list.html'
     
@@ -338,7 +338,7 @@ class FarmerContaminationControlUpdateView(CustomLoginRequiredMixin, AdminRequir
 
 class VendorListView(CustomLoginRequiredMixin, AdminRequiredMixin, ListView):
     template_name = 'farmer_admin/vendor_list.html'
-    queryset = Vendor.objects.all()
+    queryset = Vendor.objects.filter(is_active=True)
     context_object_name = 'vendors'
     
     
@@ -349,20 +349,12 @@ class VendorCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, CreateView)
     success_url = reverse_lazy('farmer_admin:vendor_list')
     
     
-    
 class VendorUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
     template_name = 'farmer_admin/vendor_create_edit.html'
-    queryset = Vendor.objects.all()
+    queryset = Vendor.objects.filter(is_active=True)
     form_class = VendorCreateForm
     success_url = reverse_lazy('farmer_admin:vendor_list')
     context_object_name = 'vendor_object'
-    
-    
-    
-class GinningMappingCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, CreateView):
-    template_name = 'farmer_admin/ginning_mapping_create.html'
-    form_class = GinningMappingForm
-    success_url = reverse_lazy('farmer_admin:vendor_list')
     
 
 class GinningMappingCreateWizardView(CustomLoginRequiredMixin, AdminRequiredMixin, SessionWizardView):
@@ -370,15 +362,6 @@ class GinningMappingCreateWizardView(CustomLoginRequiredMixin, AdminRequiredMixi
     template_name = 'farmer_admin/ginning_mapping_wizard_base.html'
     instance = []
     
-    # def get_form(self, step=None, data=None, files=None):
-    #     form = super().get_form(step, data, files)
-    #     self.instance.append(form)
-    #     print("🐍 File: farmer_admin/views.py | Line: 376 | get_form ~ self.instance",self.instance)
-        
-    #     return form
-    def process_step(self, form):
-        print("🐍 File: farmer_admin/views.py | Line: 381 | process_step ~ self.get_form_step_data(form)",self.get_form_step_data(form))
-        return self.get_form_step_data(form)
 
     def get_context_data(self, form, **kwargs):
         context = super().get_context_data(form=form, **kwargs)
@@ -409,18 +392,39 @@ class GinningMappingCreateWizardView(CustomLoginRequiredMixin, AdminRequiredMixi
             'completed': True,
         })
     
+    
+    
+class SeasonListView(CustomLoginRequiredMixin, AdminRequiredMixin, ListView):
+    template_name = 'farmer_admin/season_list.html'
+    queryset = Season.objects.filter(is_active=True)
+    context_object_name = 'seasons'
+    
+    
+class SeasonCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, CreateView):
+    form_class = SeasonCreateForm
+    template_name = 'farmer_admin/season_create_edit.html'
+    success_url = reverse_lazy('farmer_admin:season_list')
+    
+    
+class SeasonUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
+    template_name = 'farmer_admin/season_create_edit.html'
+    queryset = Season.objects.filter(is_active=True)
+    form_class = SeasonCreateForm
+    success_url = reverse_lazy('farmer_admin:season_list')
+    context_object_name = 'season_object'
+    
+    
 class DashboardVendorView(CustomLoginRequiredMixin, AdminRequiredMixin, ListView):
     template_name = 'farmer_admin/dashboard_vendor.html'
-    queryset = GinningMapping.objects.all()
+    queryset = GinningMapping.objects.all().prefetch_related('selected_farmers')
     context_object_name = 'ginning_mappings'
     
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["spinning_mapping"] = []
+        context["pending_mapping_count"] = GinningMapping.objects.filter(status=GinningMapping.IN_PROGRESS).count()
+        context["completed_mapping_count"] = GinningMapping.objects.filter(status=GinningMapping.COMPLETED).count()
         return context
-    
-    
 
     
 class DashboardFarmerView(TemplateView):

@@ -1,4 +1,5 @@
 import uuid
+from django.forms import ValidationError
 
 import phonenumbers
 import pytz
@@ -53,6 +54,20 @@ class UserManager(BaseUserManager):
         return user
     
 
+def validate_unique_phone(phone):
+    try:
+        User.objects.get(is_active=True, phone=phone)
+        raise ValidationError('User already exists with the same phone number np')
+    except User.DoesNotExist:
+        pass
+   
+def validate_unique_email(email):
+    try:
+        User.objects.get(is_active=True, email=email)
+        raise ValidationError('User already exists with the same email')
+    except User.DoesNotExist:
+        pass
+
 class User(AbstractUser):
     """
     Custom User has fields First Name, Last Name, Email Address,
@@ -74,9 +89,9 @@ class User(AbstractUser):
     first_name = models.CharField(_('first name'), max_length=150, null=True, blank=True)
     last_name = models.CharField(_('last name'), max_length=150, null=True, blank=True)
     email = models.EmailField(
-        _('Email Address'), unique=True, null=True, blank=True)
+        _('Email Address'), validators=[validate_unique_email], null=True, blank=True)
     phone = models.CharField(
-        validators=[validate_phonenumber], max_length=17, unique=True, null=True, blank=True)
+        validators=[validate_phonenumber, validate_unique_phone], max_length=17, null=True, blank=True)
     SUPER_USER = 'SU'
     FARMER = 'CO'
     ADMIN = 'AD'

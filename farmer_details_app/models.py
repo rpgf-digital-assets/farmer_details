@@ -1,6 +1,8 @@
 import uuid
 import phonenumbers
 from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
+
 from simple_history.models import HistoricalRecords
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.base_user import BaseUserManager
@@ -12,7 +14,10 @@ from utils.helpers import BaseModel
 
 # Create your models here.
 
-
+class Season(BaseModel):
+    name = models.CharField(_("Season Name"), max_length=255)
+    start_date = models.DateField(_("Start Date"),) 
+    end_date = models.DateField(_("End Date"),) 
     
     
 class VendorManager(models.Manager):
@@ -29,7 +34,6 @@ class VendorManager(models.Manager):
             phone = phonenumbers.format_number(
                 phone_number, phonenumbers.PhoneNumberFormat.E164)
         return phone
-    
     
     
 class Vendor(BaseModel):
@@ -106,6 +110,7 @@ class GinningMapping(BaseModel):
     status = models.CharField(_("Status"), max_length=100, choices=STATUS_CHOICES, default=UNDEFINED)
     created_on = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
+    returned_quantity = models.IntegerField(_("Returned quantity"), null=True, blank=True)
     
     
     @property

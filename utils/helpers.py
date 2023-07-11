@@ -3,6 +3,7 @@ import uuid
 from rest_framework.response import Response
 from django.db import models
 from simple_history.models import HistoricalRecords
+from django.utils.translation import gettext_lazy as _
 
 
 class BaseModel(models.Model):
@@ -13,6 +14,7 @@ class BaseModel(models.Model):
         abstract = True
         
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    is_active = models.BooleanField(_('is Active?'), default=True, editable=False)
     history = HistoricalRecords(inherit=True)
     
     
