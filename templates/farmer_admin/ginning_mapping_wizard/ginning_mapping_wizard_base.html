@@ -116,15 +116,15 @@
                         
                         {% if wizard.steps.current == '0' %}
                         {{ wizard.form.management_form }}
-                        {% include 'farmer_admin/ginning_mapping_wizard_form_1.html' with form=wizard.form form_errors=wizard.form.non_form_errors %}
+                        {% include 'farmer_admin/ginning_mapping_wizard/ginning_mapping_wizard_form_1.html' with form=wizard.form form_errors=wizard.form.non_form_errors %}
                         {% endif %}
                         
                         {% if wizard.steps.current == '1' %}
-                        {% include 'farmer_admin/ginning_mapping_wizard_form_2.html' with form=wizard.form form_errors=wizard.form.non_form_errors %}
+                        {% include 'farmer_admin/ginning_mapping_wizard/ginning_mapping_wizard_form_2.html' with form=wizard.form form_errors=wizard.form.non_form_errors %}
                         {% endif %}
 
                         {% if wizard.steps.current == '2' %}
-                        {% include 'farmer_admin/ginning_mapping_wizard_review.html' with form=wizard.form form_errors=wizard.form.non_form_errors %}
+                        {% include 'farmer_admin/ginning_mapping_wizard/ginning_mapping_wizard_review.html' with form=wizard.form form_errors=wizard.form.non_form_errors %}
                         {% endif %}
                         
                         {% endblock form_content %}

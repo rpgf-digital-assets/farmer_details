@@ -1,15 +1,5 @@
-{% extends 'farmer_admin/base_create_edit.html' %}
-{% load static %}
-
-{% block title %}
-Farmer Organic Crop {% if farmer_organic_object %} Edit {% else %} Create {% endif %}
-{% endblock title %}
-
-
-{% block js %}
-{{block.super}}
 <script>
-    $("#id_date_of_sowing").daterangepicker({
+    $("#id_5-first_harvest_date").daterangepicker({
         singleDatePicker: true,
         showDropdowns: true,
         minYear: 1901,
@@ -18,7 +8,16 @@ Farmer Organic Crop {% if farmer_organic_object %} Edit {% else %} Create {% end
         },
         maxYear: parseInt(moment().format("YYYY"),12)
     });
-    $("#id_expected_date_of_harvesting").daterangepicker({
+    $("#id_5-second_harvest_date").daterangepicker({
+        singleDatePicker: true,
+        showDropdowns: true,
+        minYear: 1901,
+        locale: {
+            format: 'YYYY-MM-DD'
+        },
+        maxYear: parseInt(moment().format("YYYY"),12)
+    });
+    $("#id_5-third_harvest_date").daterangepicker({
         singleDatePicker: true,
         showDropdowns: true,
         minYear: 1901,
@@ -30,4 +29,3 @@ Farmer Organic Crop {% if farmer_organic_object %} Edit {% else %} Create {% end
     
 
 </script>
-{% endblock js %}

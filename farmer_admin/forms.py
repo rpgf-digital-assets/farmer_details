@@ -1,12 +1,3 @@
-
-import os
-from typing import Any, Dict 
-from PIL import Image
-from io import BytesIO
-from django.conf import settings
-
-from django.core.files.base import ContentFile
-
 from django.forms import (
     BaseFormSet,
     CharField,
@@ -34,14 +25,55 @@ from django.forms import (
     formset_factory
 )
 
-from farmer.models import ContaminationControl, CostOfCultivation, Farmer, FarmerEducation, FarmerLand, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, PestDiseaseManagement, SeedDetails, WeedManagement
-from farmer_details_app.models import GinningMapping, Season, SelectedGinningFarmer, Vendor
-from users.models import User, validate_unique_phone
+from farmer.models import ContaminationControl, CostOfCultivation, Farmer, FarmerEducation, FarmerLand, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
+from farmer_details_app.models import SelectedGinningFarmer, Vendor
+from users.models import User
 from users.validators import validate_name, validate_phonenumber
-from .utils import country_list
 
 from django.db import transaction
 
+class BaseSelectedFarmerFormSet(BaseFormSet):
+    def clean(self):
+        """Checks that no two selected ginning farmer are same."""
+        if any(self.errors):
+            # Don't bother validating the formset unless each form is valid on its own
+            return
+        selected_farmer_list = []
+        for form in self.forms:
+            
+            if self.can_delete and self._should_delete_form(form):
+                continue
+            farmer = form.cleaned_data.get("farmer")
+            farmer_name = form.cleaned_data.get("farmer_name")
+            quantity = form.cleaned_data.get("quantity")
+            if (farmer, farmer_name, quantity) in selected_farmer_list:
+                raise ValidationError("Selected farmers in a set must be distinct.")
+            selected_farmer_list.append((farmer, farmer_name, quantity))
+            if not farmer and not farmer_name and not quantity:
+                raise ValidationError("Cannot submit an empty form")
+        
+        
+class BaseContaminationFormSet(BaseFormSet):
+    def clean(self):
+        """Checks that no two selected ginning farmer are same."""
+        if any(self.errors):
+            # Don't bother validating the formset unless each form is valid on its own
+            return
+        chances_list = []
+        for form in self.forms:
+            if self.can_delete and self._should_delete_form(form):
+                continue
+            chances = form.cleaned_data.get("chances")
+            details = form.cleaned_data.get("details")
+            preventive_measure_details = form.cleaned_data.get("preventive_measure_details")
+            control_measures_details = form.cleaned_data.get("control_measures_details")
+            remark = form.cleaned_data.get("remark")
+            if chances in chances_list:
+                raise ValidationError("Selected Chances must be distinct.")
+            chances_list.append(chances)
+            if not chances and not details and not preventive_measure_details and not control_measures_details and not remark:
+                raise ValidationError("Cannot submit an empty form")
+        
 
 class BaseCreationForm(ModelForm):
     class Meta:
@@ -145,6 +177,12 @@ class FarmerCreationForm(BaseCreationForm):
             raise ValidationError(validation_errors)
     
     
+class OtherFarmerCreationForm(BaseCreationForm):
+    class Meta:
+        model = OtherFarmer
+        fields = '__all__'
+
+    
 class FarmerSocialCreationFrom(BaseCreationForm):
     class Meta:
         model = FarmerSocial
@@ -227,8 +265,6 @@ class FarmerOrganicCropDetailForm(BaseCreationForm):
         exclude = ['farmer']
         
         
-        
-        
 class FarmerSeedDetailsForm(BaseCreationForm):
     date_of_purchase = DateField(input_formats=['%Y-%m-%d'], widget=DateInput(attrs={
         'class': 'form-control datetimepicker-input w-auto',
@@ -238,8 +274,7 @@ class FarmerSeedDetailsForm(BaseCreationForm):
     
     class Meta:
         model = SeedDetails
-        exclude = ['farmer']
-        
+        exclude = ['organic_crop']
         
         
 class FarmerNutritionManagementForm(BaseCreationForm):
@@ -281,7 +316,7 @@ class FarmerNutritionManagementForm(BaseCreationForm):
     }))
     class Meta:
         model = NutrientManagement
-        exclude = ['farmer']
+        exclude = ['organic_crop',]
     
     def clean(self):
         cleaned_data = super().clean()
@@ -317,7 +352,7 @@ class FarmerPestDiseaseManagementForm(FarmerNutritionManagementForm):
     
     class Meta: 
         model = PestDiseaseManagement
-        exclude = ['farmer']
+        exclude = ['organic_crop']
     
     
 class WeedManagementForm(BaseCreationForm):
@@ -328,7 +363,7 @@ class WeedManagementForm(BaseCreationForm):
     }))
     class Meta:
         model = WeedManagement
-        exclude = ['farmer']
+        exclude = ['organic_crop']
 
 
 class HarvestAndIncomeDetailForm(BaseCreationForm):
@@ -349,22 +384,24 @@ class HarvestAndIncomeDetailForm(BaseCreationForm):
     }))
     class Meta:
         model = HarvestAndIncomeDetails
-        exclude = ['farmer']
+        exclude = ['organic_crop']
 
 
 
 class CostOfCultivationForm(BaseCreationForm):
     class Meta:
         model = CostOfCultivation
-        exclude = ['farmer']
+        exclude = ['organic_crop']
 
     
 
 class ContaminationControlForm(BaseCreationForm):
     class Meta:
         model = ContaminationControl
-        exclude = ['farmer']
+        exclude = ['organic_crop']
     
+
+ContaminationControlFormSet = formset_factory(ContaminationControlForm, formset=BaseContaminationFormSet, extra=1, min_num=1)
     
 class VendorCreateForm(BaseCreationForm):
     class Meta:
@@ -408,29 +445,9 @@ class SelectedGinningFarmerForm(ModelForm):
             raise ValidationError(validation_errors)
         
         
-class BaseArticleFormSet(BaseFormSet):
-    def clean(self):
-        """Checks that no two selected ginning farmer are same."""
-        if any(self.errors):
-            # Don't bother validating the formset unless each form is valid on its own
-            return
-        selected_farmer_list = []
-        for form in self.forms:
-            
-            if self.can_delete and self._should_delete_form(form):
-                continue
-            farmer = form.cleaned_data.get("farmer")
-            farmer_name = form.cleaned_data.get("farmer_name")
-            quantity = form.cleaned_data.get("quantity")
-            print("🐍 File: farmer_admin/forms.py | Line: 424 | clean ~ (farmer, farmer_name, quantity)",(farmer, farmer_name, quantity))
-            if (farmer, farmer_name, quantity) in selected_farmer_list:
-                raise ValidationError("Selected farmers in a set must be distinct.")
-            selected_farmer_list.append((farmer, farmer_name, quantity))
-            if not farmer and not farmer_name and not quantity:
-                raise ValidationError("Cannot submit an empty form")
+
         
-        
-SelectedGinningFarmerFormSet = formset_factory(SelectedGinningFarmerForm, extra=1, formset=BaseArticleFormSet, min_num=1)
+SelectedGinningFarmerFormSet = formset_factory(SelectedGinningFarmerForm, extra=1, formset=BaseSelectedFarmerFormSet, min_num=1)
 
 
 class GinningMappingForm(Form):

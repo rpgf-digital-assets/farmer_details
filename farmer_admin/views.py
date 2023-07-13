@@ -4,6 +4,7 @@ from django.conf import settings
 
 from django.core.files.base import ContentFile
 from django.conf import settings
+from django.contrib import messages
 from django.db import transaction
 from django.forms import Form
 from django.http import HttpResponse
@@ -18,11 +19,11 @@ from django.views.generic import (
     DetailView
 )
 
-from farmer.models import ContaminationControl, CostOfCultivation, Farmer, FarmerLand, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, PestDiseaseManagement, SeedDetails, WeedManagement
-from farmer_admin.forms import ContaminationControlForm, CostOfCultivationForm, FarmerCreationForm, FarmerLandDetailsCreationFrom, FarmerNutritionManagementForm, FarmerOrganicCropDetailForm, FarmerPestDiseaseManagementForm, FarmerSeedDetailsForm, FarmerSocialCreationFrom, GinningMappingForm, HarvestAndIncomeDetailForm, SeasonCreateForm, SelectedGinningFarmerForm, SelectedGinningFarmerFormSet, VendorCreateForm, WeedManagementForm
+from farmer.models import ContaminationControl, CostOfCultivation, Farmer, FarmerLand, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
+from farmer_admin.forms import ContaminationControlForm, ContaminationControlFormSet, CostOfCultivationForm, FarmerCreationForm, FarmerLandDetailsCreationFrom, FarmerNutritionManagementForm, FarmerOrganicCropDetailForm, FarmerPestDiseaseManagementForm, FarmerSeedDetailsForm, FarmerSocialCreationFrom, GinningMappingForm, HarvestAndIncomeDetailForm, OtherFarmerCreationForm, SeasonCreateForm, SelectedGinningFarmerForm, SelectedGinningFarmerFormSet, VendorCreateForm, WeedManagementForm
 from farmer_admin.mixins import AdminRequiredMixin
 from farmer_details_app.mixins import CustomLoginRequiredMixin
-from farmer_details_app.models import GinningMapping, Season, SelectedGinningFarmer, Vendor
+from farmer_details_app.models import GinningMapping, SelectedGinningFarmer, Vendor
 from users.models import User
 from django.core.files.storage import FileSystemStorage
 
@@ -110,9 +111,24 @@ class FarmerUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView)
         return redirect_url
     
 
-class FarmerDetailsView(DetailView):
+class FarmerDetailsView(CustomLoginRequiredMixin, AdminRequiredMixin, DetailView):
     model = Farmer
     template_name = 'farmer_admin/farmer_overview.html'
+    
+    
+    
+class OtherFarmerListView(CustomLoginRequiredMixin, AdminRequiredMixin, ListView):
+    queryset = OtherFarmer.objects.filter(is_active=True)
+    context_object_name = 'other_farmers'
+    template_name = 'farmer_admin/other_farmers_list.html'
+    
+    
+class OtherFarmerCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, CreateView):
+    model = OtherFarmer
+    template_name = 'farmer_admin/other_farmer_create_edit.html'
+    form_class = OtherFarmerCreationForm
+    success_url = reverse_lazy('farmer_admin:farmers_list')
+    
     
     
 
@@ -173,11 +189,78 @@ class FarmerLandDetailUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, U
 
 
 
-class FarmerOrganicCropDetailCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, BaseFarmerDetailsCreateView):
-    model = OrganicCropDetails
-    template_name = 'farmer_admin/farmer_organic_crop_create_edit.html'
-    form_class = FarmerOrganicCropDetailForm
-    success_url = reverse_lazy('farmer_admin:farmers_list')
+class FarmerOrganicCropDetailCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, SessionWizardView):
+    
+    
+    def dispatch(self, request, *args, **kwargs):
+        farmer = Farmer.objects.get(user__id=self.kwargs['pk'])
+        
+        print("🐍 File: farmer_admin/views.py | Line: 183 | dispatch ~ farmer.land_set.all()",farmer.land.all())
+        if farmer.land.all().count() == 0:
+            messages.warning(request, "Land details must be added before creating crop details")
+            return redirect(reverse('farmer_admin:farmer_land_details_create', kwargs={"pk": farmer.pk}))
+        return super().dispatch(request, *args, **kwargs)
+    
+    template_name = 'farmer_admin/farmer_organic_wizard/farmer_organic_wizard_base.html'
+    form_list = [FarmerOrganicCropDetailForm, 
+                FarmerSeedDetailsForm,
+                FarmerNutritionManagementForm,
+                FarmerPestDiseaseManagementForm,
+                WeedManagementForm,
+                HarvestAndIncomeDetailForm,
+                CostOfCultivationForm,
+                ContaminationControlFormSet,
+                Form]
+    
+
+    def get_context_data(self, form, **kwargs):
+        context = super().get_context_data(form=form, **kwargs)
+        
+        if self.steps.current != '0':
+            context.update({
+                'crop_name': self.get_cleaned_data_for_step('0')['name'],
+                'crop_type': self.get_cleaned_data_for_step('0')['type']
+            })
+        if self.steps.current == '8':
+            context.update({
+                'all_form_data': self.get_all_cleaned_data(),
+            })
+        return context
+    
+
+    def done(self, form_list, **kwargs):
+        all_cleaned_data = [form.cleaned_data for form in form_list]
+        cleaned_data_form_0 = all_cleaned_data[0]
+        cleaned_data_form_1 = all_cleaned_data[1]
+        cleaned_data_form_2 = all_cleaned_data[2]
+        cleaned_data_form_3 = all_cleaned_data[3]
+        cleaned_data_form_4 = all_cleaned_data[4]
+        cleaned_data_form_5 = all_cleaned_data[5]
+        cleaned_data_form_6 = all_cleaned_data[6]
+        cleaned_data_form_7 = all_cleaned_data[7]
+        with transaction.atomic():
+            try:
+                farmer = Farmer.objects.get(user__id=self.kwargs['pk'])
+                organic_crop = OrganicCropDetails.objects.create(farmer=farmer, **cleaned_data_form_0)
+                seed = SeedDetails.objects.create(organic_crop=organic_crop, **cleaned_data_form_1)
+                nutrition = NutrientManagement.objects.create(organic_crop=organic_crop, **cleaned_data_form_2)
+                pest_disease = PestDiseaseManagement.objects.create(organic_crop=organic_crop, **cleaned_data_form_3)
+                weed = WeedManagement.objects.create(organic_crop=organic_crop, **cleaned_data_form_4)
+                harvest = HarvestAndIncomeDetails.objects.create(organic_crop=organic_crop, **cleaned_data_form_5)
+                cost_of_cultivation = CostOfCultivation.objects.create(organic_crop=organic_crop, **cleaned_data_form_6)
+                for cleaned_data in cleaned_data_form_7:
+                    try:
+                        ContaminationControl.objects.create(organic_crop=organic_crop, **cleaned_data)
+                    except Exception as e:
+                        print("🐍 File: farmer_admin/views.py | Line: 228 | done ~ e",e)
+            except Exception as e:            
+                print("🐍 File: farmer_admin/views.py | Line: 230 | done ~ e",e)
+            
+        return render(self.request, 'farmer_admin/farmer_organic_wizard/farmer_organic_wizard_done.html', {
+            'form_data': [form.cleaned_data for form in form_list],
+            'farmer_pk': self.kwargs['pk'],
+            'completed': True,
+        })
 
 
 class FarmerOrganicCropDetailUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
@@ -359,8 +442,7 @@ class VendorUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView)
 
 class GinningMappingCreateWizardView(CustomLoginRequiredMixin, AdminRequiredMixin, SessionWizardView):
     form_list = [SelectedGinningFarmerFormSet, GinningMappingForm, Form]
-    template_name = 'farmer_admin/ginning_mapping_wizard_base.html'
-    instance = []
+    template_name = 'farmer_admin/ginning_mapping_wizard/ginning_mapping_wizard_base.html'
     
 
     def get_context_data(self, form, **kwargs):
@@ -375,7 +457,6 @@ class GinningMappingCreateWizardView(CustomLoginRequiredMixin, AdminRequiredMixi
 
     def done(self, form_list, **kwargs):
         all_cleaned_data = [form.cleaned_data for form in form_list]
-        print("🐍 File: farmer_admin/views.py | Line: 374 | done ~ all_cleaned_data",all_cleaned_data)
         cleaned_data_form_1 = all_cleaned_data[0]
         cleaned_data_form_2 = all_cleaned_data[1]
         with transaction.atomic():
@@ -387,7 +468,7 @@ class GinningMappingCreateWizardView(CustomLoginRequiredMixin, AdminRequiredMixi
                 except KeyError:
                     pass
             
-        return render(self.request, 'farmer_admin/ginning_mapping_wizard_done.html', {
+        return render(self.request, 'farmer_admin/ginning_mapping_wizard/ginning_mapping_wizard_done.html', {
             'form_data': [form.cleaned_data for form in form_list],
             'completed': True,
         })

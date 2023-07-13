@@ -1,15 +1,5 @@
-{% extends 'farmer_admin/base_create_edit.html' %}
-{% load static %}
-
-{% block title %}
-Farmer Pest Disease Management {% if farmer_pest_object %} Edit {% else %} Create {% endif %}
-{% endblock title %}
-
-
-{% block js %}
-{{block.super}}
 <script>
-    $("#id_date_of_application").daterangepicker({
+    $("#id_3-date_of_application").daterangepicker({
         singleDatePicker: true,
         showDropdowns: true,
         minYear: 1901,
@@ -18,7 +8,7 @@ Farmer Pest Disease Management {% if farmer_pest_object %} Edit {% else %} Creat
         },
         maxYear: parseInt(moment().format("YYYY"),12)
     });
-    $("#id_starting_date").daterangepicker({
+    $("#id_3-starting_date").daterangepicker({
         singleDatePicker: true,
         showDropdowns: true,
         minYear: 1901,
@@ -27,7 +17,7 @@ Farmer Pest Disease Management {% if farmer_pest_object %} Edit {% else %} Creat
         },
         maxYear: parseInt(moment().format("YYYY"),12)
     });
-    $("#id_date_of_manure").daterangepicker({
+    $("#id_3-date_of_manure").daterangepicker({
         singleDatePicker: true,
         showDropdowns: true,
         minYear: 1901,
@@ -36,7 +26,7 @@ Farmer Pest Disease Management {% if farmer_pest_object %} Edit {% else %} Creat
         },
         maxYear: parseInt(moment().format("YYYY"),12)
     });
-    $("#id_sourcing_date").daterangepicker({
+    $("#id_3-sourcing_date").daterangepicker({
         singleDatePicker: true,
         showDropdowns: true,
         minYear: 1901,
@@ -47,10 +37,10 @@ Farmer Pest Disease Management {% if farmer_pest_object %} Edit {% else %} Creat
     });
     $(document).ready(function() {
         
-        const initialVal = $('#id_souce_of_input').val()
+        const initialVal = $('#id_3-souce_of_input').val()
         toggleSourcingFields(initialVal)
 
-        $('#id_souce_of_input').on('change', function() {
+        $('#id_3-souce_of_input').on('change', function() {
             const sourcing = $(this).find(":selected").val()
             toggleSourcingFields(sourcing)
         })
@@ -74,4 +64,3 @@ Farmer Pest Disease Management {% if farmer_pest_object %} Edit {% else %} Creat
 
     
 </script>
-{% endblock js %}

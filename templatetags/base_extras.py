@@ -34,5 +34,9 @@ def navactive(request, url, *args, **kwargs):
         return 'active'
     return ""
 
+@register.filter
+def is_list(value):
+    return isinstance(value, list)
+
 
 

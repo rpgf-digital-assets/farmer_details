@@ -1,0 +1,36 @@
+<div class="flex-column current {% if flex_10 %}col-xl-10{% endif %}" id="form-container" data-kt-stepper-element="content">
+    <div class="row">
+        {% for field in form.visible_fields %}
+        {% if field.field.widget.input_type == 'checkbox' %}
+        <div class="form-check form-floating mb-7 col-xl-6">
+            <div class="row ms-5">
+                {{field}}
+                <label class="form-check-label" for="{{field.auto_id}}">
+                    {{field.label}}
+                </label>
+            </div>
+        </div>
+        {% else %}
+        <!--begin::Input group-->
+        <div class="form-floating mb-7 col-xl-6">
+            <!--begin::Input-->
+            {{field}}
+            <!--end::Input-->
+            <!--begin::Label-->
+            <label for="{{field.auto_id}}" class="required fs-6 fw-semibold ml-4 mb-2" style="margin-left: 5px;">{{field.label}}</label>
+            <!--end::Label-->
+            <div class="text-danger" style="text-align:start">
+                {{ field.errors }}
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+        {% for field in form.hidden_fields %}
+        <!--begin::Input-->
+        <div class="form-group d-flex my-4">
+            {{field}}
+        </div>
+        <!--end::Input-->
+        {% endfor %}
+    </div>
+</div>

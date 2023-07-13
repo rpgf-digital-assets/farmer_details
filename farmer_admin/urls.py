@@ -7,6 +7,9 @@ urlpatterns = [
     path('farmer/<uuid:pk>/update/', views.FarmerUpdateView.as_view(), name='farmer_update'),
     path('farmer/<uuid:pk>/overview/', views.FarmerDetailsView.as_view(), name='farmer_overview'),
     
+    path('other_farmer/list/', views.OtherFarmerListView.as_view(), name="other_farmers_list"),
+    path('other_farmer/create/', views.OtherFarmerCreateView.as_view(), name='other_farmer_create'),
+    
     path('farmer/<uuid:pk>/social/create/', views.FarmerSocialCreateView.as_view(), name="farmer_social_create"),
     path('farmer/social/<uuid:pk>/update/', views.FarmerSocialUpdateView.as_view(), name="farmer_social_update"),
     

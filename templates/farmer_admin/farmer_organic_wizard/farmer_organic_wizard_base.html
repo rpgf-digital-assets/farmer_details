@@ -1,0 +1,393 @@
+{% extends 'farmer_admin/base.html' %}
+
+{% block content %}
+<!--begin::Post-->
+<div class="content flex-row-fluid" id="kt_content">
+    <!--begin::Card-->
+    <div class="card">
+        <!--begin::Card body-->
+        <div class="card-body py-4">
+            <!--begin::Stepper-->
+            <div class="stepper stepper-pills stepper-column d-flex flex-column flex-lg-row" id="kt_stepper_example_vertical">
+                <!--begin::Aside-->
+                <div class="d-flex flex-row-auto w-100 w-lg-200px">
+                <!--begin::Nav-->
+                <div class="stepper-nav flex-center">
+                    <!--begin::Step 1-->
+                    <div class="stepper-item me-5 {% if wizard.steps.current == '0' %}current{% endif %}" data-kt-stepper-element="nav">
+                        <!--begin::Wrapper-->
+                        <div class="stepper-wrapper d-flex align-items-center">
+                            <!--begin::Icon-->
+                            <div class="stepper-icon w-40px h-40px">
+                                <i class="stepper-check fas fa-check"></i>
+                                <span class="stepper-number">1</span>
+                            </div>
+                            <!--end::Icon-->
+
+                            <!--begin::Label-->
+                            <div class="stepper-label">
+                                <h3 class="stepper-title">
+                                    Organic Crop
+                                </h3>
+
+                                <div class="stepper-desc">
+                                    Add
+                                </div>
+                            </div>
+                            <!--end::Label-->
+                        </div>
+                        <!--end::Wrapper-->
+
+                        <!--begin::Line-->
+                        <div class="stepper-line h-40px"></div>
+                        <!--end::Line-->
+                    </div>
+                    <!--end::Step 1-->
+
+                    <!--begin::Step 2-->
+                    <div class="stepper-item me-5 {% if wizard.steps.current == '1' %}current{% endif %}" data-kt-stepper-element="nav">
+                        <!--begin::Wrapper-->
+                        <div class="stepper-wrapper d-flex align-items-center">
+                            <!--begin::Icon-->
+                            <div class="stepper-icon w-40px h-40px">
+                                <i class="stepper-check fas fa-check"></i>
+                                <span class="stepper-number">2</span>
+                            </div>
+                            <!--begin::Icon-->
+
+                            <!--begin::Label-->
+                            <div class="stepper-label">
+                                <h3 class="stepper-title">
+                                    Seed Details
+                                </h3>
+
+                                <div class="stepper-desc">
+                                    Organic Crop
+                                </div>
+                            </div>
+                            <!--end::Label-->
+                        </div>
+                        <!--end::Wrapper-->
+
+                        <!--begin::Line-->
+                        <div class="stepper-line h-40px"></div>
+                        <!--end::Line-->
+                    </div>
+                    <!--end::Step 2-->
+
+                    <!--begin::Step 3-->
+                    <div class="stepper-item me-5 {% if wizard.steps.current == '2' %}current{% endif %}" data-kt-stepper-element="nav">
+                        <!--begin::Wrapper-->
+                        <div class="stepper-wrapper d-flex align-items-center">
+                            <!--begin::Icon-->
+                            <div class="stepper-icon w-40px h-40px">
+                                <i class="stepper-check fas fa-check"></i>
+                                <span class="stepper-number">3</span>
+                            </div>
+                            <!--begin::Icon-->
+
+                            <!--begin::Label-->
+                            <div class="stepper-label">
+                                <h3 class="stepper-title">
+                                    Step 3
+                                </h3>
+
+                                <div class="stepper-desc">
+                                    Description
+                                </div>
+                            </div>
+                            <!--end::Label-->
+                        </div>
+                        <!--end::Wrapper-->
+
+                        <!--begin::Line-->
+                        <div class="stepper-line h-40px"></div>
+                        <!--end::Line-->
+                    </div>
+                    <!--end::Step 3-->
+
+                    <!--begin::Step 4-->
+                    <div class="stepper-item me-5 {% if wizard.steps.current == '3' %}current{% endif %}" data-kt-stepper-element="nav">
+                        <!--begin::Wrapper-->
+                        <div class="stepper-wrapper d-flex align-items-center">
+                            <!--begin::Icon-->
+                            <div class="stepper-icon w-40px h-40px">
+                                <i class="stepper-check fas fa-check"></i>
+                                <span class="stepper-number">4</span>
+                            </div>
+                            <!--begin::Icon-->
+
+                            <!--begin::Label-->
+                            <div class="stepper-label">
+                                <h3 class="stepper-title">
+                                    Step 4
+                                </h3>
+
+                                <div class="stepper-desc">
+                                    Description
+                                </div>
+                            </div>
+                            <!--end::Label-->
+                        </div>
+                        <!--end::Wrapper-->
+
+                        <!--begin::Line-->
+                        <div class="stepper-line h-40px"></div>
+                        <!--end::Line-->
+                    </div>
+                    <!--end::Step 4-->
+
+                    <!--begin::Step 5-->
+                    <div class="stepper-item me-5 {% if wizard.steps.current == '4' %}current{% endif %}" data-kt-stepper-element="nav">
+                        <!--begin::Wrapper-->
+                        <div class="stepper-wrapper d-flex align-items-center">
+                            <!--begin::Icon-->
+                            <div class="stepper-icon w-40px h-40px">
+                                <i class="stepper-check fas fa-check"></i>
+                                <span class="stepper-number">5</span>
+                            </div>
+                            <!--begin::Icon-->
+
+                            <!--begin::Label-->
+                            <div class="stepper-label">
+                                <h3 class="stepper-title">
+                                    Step 5
+                                </h3>
+
+                                <div class="stepper-desc">
+                                    Description
+                                </div>
+                            </div>
+                            <!--end::Label-->
+                        </div>
+                        <!--end::Wrapper-->
+
+                        <!--begin::Line-->
+                        <div class="stepper-line h-40px"></div>
+                        <!--end::Line-->
+                    </div>
+                    <!--end::Step 5-->
+
+                    <!--begin::Step 6-->
+                    <div class="stepper-item me-5 {% if wizard.steps.current == '5' %}current{% endif %}" data-kt-stepper-element="nav">
+                        <!--begin::Wrapper-->
+                        <div class="stepper-wrapper d-flex align-items-center">
+                            <!--begin::Icon-->
+                            <div class="stepper-icon w-40px h-40px">
+                                <i class="stepper-check fas fa-check"></i>
+                                <span class="stepper-number">6</span>
+                            </div>
+                            <!--begin::Icon-->
+
+                            <!--begin::Label-->
+                            <div class="stepper-label">
+                                <h3 class="stepper-title">
+                                    Step 6
+                                </h3>
+
+                                <div class="stepper-desc">
+                                    Description
+                                </div>
+                            </div>
+                            <!--end::Label-->
+                        </div>
+                        <!--end::Wrapper-->
+
+                        <!--begin::Line-->
+                        <div class="stepper-line h-40px"></div>
+                        <!--end::Line-->
+                    </div>
+                    <!--end::Step 6-->
+
+                    <!--begin::Step 7-->
+                    <div class="stepper-item me-5 {% if wizard.steps.current == '6' %}current{% endif %}" data-kt-stepper-element="nav">
+                        <!--begin::Wrapper-->
+                        <div class="stepper-wrapper d-flex align-items-center">
+                            <!--begin::Icon-->
+                            <div class="stepper-icon w-40px h-40px">
+                                <i class="stepper-check fas fa-check"></i>
+                                <span class="stepper-number">7</span>
+                            </div>
+                            <!--begin::Icon-->
+
+                            <!--begin::Label-->
+                            <div class="stepper-label">
+                                <h3 class="stepper-title">
+                                    Step 7
+                                </h3>
+
+                                <div class="stepper-desc">
+                                    Description
+                                </div>
+                            </div>
+                            <!--end::Label-->
+                        </div>
+                        <!--end::Wrapper-->
+
+                        <!--begin::Line-->
+                        <div class="stepper-line h-40px"></div>
+                        <!--end::Line-->
+                    </div>
+                    <!--end::Step 7-->
+
+                    <!--begin::Step 8-->
+                    <div class="stepper-item me-5 {% if wizard.steps.current == '7' %}current{% endif %}" data-kt-stepper-element="nav">
+                        <!--begin::Wrapper-->
+                        <div class="stepper-wrapper d-flex align-items-center">
+                            <!--begin::Icon-->
+                            <div class="stepper-icon w-40px h-40px">
+                                <i class="stepper-check fas fa-check"></i>
+                                <span class="stepper-number">8</span>
+                            </div>
+                            <!--begin::Icon-->
+
+                            <!--begin::Label-->
+                            <div class="stepper-label">
+                                <h3 class="stepper-title">
+                                    Step 8
+                                </h3>
+
+                                <div class="stepper-desc">
+                                    Description
+                                </div>
+                            </div>
+                            <!--end::Label-->
+                        </div>
+                        <!--end::Wrapper-->
+
+                        <!--begin::Line-->
+                        <div class="stepper-line h-40px"></div>
+                        <!--end::Line-->
+                    </div>
+                    <!--end::Step 8-->
+                    
+                    <!--begin::Step 9-->
+                    <div class="stepper-item me-5 {% if wizard.steps.current == '8' %}current{% endif %}" data-kt-stepper-element="nav">
+                        <!--begin::Wrapper-->
+                        <div class="stepper-wrapper d-flex align-items-center">
+                            <!--begin::Icon-->
+                            <div class="stepper-icon w-40px h-40px">
+                                <i class="stepper-check fas fa-check"></i>
+                                <span class="stepper-number">9</span>
+                            </div>
+                            <!--begin::Icon-->
+
+                            <!--begin::Label-->
+                            <div class="stepper-label">
+                                <h3 class="stepper-title">
+                                    Step 9
+                                </h3>
+
+                                <div class="stepper-desc">
+                                    Description
+                                </div>
+                            </div>
+                            <!--end::Label-->
+                        </div>
+                        <!--end::Wrapper-->
+                    </div>
+                    <!--end::Step 9-->
+                </div>
+                <!--end::Nav-->
+                </div>
+                
+                <!--begin::Content-->
+                <div class="flex-row-fluid">
+                    {% if crop_name %}
+                    <div class="row mb-5">
+                        <div class="col-xl-12 d-flex justify-content-center">
+                            <h4> Name: {{crop_name}} | Type: {{crop_type}} </h4>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <!--begin::Form-->
+                    <form enctype="multipart/form-data" method="POST" class="form mx-auto" id="kt_stepper_example_basic_form">
+                        {% csrf_token %}                        
+                        {{ wizard.management_form }}
+                        <!--begin::Group-->
+                        <div class="mb-5">
+                            {% block form_content %}
+                            {% if wizard.steps.current == '7' %}
+                            {{ wizard.form.management_form}}
+                            {% include 'farmer_admin/farmer_organic_wizard/farmer_organic_wizard_contamination_form.html' with form=wizard.form form_errors=wizard.form.non_form_errors %}                            
+                            {% elif wizard.steps.current == '8' %}
+                            {% include 'farmer_admin/farmer_organic_wizard/farmer_organic_wizard_preview.html' with all_form_data=all_form_data %}                            
+                            {% else %}
+                            {% include 'farmer_admin/farmer_organic_wizard/form_fields.html' with form=wizard.form form_errors=wizard.form.non_form_errors %}
+                            {% endif %}
+                            {% endblock form_content %}
+                        </div>
+                        <!--end::Group-->
+
+                        <!--begin::Actions-->
+                        <div class="d-flex flex-stack">
+                            <!--begin::Wrapper-->
+                            <div class="me-2">
+                                {% if wizard.steps.prev %}
+                                <button name="wizard_goto_step" formnovalidate="formnovalidate" type="submit" value="{{ wizard.steps.prev }}" class="btn btn-light btn-active-light-primary">
+                                    Back
+                                </button>
+                                {% endif %}
+                            </div>
+                            <!--end::Wrapper-->
+
+                            <!--begin::Wrapper-->
+                            <div>
+                                <button type="submit" value="submit" class="btn btn-primary">
+                                    Continue
+                                </button>
+                            </div>
+                            <!--end::Wrapper-->
+                        </div>
+                        <!--end::Actions-->
+                    </form>
+                    <!--end::Form-->
+                </div>
+            </div>
+            <!--end::Stepper-->
+        </div>
+        <!--end::Card body-->
+    </div>
+    <!--end::Card-->
+</div>
+<!--end::Post-->
+{% endblock content %}
+
+
+{% block js %}
+{{block.super}}
+<script type="text/javascript">
+    {% if wizard.form.management_form.errors %}
+        let fallbackUrl = '{% url "farmer_admin:traceability_ginning_mapping_create" %}'
+        window.location.replace(`${fallbackUrl}`)
+    {% endif %}
+</script>
+
+{% if wizard.steps.current == '0' %}
+{% include 'farmer_admin/farmer_organic_wizard/farmer_organic_crop_create_edit.js' %}
+{% endif %}
+
+{% if wizard.steps.current == '1' %}
+{% include 'farmer_admin/farmer_organic_wizard/farmer_seed_detail_create_edit.js' %}
+{% endif %}
+
+{% if wizard.steps.current == '2' %}
+{% include 'farmer_admin/farmer_organic_wizard/farmer_nutrient_create_edit.js' %}
+{% endif %}
+
+{% if wizard.steps.current == '3' %}
+{% include 'farmer_admin/farmer_organic_wizard/farmer_pest_management_create_update.js' %}
+{% endif %}
+
+{% if wizard.steps.current == '4' %}
+{% include 'farmer_admin/farmer_organic_wizard/farmer_weed_create_update.js' %}
+{% endif %}
+
+{% if wizard.steps.current == '5' %}
+{% include 'farmer_admin/farmer_organic_wizard/farmer_harvest_create_update.js' %}
+{% endif %}
+
+
+{% endblock js %}
+
+

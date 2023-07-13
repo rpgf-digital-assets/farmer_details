@@ -389,7 +389,7 @@ Farmers list
                     </tr>
                 </thead>
                 <tbody class="text-gray-600 fw-semibold">
-                    {% for farmer in farmers %}
+                    {% for farmer in other_farmers %}
                     <tr>
                         <td>
                             <div class="form-check form-check-sm form-check-custom form-check-solid">
@@ -397,28 +397,18 @@ Farmers list
                             </div>
                         </td>
                         <td class="d-flex align-items-center">
-                            <!--begin:: Avatar -->
-                            <div class="symbol symbol-circle symbol-50px overflow-hidden me-3">
-                                <a href="{% url 'farmer_admin:farmer_overview' farmer.pk %}">
-                                    <div class="symbol-label">
-                                        <img src="{{farmer.profile_image.url}}" alt="profile image" class="w-100" />
-                                    </div>
-                                </a>
-                            </div>
-                            <!--end::Avatar-->
                             <!--begin::User details-->
                             <div class="d-flex flex-column">
-                                <a href="{% url 'farmer_admin:farmer_overview' farmer.pk %}" class="text-gray-800 text-hover-primary mb-1">{{farmer.user.user_display_name}}</a>
-                                {% comment %} <span>{{farmer.user.email}}</span> {% endcomment %}
+                                <a class="text-gray-800 text-hover-primary mb-1">{{farmer.user.user_display_name}}</a>
                             </div>
                             <!--begin::User details-->
                         </td>
                         <td>{{farmer.village}}</td>
                         <td>
-                            <div class="badge badge-light fw-bold">{{farmer.land.first.owned_land}}</div>
+                            <div class="badge badge-light fw-bold">{{farmer.owned_land}}</div>
                         </td>
-                        <td>{{farmer.aadhar_number}}</td>
-                        <td>{{farmer.date_of_joining_of_program}}</td>
+                        <td>{{farmer.identification_number}}</td>
+                        <td>{{farmer.identification_file}}</td>
                         <td class="text-end">
                             <a href="#" class="btn btn-light btn-active-light-primary btn-flex btn-center btn-sm" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">Actions
                             <i class="ki-duotone ki-down fs-5 ms-1"></i></a>

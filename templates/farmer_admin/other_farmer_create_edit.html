@@ -1,0 +1,14 @@
+{% extends 'farmer_admin/base_create_edit.html' %}
+{% load static %}
+
+{% block title %}
+Season {% if Season_object %} Edit {% else %} Create {% endif %}
+{% endblock title %}
+
+
+{% block js %}
+{{block.super}}
+<script>
+
+</script>
+{% endblock js %}

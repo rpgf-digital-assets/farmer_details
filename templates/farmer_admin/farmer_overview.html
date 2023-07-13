@@ -634,7 +634,7 @@
                 </div>
             </div>
             <!--end::details View-->
-
+{% comment %} 
             <!--begin::details View-->
             <div class="card mb-5 mb-xl-5 page-section" id="organic_crop_details_div" >
                 <!--begin::Card header-->
@@ -915,11 +915,6 @@
                 </div>
                 <!--begin::Card header-->
                 <div id="contamination_control_collapsible" class="collapse show">
-                    {% comment %} {% if farmer.contamination_control.all.first %}
-                        {% model_to_dict farmer.contamination_control.all.first as farmer_contamination_control %}
-                        {% include 'utils/show_values_from_model_dict.html' with model_dict=farmer_contamination_control.items %}
-                    {% endif %} {% endcomment %}
-
                     <!--begin::Table-->
                 <table class="table align-middle p-10" id="table_contamination_control">
                     <thead>
@@ -967,7 +962,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                <!--end::Table-->
+                <!--end::Table--> {% endcomment %}
 
 
 

@@ -14,11 +14,6 @@ from utils.helpers import BaseModel
 
 # Create your models here.
 
-class Season(BaseModel):
-    name = models.CharField(_("Season Name"), max_length=255)
-    start_date = models.DateField(_("Start Date"),) 
-    end_date = models.DateField(_("End Date"),) 
-    
     
 class VendorManager(models.Manager):
 

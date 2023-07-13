@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from datetime import date
 from simple_history.models import HistoricalRecords
 
+from django.core.validators import MaxValueValidator
 
 from users.models import User
 from utils.helpers import BaseModel
@@ -41,15 +42,15 @@ class Farmer(models.Model):
         (FEMALE, 'FEMALE'),
         (UNDEFINED, 'UNDEFINED'),
     ]
-    gender = models.CharField(_("Gender"), max_length=30, default=UNDEFINED)
+    gender = models.CharField(_("Gender"), max_length=30, choices=GENDER_CHOICES, default=UNDEFINED)
     birth_date = models.DateField(_("BirthDate"))
     aadhar_number = models.IntegerField(_("Aadhar Number"))
     registration_number = models.IntegerField(_("Farmer Tracnet Registration Number"))
     date_of_joining_of_program = models.DateField(_("Date of Joining of Program"))
-    village = models.CharField(_("Village"), max_length=200)
-    taluka = models.CharField(_("Taluka"), max_length=200)
-    district = models.CharField(_("District"), max_length=200)
-    state = models.CharField(_("State"), max_length=200)
+    village = models.CharField(_("Village"), max_length=255)
+    taluka = models.CharField(_("Taluka"), max_length=255)
+    district = models.CharField(_("District"), max_length=255)
+    state = models.CharField(_("State"), max_length=255)
     country = models.CharField(_("Country"), max_length=100, null=True, blank=True)
     profile_image = models.ImageField(
         _("Profile Image"), upload_to="farmer_profile_image", default="farmer_profile_image/blank-profile-picture.png")
@@ -67,9 +68,27 @@ class Farmer(models.Model):
     
     def __str__(self):
         return f'{self.user}'
+   
 
+class OtherFarmer(BaseModel):
+    first_name = models.CharField(_("First Name"), max_length=255)
+    last_name = models.CharField(_("Last Name"), max_length=255)
+    gender = models.CharField(_("Gender"), max_length=30, choices=Farmer.GENDER_CHOICES, default=Farmer.UNDEFINED)
+    owned_land = models.IntegerField(_("Owned land in Hectare"), null=True, blank=True)
+    identification_number = models.IntegerField(_("Identification Number"), null=True, blank=True)
+    identification_file = models.FileField(_("Identification File"), upload_to="other_farmer/identification", null=True, blank=True)
+    latitude = models.FloatField(_("Latitude of land"), null=True, blank=True)
+    longitude = models.FloatField(_("Longitude of land"), null=True, blank=True)
+    village = models.CharField(_("Village"), max_length=255)
+    taluka = models.CharField(_("Taluka"), max_length=255)
+    district = models.CharField(_("District"), max_length=255)
+    state = models.CharField(_("State"), max_length=255)
     
-
+    @property
+    def user_display_name(self):
+        return self.first_name + " " + self.last_name if self.last_name else self.first_name
+    
+    
 class FarmerProject(BaseModel):
     """Store project information of a farmer
     """
@@ -83,8 +102,8 @@ class FarmerProject(BaseModel):
         (UNDEFINED, 'UNDEFINED'),
     ]
     type = models.CharField(max_length=100, choices=TYPE_CHOICES, default=UNDEFINED)
-    ics_name = models.CharField(max_length=200)
-    mandator_name = models.CharField(max_length=200)
+    ics_name = models.CharField(max_length=255)
+    mandator_name = models.CharField(max_length=255)
     certification_agency_name = models.CharField(max_length=400)
     
     
@@ -93,6 +112,7 @@ class FarmerEducation(BaseModel):
     
     def __str__(self):
         return self.name
+    
     
 class FarmerSocial(BaseModel):
     """Store social data of a farmer
@@ -154,7 +174,6 @@ class FarmerLivestock(BaseModel):
     young_ones = models.IntegerField(_("Number of Heifer/Young ones"))
     total = models.IntegerField(_("Number of total livestock"))
  
- 
 
 class FarmerLand(BaseModel):
     farmer = models.ForeignKey(Farmer, related_name='land', on_delete=models.PROTECT)
@@ -192,21 +211,29 @@ class FarmerLand(BaseModel):
     survey_number = models.IntegerField(_("Survey Number"))
     soil_test_conducted = models.BooleanField(_('Is soil testing done?'), )
     last_conducted = models.IntegerField(_("Last Soil test conducted in year"), null=True, blank=True)
-    soil_type = models.CharField(_("Soil type"), max_length=200, null=True, blank=True)
-    soil_texture = models.CharField(_("Soil texture"), max_length=200, null=True, blank=True)
-    soil_organic_matter = models.CharField(_("Soil organic matter"), max_length=200, null=True, blank=True)
-    soil_ph = models.CharField(_("Soil ph"), max_length=200, null=True, blank=True)
-    soil_drainage = models.CharField(_("Soil drainage"), max_length=200, null=True, blank=True)
-    soil_moisture = models.CharField(_("Soil Pressure"), max_length=200, null=True, blank=True)
+    soil_type = models.CharField(_("Soil type"), max_length=255, null=True, blank=True)
+    soil_texture = models.CharField(_("Soil texture"), max_length=255, null=True, blank=True)
+    soil_organic_matter = models.CharField(_("Soil organic matter"), max_length=255, null=True, blank=True)
+    soil_ph = models.CharField(_("Soil ph"), max_length=255, null=True, blank=True)
+    soil_drainage = models.CharField(_("Soil drainage"), max_length=255, null=True, blank=True)
+    soil_moisture = models.CharField(_("Soil Pressure"), max_length=255, null=True, blank=True)
     
     @property
     def total_land(self):
         return self.owned_land + self.leased_land
     
+
+class Season(BaseModel):
+    name = models.CharField(_("Season Name"), max_length=255)
+    start_date = models.DateField(_("Start Date"),) 
+    end_date = models.DateField(_("End Date"),) 
+    
+    def __str__(self):
+        return f"{self.name}"
     
 class OrganicCropDetails(BaseModel):
     farmer = models.ForeignKey(Farmer, related_name='organic_crop', on_delete=models.PROTECT)
-    name = models.CharField(_("Name"), max_length=200)
+    name = models.CharField(_("Name"), max_length=255)
     TYPE_CHOICES = [
         ("MAIN_CROP", 'Main crop'),
         ("INTER_CROP", 'Inter crop'),
@@ -219,13 +246,18 @@ class OrganicCropDetails(BaseModel):
     expected_date_of_harvesting = models.DateField(_("Expected date of harvest"))
     expected_yield = models.IntegerField(_("Expected yield in kg"))
     expected_productivity = models.IntegerField(_("Expected productivity in kg/ha"))
+    season = models.ForeignKey(Season, related_name='organic_crop', on_delete=models.PROTECT)
+    year = models.IntegerField(_("Season Year"), validators=[MaxValueValidator(9999)])
+    
+    def __str__(self):
+        return f"{self.name}"
     
     
 class SeedDetails(BaseModel):
-    farmer = models.ForeignKey(Farmer, related_name='seed', on_delete=models.PROTECT)
+    organic_crop = models.OneToOneField(OrganicCropDetails, related_name='seed', on_delete=models.PROTECT)
     type = models.CharField(_("Type of crop"), max_length=100, choices=OrganicCropDetails.TYPE_CHOICES)
     date_of_purchase = models.DateField(_("Date of purchase"))
-    name_of_supplier = models.CharField(_("Name of supplier"), max_length=200)
+    name_of_supplier = models.CharField(_("Name of supplier"), max_length=255)
     seed_for_sowing = models.IntegerField(_("Amount of seed used for sowing (Kg)"))
     variety = models.CharField(_("Name of variety"), max_length=500)
     SEED_TYPES = [
@@ -243,11 +275,10 @@ class SeedDetails(BaseModel):
     source_of_seed = models.CharField(_("Main Source of Seed"), max_length=100, choices=SEED_SOURCES)
     treatment = models.CharField(_("Details of seed treatment"), max_length=500)
     no_of_plants = models.IntegerField(_("No of plants (Perennial crops)"))
-    
 
 
 class NutrientManagement(BaseModel):
-    farmer = models.ForeignKey(Farmer, related_name='nutrient', on_delete=models.PROTECT)
+    organic_crop = models.OneToOneField(OrganicCropDetails, related_name='nutrient', on_delete=models.PROTECT)
     crop_name = models.CharField(_("Name of crop"), max_length=100)
     TYPE_CHOICES = [
         ('FYM', 'FYM'),
@@ -286,12 +317,11 @@ class NutrientManagement(BaseModel):
     quantity_sourced = models.IntegerField(_("Qty sourced (Kg)"), null=True, blank=True)
     supplier_name = models.CharField(_("Name of supplier"), max_length=500, null=True, blank=True)
     
-    
 
 class PestDiseaseManagement(BaseModel):
-    farmer = models.ForeignKey(Farmer, related_name='pest_disease', on_delete=models.PROTECT)
+    organic_crop = models.OneToOneField(OrganicCropDetails, related_name='pest_disease', on_delete=models.PROTECT)
     crop_name = models.CharField(_("Name of crop"), max_length=100)
-    name_of_input = models.CharField(_("Name of input used"), max_length=200)
+    name_of_input = models.CharField(_("Name of input used"), max_length=255)
     quantity_of_input = models.IntegerField(_("Qty of input used (Kg or lit)"))
     souce_of_input = models.CharField(_("Source of input"), max_length=100, choices=NutrientManagement.SOURCE_CHOICES)
     date_of_application = models.DateField(_("Date of application"))
@@ -302,7 +332,7 @@ class PestDiseaseManagement(BaseModel):
         ('DRENCHING', 'drenching'),
     ]
     type_of_application = models.CharField(_("Type of application"), max_length=100, choices=APPLICATION_CHOICES)
-    targeted_pest_diseases = models.CharField(_("Targeted pest/disease"), max_length=200)
+    targeted_pest_diseases = models.CharField(_("Targeted pest/disease"), max_length=255)
     
     # on farm inputs
     type_of_raw_material = models.CharField(_("Type of raw material used"), max_length=500, null=True, blank=True)
@@ -317,11 +347,9 @@ class PestDiseaseManagement(BaseModel):
     supplier_name = models.CharField(_("Name of supplier"), max_length=500, null=True, blank=True)
     
     
-    
-    
 class WeedManagement(BaseModel):
-    farmer = models.ForeignKey(Farmer, related_name='weed', on_delete=models.PROTECT)
-    activity_name = models.CharField(_("Name of activity carried out"), max_length=200)
+    organic_crop = models.OneToOneField(OrganicCropDetails, related_name='weed', on_delete=models.PROTECT)
+    activity_name = models.CharField(_("Name of activity carried out"), max_length=255)
     date_of_activity = models.DateField(_("Date of activity"))
     METHOD_CHOICES = [
         ('MANUAL', 'Manual'),
@@ -333,18 +361,18 @@ class WeedManagement(BaseModel):
     
     
 class HarvestAndIncomeDetails(BaseModel): 
-    farmer = models.ForeignKey(Farmer, related_name='harvest_income', on_delete=models.PROTECT)
+    organic_crop = models.OneToOneField(OrganicCropDetails, related_name='harvest_income', on_delete=models.PROTECT)
     name = models.CharField(verbose_name=_('Name of crop'), max_length=500)
     TYPE_CHOICES = [
         ('SINGLE', 'Single'),
         ('MULTIPLE', 'Multiple'),
     ]
     type = models.CharField(verbose_name=_('Type of harvest (Single/multiple)'), max_length=100, choices=TYPE_CHOICES)
-    first_harvest = models.CharField(verbose_name=_('First harvest'), max_length=200)
+    first_harvest = models.CharField(verbose_name=_('First harvest'), max_length=255)
     first_harvest_date = models.DateField(verbose_name=_('First harvest date'))
-    second_harvest = models.CharField(verbose_name=_('Second harvest'), max_length=200)
+    second_harvest = models.CharField(verbose_name=_('Second harvest'), max_length=255)
     second_harvest_date = models.DateField(verbose_name=_('Second harvest date'))
-    third_harvest = models.CharField(verbose_name=_('Third harvest'), max_length=200)
+    third_harvest = models.CharField(verbose_name=_('Third harvest'), max_length=255)
     third_harvest_date = models.DateField(verbose_name=_('Third harvest date'))
     total_crop_harvested = models.IntegerField(_('Total Actual organic crop harvested (kg)'))
     actual_crop_production = models.IntegerField(_('Actual organic crop productivity (kg/ha)'))
@@ -369,9 +397,8 @@ class HarvestAndIncomeDetails(BaseModel):
     unsold_quantity = models.IntegerField(_('Quantity of organic harvest unsold/Balance (kg)'))
     
     
-    
 class CostOfCultivation(BaseModel):
-    farmer = models.ForeignKey(Farmer, related_name='cost_of_cultivation', on_delete=models.PROTECT)
+    organic_crop = models.OneToOneField(OrganicCropDetails, related_name='cost_of_cultivation', on_delete=models.PROTECT)
     name = models.CharField(verbose_name=_('Name of crop'), max_length=500)
     area = models.IntegerField(verbose_name=_('Crop Area (Ha)'))
     input_source = models.CharField(verbose_name=_('Source of Input'), max_length=500)
@@ -393,11 +420,10 @@ class CostOfCultivation(BaseModel):
     total_labour_hiring_cost = models.IntegerField(verbose_name=_('Total Labour Hiring Costs'))
     other_cost = models.IntegerField(verbose_name=_('Other Costs (E.g Transport to Gin, Equipment Purchase etc.)'))
     total_cost = models.IntegerField(verbose_name=_('Total Cost'))
-    
-    
+        
     
 class ContaminationControl(BaseModel):
-    farmer = models.ForeignKey(Farmer, related_name='contamination_control', on_delete=models.PROTECT)
+    organic_crop = models.OneToOneField(OrganicCropDetails, related_name='contamination_control', on_delete=models.PROTECT)
     CHANCES_CHOICES = [
         ('Seed', 'Seed'),
         ('machinery', 'machinery'),

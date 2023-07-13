@@ -1,0 +1,112 @@
+
+<div class="flex-column current " id="form-container" data-kt-stepper-element="content">
+    {% for each_form in form %}
+    <div class="contamination_add_form row d-flex justify-content-evenly" id="form_{{forloop.counter0}}">
+        {% include 'farmer_admin/farmer_organic_wizard/form_fields.html' with form=each_form form_errors=each_form.non_form_errors flex_10=True %}
+        
+        {% if forloop.counter == 1 %}
+        <div class="col-xl-1 d-flex justify-content-center align-items-center delete-button">
+        </div>
+        {% else %}
+        <div class="col-xl-1 d-flex justify-content-center align-items-center delete-button">
+            <button class="btn btn-primary" onClick="deleteForm('form_{{forloop.counter0}}')" type="button">
+                <i class="bi bi-trash fs-2"></i>
+            </button>
+        </div>
+        {% endif %}
+    </div>
+
+    {% comment %} Each form error {% endcomment %}
+    <div class="row">
+        <ul id="errorlist_ul" class="errorlist">
+            {% for error in each_form.non_field_errors %}
+            <li class="text-danger mt-3" style="text-align:start">
+                {{error}}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endfor %}
+
+    {% comment %} Formset error {% endcomment %}
+    <div class="row">
+        <ul id="errorlist_ul" class="errorlist">
+            {% for error in form_errors %}
+            <li class="text-danger mt-3" style="text-align:start">
+                {{error}}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+
+    <div class="row d-flex justify-content-center" id="add-new-button-container">
+        <div class="col-xl-3 d-flex justify-content-center">
+            <button id="add-form" onclick="addForm(event)" class="btn btn-primary" type="button">Add Another</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    
+    function addForm(e){
+        e.preventDefault()
+
+        let contamination_add_form = document.querySelectorAll(".contamination_add_form")
+        let container = document.querySelector("#form-container")
+        let addButtonContainer = document.querySelector("#add-new-button-container")
+        let totalForms = document.querySelector("#id_7-TOTAL_FORMS")
+        let formNum = contamination_add_form.length - 1
+
+        let newForm = contamination_add_form[0].cloneNode(true)
+        let formRegex = RegExp(`7-(\\d){1}-`,'g')
+
+        formNum++
+        newForm.innerHTML = newForm.innerHTML.replace(formRegex, `7-${formNum}-`)
+        if (formNum >= 1){
+            var html = `
+            <button class="btn btn-primary" onClick="deleteForm('form_${formNum}')" type="button">
+                <i class="bi bi-trash fs-2"></i>
+            </button>
+            `
+            newForm.querySelector('.delete-button').innerHTML = html 
+        }
+        newForm.id = `form_${formNum}`
+        inputs = newForm.querySelectorAll('.form-control')
+        for (i = 0; i < inputs.length; i++) {
+            var input = inputs[i]
+            if (input) {
+                console.log(input.type)
+                switch (input.type) {
+                    case 'select-one':
+                        input.value = ''
+                    case 'button':
+                    case 'text':
+                    case 'submit':
+                    case 'password':
+                    case 'file':
+                    case 'email':
+                    case 'date':
+                    case 'number':
+                        input.value = '';
+                    case 'checkbox':
+                    case 'radio':
+                        input.checked = false;
+                }
+            }
+        }
+        container.insertBefore(newForm, addButtonContainer)
+        totalForms.setAttribute('value', `${formNum+1}`)
+    }
+
+    function deleteForm(id){
+        let contamination_add_form = document.querySelectorAll(".contamination_add_form")
+        let totalForms = document.querySelector("#id_7-TOTAL_FORMS")
+        let formNum = contamination_add_form.length - 1
+
+        let form = document.getElementById(id)
+        form.parentNode.removeChild(form)
+        totalForms.setAttribute('value', `${formNum}`)
+    }
+</script>
+

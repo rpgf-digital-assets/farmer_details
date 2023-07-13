@@ -6,8 +6,8 @@ from api.farmer_admin.serializers import FarmerDetailsSerializer, FarmerLandCoor
 from django.db.models import ProtectedError
 from django.db import transaction
 from api.permissions import IsAdminOrSuperUser
-from farmer.models import Farmer, FarmerLand
-from farmer_details_app.models import Season, Vendor
+from farmer.models import Farmer, FarmerLand, Season
+from farmer_details_app.models import Vendor
 from users.models import User
 
 class DeleteBaseAPIView(DestroyAPIView):
