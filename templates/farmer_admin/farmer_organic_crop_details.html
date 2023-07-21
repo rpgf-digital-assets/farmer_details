@@ -1,0 +1,726 @@
+{% extends 'farmer_admin/base.html' %}
+
+{% load static %}
+{% load base_extras %}
+
+{% block css %}
+{{block.super}}
+<style>
+    .page-section{
+
+    }
+</style>
+{% endblock css %}
+
+{% block content %}
+<!--begin::Post-->
+<div class="content flex-row-fluid" id="kt_content">
+    <!--begin::Layout - Overview-->
+    <div class="d-flex flex-column flex-xl-row">
+        <!--begin::Content-->
+        <div class="flex-lg-row-fluid ms-lg-5">
+            <!--begin::details View-->
+            <div class="card mb-5 mb-xl-5 page-section" id="profile_details_div">
+                <!--begin::Card header-->
+                <div class="card-header" >
+                    <!--begin::Card title-->
+                    <div class="card-title m-0">
+                        <h3 class="fw-bold m-0">Farmer Details</h3>
+                    </div>
+                    <!--end::Card title-->
+                </div>
+                <div class="card-body p-9">
+                    <!--begin::Summary-->
+                    <div class="d-flex flex-center flex-column mb-10">
+                        <!--begin::Avatar-->
+                        <div class="symbol mb-3 symbol-100px symbol-circle">
+                            <img alt="Pic" src="{{crop.farmer.profile_image.url}}" />
+                        </div>
+                        <!--end::Avatar-->
+                        <!--begin::Name-->
+                        <a href="#" class="fs-2 text-gray-800 text-hover-primary fw-bold mb-1">{{crop.farmer.user.user_display_name}}</a>
+                        <!--end::Name-->
+                        <!--begin::Position-->
+                        <div class="fs-6 fw-semibold text-gray-400 mb-2"></div>
+                        <!--end::Position-->
+                        {% comment %} <!--begin::Actions-->
+                        <div class="d-flex flex-center">
+                            <a href="#" class="btn btn-sm btn-light-primary py-2 px-4 fw-bold me-2" data-kt-drawer-show="true" data-kt-drawer-target="#kt_drawer_chat">Send Message</a>
+                        </div>
+                        <!--end::Actions--> {% endcomment %}
+                    </div>
+                </div>
+            </div>
+            <!--end::details View-->
+            <!--begin::details View-->
+            <div class="card mb-5 mb-xl-5 page-section" id="profile_details_div">
+                <!--begin::Card header-->
+                <div class="card-header" >
+                    <!--begin::Card title-->
+                    <div class="card-title m-0">
+                        <h3 class="fw-bold m-0">Organic Crop Details</h3>
+                    </div>
+                    <!--end::Card title-->
+                    <div class="card-toolbar">
+                        <!--begin::Action-->
+                        <a href="{% url 'farmer_admin:farmer_organic_crop_update' crop.pk %}" class="btn btn-primary align-self-center mx-10">Edit</a>
+                        <!--end::Action-->
+                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#profile_collapsible">
+                            <div class="rotate-180">    
+                                <i class="ki-duotone ki-down fs-1"></i>
+                            </div>
+                        </div>
+                    </div> 
+                    
+                </div>
+                <!--begin::Card header-->
+                <!--begin::Card body-->
+                <div id="profile_collapsible" class="collapse show">
+                    {% model_to_dict crop as crop_dict %}
+                    <!--begin::Card body-->
+                    <div class="card-body p-9">
+                        {% for field_name, value in crop_dict.items %}
+                        {% if field_name == 'id' or field_name == 'farmer' or field_name == 'is Active?' %}
+                        {% elif field_name == 'Season' %}
+                        <!--begin::Row-->
+                        <div class="row mb-7">
+                            <!--begin::Label-->
+                            <label class="col-lg-4 fw-semibold text-muted">{{field_name}}</label>
+                            <!--end::Label-->
+                            <!--begin::Col-->
+                            <div class="col-lg-8">
+                                <span class="fw-bold fs-6 text-dark">
+                                    {{crop.season.name}}
+                                </span>
+                            </div>
+                            <!--end::Col-->
+                        </div>
+                        <!--end::Row-->
+                        {% else %}
+                        <!--begin::Row-->
+                        <div class="row mb-7">
+                            <!--begin::Label-->
+                            <label class="col-lg-4 fw-semibold text-muted">{{field_name}}</label>
+                            <!--end::Label-->
+                            <!--begin::Col-->
+                            <div class="col-lg-8">
+                                <span class="fw-bold fs-6 text-dark">
+                                    {% if value is True %}
+                                    <i class="fa-solid fa-check"></i>
+                                    {% elif value is False %}
+                                    <i class="fa-solid fa-x"></i>
+                                    {% else %}
+                                    {{value}}
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <!--end::Col-->
+                        </div>
+                        <!--end::Row-->
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    <!--end::Card body-->
+                </div>
+                <!--end::Card body-->
+            </div>
+            <!--end::details View-->
+            <!--begin::details View-->
+            <div class="card mb-5 mb-xl-5 page-section" id="seed_details_div" >
+                <!--begin::Card header-->
+                <div class="card-header" >
+                    <!--begin::Card title-->
+                    <div class="card-title m-0">
+                        <h3 class="fw-bold m-0">Seed Details</h3>
+                        
+                    </div>
+                    <!--end::Card title-->
+                    <div class="card-toolbar">
+                        <!--begin::Action-->
+                        <a href="{% url 'farmer_admin:farmer_seed_details_create' crop.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
+                        <!--end::Action-->
+                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#seeds_collapsible">
+                            <div class="card-toolbar rotate-180">    
+                                <i class="ki-duotone ki-down fs-1"></i>
+                            </div>
+                        </div>
+                    </div> 
+                    
+                </div>
+                <!--begin::Card header-->
+                <div id="seeds_collapsible" class="collapse show">
+                    <!--begin::Card body-->
+                    <div class="card-body p-9">
+                        <table class="table table-bordered align-middle p-0 datatable mb-10 ">
+                            <thead>
+                                <tr class="text-start fw-bold fs-7 text-uppercase gs-0">
+                                {% model_to_dict crop.seed.all.first as seed_detail %}
+                                {% for field_name in seed_detail.keys %}
+                                {% if field_name == 'id' or field_name == 'is Active?' %}
+                                {% else %}
+                                <th class="min-w-125px ">{{field_name}}</th>
+                                {% endif %}
+                                {% endfor %}
+                                <th class="min-w-125px ">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-600 fw-semibold">
+                                {% for seed_detail in crop.seed.all %}
+                                    {% if seed_detail.is_active %}    
+                                    <tr>
+                                        <td>{{seed_detail.organic_crop}}</td>
+                                        <td>{{seed_detail.date_of_purchase}}</td>
+                                        <td>{{seed_detail.name_of_supplier}}</td>
+                                        <td>{{seed_detail.seed_for_sowing}}</td>
+                                        <td>{{seed_detail.variety}}</td>
+                                        <td>{{seed_detail.seed_type}}</td>
+                                        <td>{{seed_detail.source_of_seed}}</td>
+                                        <td>{{seed_detail.treatment}}</td>
+                                        <td>{{seed_detail.no_of_plants}}</td>
+                                        <td class="d-flex">
+                                            <a href="{% url 'farmer_admin:farmer_seed_details_update' seed_detail.pk %}" class="ps-5">
+                                                <i class="ki-duotone ki-notepad-edit text-primary fs-2x">
+                                                    <i class="path1"></i>
+                                                    <i class="path2"></i>
+                                                </i>
+                                            </a>
+                                            <a href="" class="ps-5" onClick="deleteEntry('seed', '{{seed_detail.pk}}')">
+                                                <i class="ki-duotone ki-trash-square text-danger fs-2x">
+                                                    <i class="path1"></i>
+                                                    <i class="path2"></i>
+                                                    <i class="path3"></i>
+                                                    <i class="path4"></i>
+                                                </i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--end::Card body-->
+                </div>
+            </div>
+            <!--end::details View-->
+            
+            <!--begin::details View-->
+            <div class="card mb-5 mb-xl-5 page-section" id="nutrition_details_div" >
+                <!--begin::Card header-->
+                <div class="card-header" >
+                    <!--begin::Card title-->
+                    <div class="card-title m-0">
+                        <h3 class="fw-bold m-0">Nutrition Management</h3>
+                        
+                    </div>
+                    <!--end::Card title-->
+                    <div class="card-toolbar">
+                        <!--begin::Action-->
+                        <a href="{% url 'farmer_admin:farmer_nutrient_details_create' crop.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
+                        <!--end::Action-->
+                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#nutrition_collapsible">
+                            <div class="card-toolbar rotate-180">    
+                                <i class="ki-duotone ki-down fs-1"></i>
+                            </div>
+                        </div>
+                    </div> 
+                    
+                </div>
+                <!--begin::Card header-->
+                <div id="nutrition_collapsible" class="collapse show">
+                    <!--begin::Card body-->
+                    <div class="card-body p-9">
+                        <table class="table table-bordered align-middle p-0 datatable mb-10 ">
+                            <thead>
+                                <tr class="text-start fw-bold fs-7 text-uppercase gs-0">
+                                {% model_to_dict crop.nutrient.all.first as nutrition %}
+                                {% for field_name in nutrition.keys %}
+                                {% if field_name == 'id' or field_name == 'is Active?' %}
+                                {% else %}
+                                <th class="min-w-125px ">{{field_name}}</th>
+                                {% endif %}
+                                {% endfor %}
+                                <th class="min-w-125px ">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-600 fw-semibold">
+                                {% for nutrition in crop.nutrient.all %}
+                                    {% if nutrition.is_active %}
+                                    <tr>
+                                        <td>{{nutrition.organic_crop}}</td>
+                                        <td>{{nutrition.type}}</td>
+                                        <td>{{nutrition.source_of_fertilizer}}</td>
+                                        <td>{{nutrition.quantity_of_fertilizer}}</td>
+                                        <td>{{nutrition.date_of_application}}</td>
+                                        <td>{{nutrition.type_of_application}}</td>
+                                        <td>{{nutrition.no_of_workdays_required}}</td>
+                                        <td>{{nutrition.type_of_raw_material}}</td>
+                                        <td>{{nutrition.quantity_used}}</td>
+                                        <td>{{nutrition.starting_date}}</td>
+                                        <td>{{nutrition.date_of_manure}}</td>
+                                        <td>{{nutrition.quantity_obtained}}</td>
+                                        <td>{{nutrition.no_of_workdays_used}}</td>
+                                        <td>{{nutrition.sourcing_date}}</td>
+                                        <td>{{nutrition.quantity_sourced}}</td>
+                                        <td>{{nutrition.supplier_name}}</td>
+                                        <td class="d-flex">
+                                            <a href="{% url 'farmer_admin:farmer_nutrient_details_update' nutrition.pk %}" class="ps-5">
+                                                <i class="ki-duotone ki-notepad-edit text-primary fs-2x">
+                                                    <i class="path1"></i>
+                                                    <i class="path2"></i>
+                                                </i>
+                                            </a>
+                                            <a href="" class="ps-5" onClick="deleteEntry('nutrition', '{{nutrition.pk}}')">
+                                                <i class="ki-duotone ki-trash-square text-danger fs-2x">
+                                                    <i class="path1"></i>
+                                                    <i class="path2"></i>
+                                                    <i class="path3"></i>
+                                                    <i class="path4"></i>
+                                                </i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--end::Card body-->
+                </div>
+            </div>
+            <!--end::details View-->
+
+            
+            <!--begin::details View-->
+            <div class="card mb-5 mb-xl-5 page-section" id="pest_disease_details_div" >
+                <!--begin::Card header-->
+                <div class="card-header" >
+                    <!--begin::Card title-->
+                    <div class="card-title m-0">
+                        <h3 class="fw-bold m-0">Pest Disease Management</h3>
+                        
+                    </div>
+                    <!--end::Card title-->
+                    <div class="card-toolbar">
+                        <!--begin::Action-->
+                        <a href="{% url 'farmer_admin:farmer_pest_disease_management_create' crop.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
+                        <!--end::Action-->
+                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#pest_disease_collapsible">
+                            <div class="card-toolbar rotate-180">    
+                                <i class="ki-duotone ki-down fs-1"></i>
+                            </div>
+                        </div>
+                    </div> 
+                    
+                </div>
+                <!--begin::Card header-->
+                <div id="pest_disease_collapsible" class="collapse show">
+                    <!--begin::Card body-->
+                    <div class="card-body p-9">
+                        <table class="table table-bordered align-middle p-0 datatable mb-10 ">
+                            <thead>
+                                <tr class="text-start fw-bold fs-7 text-uppercase gs-0">
+                                {% model_to_dict crop.pest_disease.all.first as pest_disease %}
+                                {% for field_name in pest_disease.keys %}
+                                {% if field_name == 'id' or field_name == 'is Active?' %}
+                                {% else %}
+                                <th class="min-w-125px ">{{field_name}}</th>
+                                {% endif %}
+                                {% endfor %}
+                                <th class="min-w-125px ">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-600 fw-semibold">
+                                {% for pest_disease in crop.pest_disease.all %}
+                                    {% if pest_disease.is_active %}
+                                    <tr>
+                                        <td>{{pest_disease.organic_crop}}</td>
+                                        <td>{{pest_disease.name_of_input}}</td>
+                                        <td>{{pest_disease.quantity_of_input}}</td>
+                                        <td>{{pest_disease.source_of_input}}</td>
+                                        <td>{{pest_disease.date_of_application}}</td>
+                                        <td>{{pest_disease.type_of_application}}</td>
+                                        <td>{{pest_disease.targeted_pest_diseases}}</td>
+                                        <td>{{pest_disease.type_of_raw_material}}</td>
+                                        <td>{{pest_disease.quantity_used}}</td>
+                                        <td>{{pest_disease.starting_date}}</td>
+                                        <td>{{pest_disease.date_of_manure}}</td>
+                                        <td>{{pest_disease.quantity_obtained}}</td>
+                                        <td>{{pest_disease.no_of_workdays_used}}</td>
+                                        <td>{{pest_disease.sourcing_date}}</td>
+                                        <td>{{pest_disease.quantity_sourced}}</td>
+                                        <td>{{pest_disease.supplier_name}}</td>
+                                        <td class="d-flex">
+                                            <a href="{% url 'farmer_admin:farmer_pest_disease_management_update' pest_disease.pk %}" class="ps-5">
+                                                <i class="ki-duotone ki-notepad-edit text-primary fs-2x">
+                                                    <i class="path1"></i>
+                                                    <i class="path2"></i>
+                                                </i>
+                                            </a>
+                                            <a href="" class="ps-5" onClick="deleteEntry('pest_disease', '{{pest_disease.pk}}')">
+                                                <i class="ki-duotone ki-trash-square text-danger fs-2x">
+                                                    <i class="path1"></i>
+                                                    <i class="path2"></i>
+                                                    <i class="path3"></i>
+                                                    <i class="path4"></i>
+                                                </i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--end::Card body-->
+                </div>
+            </div>
+            <!--end::details View-->
+
+            
+            <!--begin::details View-->
+            <div class="card mb-5 mb-xl-5 page-section" id="weed_details_div" >
+                <!--begin::Card header-->
+                <div class="card-header" >
+                    <!--begin::Card title-->
+                    <div class="card-title m-0">
+                        <h3 class="fw-bold m-0">Weed Management</h3>
+                        
+                    </div>
+                    <!--end::Card title-->
+                    <div class="card-toolbar">
+                        <!--begin::Action-->
+                        <a href="{% url 'farmer_admin:farmer_weed_management_create' crop.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
+                        <!--end::Action-->
+                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#weed_collapsible">
+                            <div class="card-toolbar rotate-180">    
+                                <i class="ki-duotone ki-down fs-1"></i>
+                            </div>
+                        </div>
+                    </div> 
+                    
+                </div>
+                <!--begin::Card header-->
+                <div id="weed_collapsible" class="collapse show">
+                    <!--begin::Card body-->
+                    <div class="card-body p-9">
+                        <table class="table table-bordered align-middle p-0 datatable mb-10 ">
+                            <thead>
+                                <tr class="text-start fw-bold fs-7 text-uppercase gs-0">
+                                {% model_to_dict crop.weed.all.first as weed %}
+                                {% for field_name in weed.keys %}
+                                {% if field_name == 'id' or field_name == 'is Active?' %}
+                                {% else %}
+                                <th class="min-w-125px ">{{field_name}}</th>
+                                {% endif %}
+                                {% endfor %}
+                                <th class="min-w-125px ">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-600 fw-semibold">
+                                {% for weed in crop.weed.all %}
+                                    {% if weed.is_active %}
+                                    <tr>
+                                        <td>{{weed.organic_crop}}</td>
+                                        <td>{{weed.activity_name}}</td>
+                                        <td>{{weed.date_of_activity}}</td>
+                                        <td>{{weed.method}}</td>
+                                        <td>{{weed.workdays_utilized}}</td>
+                                        <td class="d-flex">
+                                            <a href="{% url 'farmer_admin:farmer_weed_management_update' weed.pk %}" class="ps-5">
+                                                <i class="ki-duotone ki-notepad-edit text-primary fs-2x">
+                                                    <i class="path1"></i>
+                                                    <i class="path2"></i>
+                                                </i>
+                                            </a>
+                                            <a href="" class="ps-5" onClick="deleteEntry('weed', '{{weed.pk}}')">
+                                                <i class="ki-duotone ki-trash-square text-danger fs-2x">
+                                                    <i class="path1"></i>
+                                                    <i class="path2"></i>
+                                                    <i class="path3"></i>
+                                                    <i class="path4"></i>
+                                                </i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--end::Card body-->
+                </div>
+            </div>
+            <!--end::details View-->
+
+
+            <!--begin::details View-->
+            <div class="card mb-5 mb-xl-5 page-section" id="harvest_income_details_div" >
+                <!--begin::Card header-->
+                <div class="card-header" >
+                    <!--begin::Card title-->
+                    <div class="card-title m-0">
+                        <h3 class="fw-bold m-0">Harvest and Income Details</h3>
+                        
+                    </div>
+                    <!--end::Card title-->
+                    <div class="card-toolbar">
+                        <!--begin::Action-->
+                        <a href="{% url 'farmer_admin:farmer_harvest_income_create' crop.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
+                        <!--end::Action-->
+                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#harvest_income_collapsible">
+                            <div class="card-toolbar rotate-180">    
+                                <i class="ki-duotone ki-down fs-1"></i>
+                            </div>
+                        </div>
+                    </div> 
+                    
+                </div>
+                <!--begin::Card header-->
+                <div id="harvest_income_collapsible" class="collapse show">
+                    <!--begin::Card body-->
+                    <div class="card-body p-9">
+                        <table class="table table-bordered align-middle p-0 datatable mb-10 ">
+                            <thead>
+                                <tr class="text-start fw-bold fs-7 text-uppercase gs-0">
+                                {% model_to_dict crop.harvest_income.all.first as harvest_income %}
+                                {% for field_name in harvest_income.keys %}
+                                {% if field_name == 'id' or field_name == 'is Active?' %}
+                                {% else %}
+                                <th class="min-w-125px ">{{field_name}}</th>
+                                {% endif %}
+                                {% endfor %}
+                                <th class="min-w-125px ">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-600 fw-semibold">
+                                {% for harvest_income in crop.harvest_income.all %}
+                                    {% if harvest_income.is_active %}
+                                    <tr>
+                                        {% model_to_dict harvest_income as harvest_income_dict %}
+                                        {% for key, value in harvest_income_dict.items %}
+                                        {% if key == 'id' or key == 'is Active?' %}
+                                        {% elif key == 'organic crop' %}
+                                        <td> {{harvest_income.organic_crop}} </td>
+                                        {% else %}
+                                        <td>{{value}}</td>
+                                        {% endif %}
+                                        {% endfor %}
+                                        <td class="d-flex">
+                                            <a href="{% url 'farmer_admin:farmer_harvest_income_update' harvest_income.pk %}" class="ps-5">
+                                                <i class="ki-duotone ki-notepad-edit text-primary fs-2x">
+                                                    <i class="path1"></i>
+                                                    <i class="path2"></i>
+                                                </i>
+                                            </a>
+                                            <a href="" class="ps-5" onClick="deleteEntry('harvest_income', '{{harvest_income.pk}}')">
+                                                <i class="ki-duotone ki-trash-square text-danger fs-2x">
+                                                    <i class="path1"></i>
+                                                    <i class="path2"></i>
+                                                    <i class="path3"></i>
+                                                    <i class="path4"></i>
+                                                </i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--end::Card body-->
+                </div>
+            </div>
+            <!--end::details View-->
+
+            
+            <!--begin::details View-->
+            <div class="card mb-5 mb-xl-5 page-section" id="cost_of_cultivation_details_div" >
+                <!--begin::Card header-->
+                <div class="card-header" >
+                    <!--begin::Card title-->
+                    <div class="card-title m-0">
+                        <h3 class="fw-bold m-0">Cost Of Cultivation Details</h3>
+                        
+                    </div>
+                    <!--end::Card title-->
+                    <div class="card-toolbar">
+                        <!--begin::Action-->
+                        <a href="{% url 'farmer_admin:farmer_cost_of_cultivation_create' crop.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
+                        <!--end::Action-->
+                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#cost_of_cultivation_collapsible">
+                            <div class="card-toolbar rotate-180">    
+                                <i class="ki-duotone ki-down fs-1"></i>
+                            </div>
+                        </div>
+                    </div> 
+                    
+                </div>
+                <!--begin::Card header-->
+                <div id="cost_of_cultivation_collapsible" class="collapse show">
+                    <!--begin::Card body-->
+                    <div class="card-body p-9">
+                        <table class="table table-bordered align-middle p-0 datatable mb-10 ">
+                            <thead>
+                                <tr class="text-start fw-bold fs-7 text-uppercase gs-0">
+                                {% model_to_dict crop.cost_of_cultivation.all.first as cost_of_cultivation %}
+                                {% for field_name in cost_of_cultivation.keys %}
+                                {% if field_name == 'id' or field_name == 'is Active?' %}
+                                {% else %}
+                                <th class="min-w-125px ">{{field_name}}</th>
+                                {% endif %}
+                                {% endfor %}
+                                <th class="min-w-125px ">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-600 fw-semibold">
+                                {% for cost_of_cultivation in crop.cost_of_cultivation.all %}
+                                    {% if cost_of_cultivation.is_active %}
+                                    <tr>
+                                        {% model_to_dict cost_of_cultivation as cost_of_cultivation_dict %}
+                                        {% for key, value in cost_of_cultivation_dict.items %}
+                                        {% if key == 'id' or key == 'is Active?' %}
+                                        {% elif key == 'organic crop' %}
+                                        <td> {{cost_of_cultivation.organic_crop}} </td>
+                                        {% else %}
+                                        <td>{{value}}</td>
+                                        {% endif %}
+                                        {% endfor %}
+                                        <td class="d-flex">
+                                            <a href="{% url 'farmer_admin:farmer_cost_of_cultivation_update' cost_of_cultivation.pk %}" class="ps-5">
+                                                <i class="ki-duotone ki-notepad-edit text-primary fs-2x">
+                                                    <i class="path1"></i>
+                                                    <i class="path2"></i>
+                                                </i>
+                                            </a>
+                                            <a href="" class="ps-5" onClick="deleteEntry('cost_of_cultivation', '{{cost_of_cultivation.pk}}')">
+                                                <i class="ki-duotone ki-trash-square text-danger fs-2x">
+                                                    <i class="path1"></i>
+                                                    <i class="path2"></i>
+                                                    <i class="path3"></i>
+                                                    <i class="path4"></i>
+                                                </i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--end::Card body-->
+                </div>
+            </div>
+            <!--end::details View-->
+
+            <!--begin::details View-->
+            <div class="card mb-5 mb-xl-5 page-section" id="contamination_control_details_div" >
+                <!--begin::Card header-->
+                <div class="card-header" >
+                    <!--begin::Card title-->
+                    <div class="card-title m-0">
+                        <h3 class="fw-bold m-0">Contamination Control Details</h3>
+                        
+                    </div>
+                    <!--end::Card title-->
+                    <div class="card-toolbar">
+                        <!--begin::Action-->
+                        <a href="{% url 'farmer_admin:farmer_contamination_control_create' crop.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
+                        <!--end::Action-->
+                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#contamination_control_collapsible">
+                            <div class="card-toolbar rotate-180">    
+                                <i class="ki-duotone ki-down fs-1"></i>
+                            </div>
+                        </div>
+                    </div> 
+                    
+                </div>
+                <!--begin::Card header-->
+                <div id="contamination_control_collapsible" class="collapse show">
+                    <!--begin::Card body-->
+                    <div class="card-body p-9">
+                        <table class="table table-bordered align-middle p-0 datatable mb-10 ">
+                            <thead>
+                                <tr class="text-start fw-bold fs-7 text-uppercase gs-0">
+                                {% model_to_dict crop.contamination_control.all.first as contamination_control %}
+                                {% for field_name in contamination_control.keys %}
+                                {% if field_name == 'id' or field_name == 'is Active?' %}
+                                {% else %}
+                                <th class="min-w-125px ">{{field_name}}</th>
+                                {% endif %}
+                                {% endfor %}
+                                <th class="min-w-125px ">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-600 fw-semibold">
+                                {% for contamination_control in crop.contamination_control.all %}
+                                    {% if contamination_control.is_active %}
+                                    <tr>
+                                        {% model_to_dict contamination_control as contamination_control_dict %}
+                                        {% for key, value in contamination_control_dict.items %}
+                                        {% if key == 'id' or key == 'is Active?' %}
+                                        {% elif key == 'organic crop' %}
+                                        <td> {{contamination_control.organic_crop}} </td>
+                                        {% else %}
+                                        <td>{{value}}</td>
+                                        {% endif %}
+                                        {% endfor %}
+                                        <td class="d-flex">
+                                            <a href="{% url 'farmer_admin:farmer_contamination_control_update' contamination_control.pk %}" class="ps-5">
+                                                <i class="ki-duotone ki-notepad-edit text-primary fs-2x">
+                                                    <i class="path1"></i>
+                                                    <i class="path2"></i>
+                                                </i>
+                                            </a>
+                                            <a href="" class="ps-5" onClick="deleteEntry('contamination_control', '{{contamination_control.pk}}')">
+                                                <i class="ki-duotone ki-trash-square text-danger fs-2x">
+                                                    <i class="path1"></i>
+                                                    <i class="path2"></i>
+                                                    <i class="path3"></i>
+                                                    <i class="path4"></i>
+                                                </i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--end::Card body-->
+                </div>
+            </div>
+            <!--end::details View-->
+            
+
+        </div>
+        <!--end::Content-->
+    </div>
+    <!--end::Layout - Overview-->
+</div>
+<!--end::Post-->
+{% endblock content %}
+
+{% block js %}
+{{block.super}}
+
+<script>
+    $(document).ready(function() {
+
+        $('.datatable').DataTable({
+            'columnDefs': [
+                { orderable: false, targets: -1 }, // Disable ordering on column 6 (actions)
+            ]
+        })
+
+
+        
+    });
+
+
+    const deleteEntry = (type, pk) => {
+
+    }
+
+</script>
+{% endblock js %}

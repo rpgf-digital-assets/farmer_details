@@ -8,7 +8,7 @@
         <!--begin::Card body-->
         <div class="card-body py-4">
             <!--begin::Stepper-->
-            <div class="stepper stepper-pills stepper-column d-flex flex-column flex-lg-row" id="kt_stepper_example_vertical">
+            <div class="stepper stepper-pills stepper-column d-flex flex-column flex-lg-row mt-10" id="kt_stepper_example_vertical">
                 <!--begin::Aside-->
                 <div class="d-flex flex-row-auto w-100 w-lg-200px">
                 <!--begin::Nav-->
@@ -293,10 +293,10 @@
                 
                 <!--begin::Content-->
                 <div class="flex-row-fluid">
-                    {% if crop_name %}
+                    {% if crop_name and wizard.steps.current != '0' and wizard.steps.current != '8' %}
                     <div class="row mb-5">
                         <div class="col-xl-12 d-flex justify-content-center">
-                            <h4> Name: {{crop_name}} | Type: {{crop_type}} </h4>
+                            <h4> <span style="font-weight: normal;"> Organic Crop Name: </span> {{crop_name}} <span style="font-weight: normal;"> & Organic Crop Type: </span> {{crop_type}} </h4>
                         </div>
                     </div>
                     {% endif %}
@@ -307,15 +307,17 @@
                         <!--begin::Group-->
                         <div class="mb-5">
                             {% block form_content %}
-                            {% if wizard.steps.current == '7' %}
-                            {{ wizard.form.management_form}}
-                            {% include 'farmer_admin/farmer_organic_wizard/farmer_organic_wizard_contamination_form.html' with form=wizard.form form_errors=wizard.form.non_form_errors %}                            
+                            {% if wizard.steps.current == '0' %}
+                            {% include 'farmer_admin/form_fields.html' with form=wizard.form form_errors=wizard.form.non_form_errors %}
                             {% elif wizard.steps.current == '8' %}
                             {% include 'farmer_admin/farmer_organic_wizard/farmer_organic_wizard_preview.html' with all_form_data=all_form_data %}                            
                             {% else %}
-                            {% include 'farmer_admin/farmer_organic_wizard/form_fields.html' with form=wizard.form form_errors=wizard.form.non_form_errors %}
+                            {{ wizard.form.management_form}}
+                            {% include 'farmer_admin/farmer_organic_wizard/farmer_organic_wizard_form_set.html' with wizard_current_step=wizard.steps.current form=wizard.form form_errors=wizard.form.non_form_errors %}                            
                             {% endif %}
                             {% endblock form_content %}
+
+
                         </div>
                         <!--end::Group-->
 
@@ -358,34 +360,55 @@
 {{block.super}}
 <script type="text/javascript">
     {% if wizard.form.management_form.errors %}
-        let fallbackUrl = '{% url "farmer_admin:traceability_ginning_mapping_create" %}'
+        let fallbackUrl = '{% url "farmer_admin:farmers_list" %}'
         window.location.replace(`${fallbackUrl}`)
+    {% else %}
+        $('.datetimepicker-input').daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true,
+            minYear: 1901,
+            locale: {
+                format: 'YYYY-MM-DD'
+            },
+            maxYear: parseInt(moment().format("YYYY"),12)
+        });
     {% endif %}
 </script>
 
-{% if wizard.steps.current == '0' %}
-{% include 'farmer_admin/farmer_organic_wizard/farmer_organic_crop_create_edit.js' %}
+{% include 'farmer_admin/farmer_organic_wizard/farmer_organic_wizard_base.js' with wizard_current_step=wizard.steps.current %}
+
+
+{% if wizard.steps.current != '0' %}
+{% include 'farmer_admin/farmer_organic_wizard/add_delete_form.js' with wizard_current_step=wizard.steps.current %}
 {% endif %}
 
-{% if wizard.steps.current == '1' %}
-{% include 'farmer_admin/farmer_organic_wizard/farmer_seed_detail_create_edit.js' %}
+
+{% if wizard.steps.current == '0' %}
+    <script type="text/javascript">
+        $('#id_0-season').change();
+    </script>
 {% endif %}
+    
 
 {% if wizard.steps.current == '2' %}
-{% include 'farmer_admin/farmer_organic_wizard/farmer_nutrient_create_edit.js' %}
+{% comment %} Nutrient and Pest details {% endcomment %}
+{% include 'farmer_admin/farmer_organic_wizard/on_farm_input_toggle.js' with wizard_current_step=wizard.steps.current trigger_field_name='source_of_fertilizer' %}
+{% elif wizard.steps.current == '3' %}
+{% include 'farmer_admin/farmer_organic_wizard/on_farm_input_toggle.js' with wizard_current_step=wizard.steps.current trigger_field_name='source_of_input' %}
 {% endif %}
 
-{% if wizard.steps.current == '3' %}
-{% include 'farmer_admin/farmer_organic_wizard/farmer_pest_management_create_update.js' %}
-{% endif %}
 
-{% if wizard.steps.current == '4' %}
-{% include 'farmer_admin/farmer_organic_wizard/farmer_weed_create_update.js' %}
+{% if wizard.steps.current == '8' %}
+    <script>
+        $(".datatable").DataTable({
+            ordering: false,
+            searchable: false,
+            paging: false, 
+            info: false
+        })
+    </script>
 {% endif %}
-
-{% if wizard.steps.current == '5' %}
-{% include 'farmer_admin/farmer_organic_wizard/farmer_harvest_create_update.js' %}
-{% endif %}
+    
 
 
 {% endblock js %}

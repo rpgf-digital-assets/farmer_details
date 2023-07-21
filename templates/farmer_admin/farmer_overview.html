@@ -172,8 +172,6 @@
                             </a>
                             <!--end::Menu link-->
                         </li>
-
-                        
                         <!--end::Menu item-->
                         <!--begin::Menu item-->
                         <li class="menu-item mb-1">
@@ -187,108 +185,6 @@
                             <!--end::Menu link-->
                         </li>
                         <!--end::Menu item-->
-
-                        <!--begin::Menu item-->
-                        <li class="menu-item mb-1">
-                            <!--begin::Menu link-->
-                            <a class="menu-link px-6 py-4 left-navigation" href="#seed_details_div">
-                                <span class="menu-bullet">
-                                    <span class="bullet"></span>
-                                </span>
-                                <span class="menu-title">Seed Details</span>
-                            </a>
-                            <!--end::Menu link-->
-                        </li>
-                        <!--end::Menu item-->
-
-                        <!--begin::Menu item-->
-                        <li class="menu-item mb-1">
-                            <!--begin::Menu link-->
-                            <a class="menu-link px-6 py-4 left-navigation" href="#nutrient_details_div">
-                                <span class="menu-bullet">
-                                    <span class="bullet"></span>
-                                </span>
-                                <span class="menu-title">Nutrient Details</span>
-                            </a>
-                            <!--end::Menu link-->
-                        </li>
-                        <!--end::Menu item-->
-                        
-                        <!--begin::Menu item-->
-                        <li class="menu-item mb-1">
-                            <!--begin::Menu link-->
-                            <a class="menu-link px-6 py-4 left-navigation" href="#pest_disease_management_div">
-                                <span class="menu-bullet">
-                                    <span class="bullet"></span>
-                                </span>
-                                <span class="menu-title">Pest Disease Management</span>
-                            </a>
-                            <!--end::Menu link-->
-                        </li>
-                        <!--end::Menu item-->
-
-                        <!--begin::Menu item-->
-                        <li class="menu-item mb-1">
-                            <!--begin::Menu link-->
-                            <a class="menu-link px-6 py-4 left-navigation" href="#weed_management_div">
-                                <span class="menu-bullet">
-                                    <span class="bullet"></span>
-                                </span>
-                                <span class="menu-title">Weed Management</span>
-                            </a>
-                            <!--end::Menu link-->
-                        </li>
-                        <!--end::Menu item-->
-
-                        <!--begin::Menu item-->
-                        <li class="menu-item mb-1">
-                            <!--begin::Menu link-->
-                            <a class="menu-link px-6 py-4 left-navigation" href="#harvest_income_div">
-                                <span class="menu-bullet">
-                                    <span class="bullet"></span>
-                                </span>
-                                <span class="menu-title">Harvest & Income</span>
-                            </a>
-                            <!--end::Menu link-->
-                        </li>
-
-                        
-                        <!--begin::Menu item-->
-                        <li class="menu-item mb-1">
-                            <!--begin::Menu link-->
-                            <a class="menu-link px-6 py-4 left-navigation" href="#cost_of_cultivation_div">
-                                <span class="menu-bullet">
-                                    <span class="bullet"></span>
-                                </span>
-                                <span class="menu-title">Cost Of Cultivation</span>
-                            </a>
-                            <!--end::Menu link-->
-                        </li>
-                        <!--end::Menu item-->
-
-                        <!--begin::Menu item-->
-                        <li class="menu-item mb-1">
-                            <!--begin::Menu link-->
-                            <a class="menu-link px-6 py-4 left-navigation" href="#contamination_control_div">
-                                <span class="menu-bullet">
-                                    <span class="bullet"></span>
-                                </span>
-                                <span class="menu-title">Contamination Control</span>
-                            </a>
-                            <!--end::Menu link-->
-                        </li>
-                        <!--end::Menu item-->
-                        {% comment %} <!--begin::Menu item-->
-                        <li class="menu-item mb-1">
-                            <!--begin::Menu link-->
-                            <a class="menu-link px-6 py-4 left-navigation" href="#settings">
-                                <span class="menu-bullet">
-                                    <span class="bullet"></span>
-                                </span>
-                                <span class="menu-title">Settings</span>
-                            </a>
-                            <!--end::Menu link-->
-                        </li> {% endcomment %}
                     </ul>
                     <!--end::Menu-->
                     {% comment %} <!--begin::Account info-->
@@ -341,7 +237,7 @@
                 </div>
                 <!--begin::Card header-->
                 <!--begin::Card body-->
-                <div id="profile_collapsible" class="collapse show ">
+                <div id="profile_collapsible" class="collapse">
                     <div class="card-body p-9">
                         <!--begin::Row-->
                         <div class="row mb-7">
@@ -634,7 +530,6 @@
                 </div>
             </div>
             <!--end::details View-->
-{% comment %} 
             <!--begin::details View-->
             <div class="card mb-5 mb-xl-5 page-section" id="organic_crop_details_div" >
                 <!--begin::Card header-->
@@ -646,14 +541,7 @@
                     </div>
                     <!--end::Card title-->
                     <div class="card-toolbar">
-                        <!--begin::Action-->
-                        {% if farmer.organic_crop.all.first %}
-                        <!--begin::Action-->
-                        <a href="{% url 'farmer_admin:farmer_organic_crop_update' farmer.organic_crop.all.first.pk %}" class="btn btn-primary align-self-center mx-10">Edit</a>
-                        <!--end::Action-->
-                        {% else %}
                         <a href="{% url 'farmer_admin:farmer_organic_crop_create' farmer.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
-                        {% endif %}
                         <!--end::Action-->
                         <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#organic_crop_collapsible">
                             <div class="rotate-180">    
@@ -664,313 +552,50 @@
                 </div>
                 <!--begin::Card header-->
                 <div id="organic_crop_collapsible" class="collapse show">
-                    {% if farmer.organic_crop.all.first %}
-                        {% model_to_dict farmer.organic_crop.all.first as farmer_organic_crop %}
-                        {% include 'utils/show_values_from_model_dict.html' with model_dict=farmer_organic_crop.items %}
-                    {% endif %}
+                    <table class="table table-row-dashed p-10" id="organic_crop_datatable">
+                        <thead>
+                            <tr class="text-start fw-bold fs-7 text-uppercase gs-0">
+                                <th class="min-w-125px">Crop Name</th>
+                                <th class="min-w-125px">Crop Type</th>
+                                <th class="min-w-125px">Crop Area</th>
+                                <th class="min-w-125px">Season</th>
+                                <th class="min-w-125px">Year</th>
+                                <th class="min-w-125px">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-600 fw-semibold">
+                            {% for crop in farmer.organic_crop.all %}
+                                <tr>
+                                    <td>{{crop.name}}</td>
+                                    <td>{{crop.type}}</td>
+                                    <td>{{crop.area}}</td>
+                                    <td>{{crop.season.name}}</td>
+                                    <td>{{crop.year}}</td>
+                                    <td class="text-end">
+                                        <a href="#" class="btn btn-light btn-active-light-primary btn-flex btn-center btn-sm" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">Actions
+                                        <i class="ki-duotone ki-down fs-5 ms-1"></i></a>
+                                        <!--begin::Menu-->
+                                        <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-125px py-4" data-kt-menu="true">
+                                            <!--begin::Menu item-->
+                                            <div class="menu-item px-3">
+                                                <a href="{% url 'farmer_admin:farmer_organic_crop_details' crop.pk %}" class="menu-link px-3">View</a>
+                                            </div>
+                                            <!--end::Menu item-->
+                                            <!--begin::Menu item-->
+                                            <div class="menu-item px-3">
+                                                <a href="#" class="menu-link px-3" data-kt-users-table-filter="delete_row">Delete</a>
+                                            </div>
+                                            <!--end::Menu item-->
+                                        </div>
+                                        <!--end::Menu-->
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
             <!--end::details View-->
-
-            <!--begin::details View-->
-            <div class="card mb-5 mb-xl-5 page-section" id="seed_details_div" >
-                <!--begin::Card header-->
-                <div class="card-header" >
-                    <!--begin::Card title-->
-                    <div class="card-title m-0">
-                        <h3 class="fw-bold m-0">Seed Details</h3>
-                        
-                    </div>
-                    <!--end::Card title-->
-                    <div class="card-toolbar">
-                        <!--begin::Action-->
-                        {% if farmer.seed.all.first %}
-                        <!--begin::Action-->
-                        <a href="{% url 'farmer_admin:farmer_seed_details_update' farmer.seed.all.first.pk %}" class="btn btn-primary align-self-center mx-10">Edit</a>
-                        <!--end::Action-->
-                        {% else %}
-                        <a href="{% url 'farmer_admin:farmer_seed_details_create' farmer.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
-                        {% endif %}
-                        <!--end::Action-->
-                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#seed_collapsible">
-                            <div class="card-toolbar rotate-180">    
-                                <i class="ki-duotone ki-down fs-1"></i>
-                            </div>
-                        </div>
-                    </div> 
-                </div>
-                <!--begin::Card header-->
-                <div id="seed_collapsible" class="collapse show">
-                    {% if farmer.seed.all.first %}
-                        {% model_to_dict farmer.seed.all.first as farmer_seed %}
-                        {% include 'utils/show_values_from_model_dict.html' with model_dict=farmer_seed.items %}
-                    {% endif %}
-                </div>
-            </div>
-            <!--end::details View-->
-
-            <!--begin::details View-->
-            <div class="card mb-5 mb-xl-5 page-section" id="nutrient_details_div" >
-                <!--begin::Card header-->
-                <div class="card-header" >
-                    <!--begin::Card title-->
-                    <div class="card-title m-0">
-                        <h3 class="fw-bold m-0">Nutrient Details</h3>
-                        
-                    </div>
-                    <!--end::Card title-->
-                    <div class="card-toolbar">
-                        <!--begin::Action-->
-                        {% if farmer.nutrient.all.first %}
-                        <!--begin::Action-->
-                        <a href="{% url 'farmer_admin:farmer_nutrient_details_update' farmer.nutrient.all.first.pk %}" class="btn btn-primary align-self-center mx-10">Edit</a>
-                        <!--end::Action-->
-                        {% else %}
-                        <a href="{% url 'farmer_admin:farmer_nutrient_details_create' farmer.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
-                        {% endif %}
-                        <!--end::Action-->
-                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#nutrient_collapsible">
-                            <div class="rotate-180">    
-                                <i class="ki-duotone ki-down fs-1"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!--begin::Card header-->
-                <div id="nutrient_collapsible" class="collapse show">
-                    {% if farmer.nutrient.all.first %}
-                        {% model_to_dict farmer.nutrient.all.first as farmer_nutrient %}
-                        {% include 'utils/show_values_from_model_dict.html' with model_dict=farmer_nutrient.items %}
-                    {% endif %}
-                </div>
-            </div>
-            <!--end::details View-->
-
-            <!--begin::details View-->
-            <div class="card mb-5 mb-xl-5 page-section" id="pest_disease_management_div" >
-                <!--begin::Card header-->
-                <div class="card-header" >
-                    <!--begin::Card title-->
-                    <div class="card-title m-0">
-                        <h3 class="fw-bold m-0">Pest Disease Management</h3>
-                        
-                    </div>
-                    <!--end::Card title-->
-                    <div class="card-toolbar">
-                        <!--begin::Action-->
-                        {% if farmer.pest_disease.all.first %}
-                        <!--begin::Action-->
-                        <a href="{% url 'farmer_admin:farmer_pest_disease_management_update' farmer.pest_disease.all.first.pk %}" class="btn btn-primary align-self-center mx-10">Edit</a>
-                        <!--end::Action-->
-                        {% else %}
-                        <a href="{% url 'farmer_admin:farmer_pest_disease_management_create' farmer.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
-                        {% endif %}
-                        <!--end::Action-->
-                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#pest_disease_management_collapsible">
-                            <div class="rotate-180">    
-                                <i class="ki-duotone ki-down fs-1"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!--begin::Card header-->
-                <div id="pest_disease_management_collapsible" class="collapse show">
-                    {% if farmer.pest_disease.all.first %}
-                        {% model_to_dict farmer.pest_disease.all.first as farmer_pest_disease %}
-                        {% include 'utils/show_values_from_model_dict.html' with model_dict=farmer_pest_disease.items %}
-                    {% endif %}
-                </div>
-            </div>
-            <!--end::details View-->
-
-            <!--begin::details View-->
-            <div class="card mb-5 mb-xl-5 page-section" id="weed_management_div" >
-                <!--begin::Card header-->
-                <div class="card-header" >
-                    <!--begin::Card title-->
-                    <div class="card-title m-0">
-                        <h3 class="fw-bold m-0">Weed Management</h3>
-                        
-                    </div>
-                    <!--end::Card title-->
-                    <div class="card-toolbar">
-                        <!--begin::Action-->
-                        {% if farmer.weed.all.first %}
-                        <!--begin::Action-->
-                        <a href="{% url 'farmer_admin:farmer_weed_management_update' farmer.weed.all.first.pk %}" class="btn btn-primary align-self-center mx-10">Edit</a>
-                        <!--end::Action-->
-                        {% else %}
-                        <a href="{% url 'farmer_admin:farmer_weed_management_create' farmer.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
-                        {% endif %}
-                        <!--end::Action-->
-                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#weed_management_collapsible">
-                            <div class="rotate-180">    
-                                <i class="ki-duotone ki-down fs-1"></i>
-                            </div>
-                        </div>
-                    </div> 
-                </div>
-                <!--begin::Card header-->
-                <div id="weed_management_collapsible" class="collapse show">
-                    {% if farmer.weed.all.first %}
-                        {% model_to_dict farmer.weed.all.first as farmer_weed %}
-                        {% include 'utils/show_values_from_model_dict.html' with model_dict=farmer_weed.items %}
-                    {% endif %}
-                </div>
-            </div>
-            <!--end::details View-->
-
-            <!--begin::details View-->
-            <div class="card mb-5 mb-xl-5 page-section" id="harvest_income_div" >
-                <!--begin::Card header-->
-                <div class="card-header" >
-                    <!--begin::Card title-->
-                    <div class="card-title m-0">
-                        <h3 class="fw-bold m-0">Harvest & Income</h3>
-                    </div>
-                    <!--end::Card title-->
-                    <div class="card-toolbar">
-                        <!--begin::Action-->
-                        {% if farmer.harvest_income.all.first %}
-                        <!--begin::Action-->
-                        <a href="{% url 'farmer_admin:farmer_harvest_income_update' farmer.harvest_income.all.first.pk %}" class="btn btn-primary align-self-center mx-10">Edit</a>
-                        <!--end::Action-->
-                        {% else %}
-                        <a href="{% url 'farmer_admin:farmer_harvest_income_create' farmer.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
-                        {% endif %}
-                        <!--end::Action-->
-                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#harvest_income_collapsible">
-                            <div class="rotate-180">    
-                                <i class="ki-duotone ki-down fs-1"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!--begin::Card header-->
-                <div id="harvest_income_collapsible" class="collapse show">
-                    {% if farmer.harvest_income.all.first %}
-                        {% model_to_dict farmer.harvest_income.all.first as farmer_harvest_income %}
-                        {% include 'utils/show_values_from_model_dict.html' with model_dict=farmer_harvest_income.items %}
-                    {% endif %}
-                </div>
-            </div>
-            <!--end::details View-->
-            
-            <!--begin::details View-->
-            <div class="card mb-5 mb-xl-5 page-section" id="cost_of_cultivation_div" >
-                <!--begin::Card header-->
-                <div class="card-header" >
-                    <!--begin::Card title-->
-                    <div class="card-title m-0">
-                        <h3 class="fw-bold m-0">Cost Of Cultivation</h3>
-                        
-                    </div>
-                    <!--end::Card title-->
-                    <div class="card-toolbar">
-                        <!--begin::Action-->
-                        {% if farmer.cost_of_cultivation.all.first %}
-                        <!--begin::Action-->
-                        <a href="{% url 'farmer_admin:farmer_cost_of_cultivation_update' farmer.cost_of_cultivation.all.first.pk %}" class="btn btn-primary align-self-center mx-10">Edit</a>
-                        <!--end::Action-->
-                        {% else %}
-                        <a href="{% url 'farmer_admin:farmer_cost_of_cultivation_create' farmer.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
-                        {% endif %}
-                        <!--end::Action-->
-                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#cost_of_cultivation_collapsible">
-                            <div class="rotate-180">    
-                                <i class="ki-duotone ki-down fs-1"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!--begin::Card header-->
-                <div id="cost_of_cultivation_collapsible" class="collapse show">
-                    {% if farmer.cost_of_cultivation.all.first %}
-                        {% model_to_dict farmer.cost_of_cultivation.all.first as farmer_cost_of_cultivation %}
-                        {% include 'utils/show_values_from_model_dict.html' with model_dict=farmer_cost_of_cultivation.items %}
-                    {% endif %}
-                </div>
-            </div>
-            <!--end::details View-->
-            
-            <!--begin::details View-->
-            <div class="card mb-5 mb-xl-5 page-section" id="contamination_control_div">
-                <!--begin::Card header-->
-                <div class="card-header" >
-                    <!--begin::Card title-->
-                    <div class="card-title m-0">
-                        <h3 class="fw-bold m-0">Contamination Control</h3>
-                    </div>
-                    <!--end::Card title-->
-                    <div class="card-toolbar">
-                        <!--begin::Action-->
-                        <a href="{% url 'farmer_admin:farmer_contamination_control_create' farmer.pk %}" class="btn btn-primary align-self-center mx-10">Add New</a>
-                        <!--end::Action-->
-                        <div class="collapsible cursor-pointer rotate d-flex" data-bs-toggle="collapse" data-bs-target="#contamination_control_collapsible">
-                            <div class="card-toolbar rotate-180">    
-                                <i class="ki-duotone ki-down fs-1"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!--begin::Card header-->
-                <div id="contamination_control_collapsible" class="collapse show">
-                    <!--begin::Table-->
-                <table class="table align-middle p-10" id="table_contamination_control">
-                    <thead>
-                        <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0">
-                            <th class="min-w-125px">Chances of contamination</th>
-                            <th class="min-w-125px">Details of contamination</th>
-                            <th class="min-w-125px">Details of Preventive measure taken</th>
-                            <th class="min-w-125px">Details of control measures taken </th>
-                            <th class="min-w-125px">Remark</th>
-                            <th class="text-end min-w-100px">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-gray-600 fw-semibold">
-                        {% for contamination in farmer.contamination_control.all %}
-                        <tr>
-                            <td class="d-flex align-items-center">
-                               <p>{{contamination.chances}}</p>
-                            </td>
-                            <td>
-                                <p>{{contamination.details}}</p>
-                            </td>
-                            <td>
-                                <p>{{contamination.preventive_measure_details}}</p>
-                            </td>
-                            <td>
-                                <p>{{contamination.control_measures_details}}</p>
-                            </td>
-                            <td>
-                                <p>{{contamination.remark}}</p>
-                            </td>
-                            <td class="text-end">
-                                <a href="#" class="btn btn-light btn-active-light-primary btn-flex btn-center btn-sm" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">Actions
-                                <i class="ki-duotone ki-down fs-5 ms-1"></i></a>
-                                <!--begin::Menu-->
-                                <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-125px py-4" data-kt-menu="true">
-                                    <!--begin::Menu item-->
-                                    <div class="menu-item px-3">
-                                        <a href="{% url 'farmer_admin:farmer_contamination_control_update' contamination.pk %}" class="menu-link px-3">Edit</a>
-                                    </div>
-                                    <!--end::Menu item-->
-                                </div>
-                                <!--end::Menu-->
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                <!--end::Table--> {% endcomment %}
-
-
-
-                </div>
-            </div>
-            <!--end::details View-->
-            
-
         </div>
         <!--end::Content-->
     </div>
@@ -985,9 +610,7 @@
 <script>
     $(document).ready(function() {
 
-        const datatable = $('#table_contamination_control').DataTable({
-            "info": false,
-            'order': [],
+        const datatable = $('#organic_crop_datatable').DataTable({
             'columnDefs': [
                 { orderable: false, targets: 5 }, // Disable ordering on column 6 (actions)
             ]
@@ -996,6 +619,7 @@
         $('.collapse').collapse({
             hide: true
         })
+        
 
         $("a[href*=\\#]").bind('click', function(e) {
             e.preventDefault(); // prevent hard jump, the default behavior

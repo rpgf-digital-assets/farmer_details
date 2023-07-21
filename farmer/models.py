@@ -232,7 +232,7 @@ class Season(BaseModel):
         return f"{self.name}"
     
 class OrganicCropDetails(BaseModel):
-    farmer = models.ForeignKey(Farmer, related_name='organic_crop', on_delete=models.PROTECT)
+    farmer = models.ForeignKey(Farmer, verbose_name=_("farmer"), related_name='organic_crop', on_delete=models.PROTECT)
     name = models.CharField(_("Name"), max_length=255)
     TYPE_CHOICES = [
         ("MAIN_CROP", 'Main crop'),
@@ -246,7 +246,7 @@ class OrganicCropDetails(BaseModel):
     expected_date_of_harvesting = models.DateField(_("Expected date of harvest"))
     expected_yield = models.IntegerField(_("Expected yield in kg"))
     expected_productivity = models.IntegerField(_("Expected productivity in kg/ha"))
-    season = models.ForeignKey(Season, related_name='organic_crop', on_delete=models.PROTECT)
+    season = models.ForeignKey(Season, verbose_name=_("Season"), related_name='organic_crop', on_delete=models.PROTECT)
     year = models.IntegerField(_("Season Year"), validators=[MaxValueValidator(9999)])
     
     def __str__(self):
@@ -254,8 +254,7 @@ class OrganicCropDetails(BaseModel):
     
     
 class SeedDetails(BaseModel):
-    organic_crop = models.OneToOneField(OrganicCropDetails, related_name='seed', on_delete=models.PROTECT)
-    type = models.CharField(_("Type of crop"), max_length=100, choices=OrganicCropDetails.TYPE_CHOICES)
+    organic_crop = models.ForeignKey(OrganicCropDetails, related_name='seed', on_delete=models.PROTECT)
     date_of_purchase = models.DateField(_("Date of purchase"))
     name_of_supplier = models.CharField(_("Name of supplier"), max_length=255)
     seed_for_sowing = models.IntegerField(_("Amount of seed used for sowing (Kg)"))
@@ -278,8 +277,7 @@ class SeedDetails(BaseModel):
 
 
 class NutrientManagement(BaseModel):
-    organic_crop = models.OneToOneField(OrganicCropDetails, related_name='nutrient', on_delete=models.PROTECT)
-    crop_name = models.CharField(_("Name of crop"), max_length=100)
+    organic_crop = models.ForeignKey(OrganicCropDetails, related_name='nutrient', on_delete=models.PROTECT)
     TYPE_CHOICES = [
         ('FYM', 'FYM'),
         ('COMPOST', 'Compost'),
@@ -293,7 +291,7 @@ class NutrientManagement(BaseModel):
         ('ON_FARM', 'on farm'),
         ('OUTSOURCED', 'outsourced'),
     ]
-    souce_of_fertilizer = models.CharField(_("Source of fertiliser"), max_length=100, choices=SOURCE_CHOICES)
+    source_of_fertilizer = models.CharField(_("Source of fertiliser"), max_length=100, choices=SOURCE_CHOICES)
     quantity_of_fertilizer = models.IntegerField(_("Qty of fertiliser applied (Kg)"))
     date_of_application = models.DateField(_("Date of application"))
     APPLICATION_CHOICES = [
@@ -307,7 +305,7 @@ class NutrientManagement(BaseModel):
     
     # on farm inputs
     type_of_raw_material = models.CharField(_("Type of raw material used"), max_length=500, null=True, blank=True)
-    quantity_used = models.IntegerField(_("No of workdays required for activity"), null=True, blank=True)
+    quantity_used = models.IntegerField(_("Quantity used"), null=True, blank=True)
     starting_date = models.DateField(_("Starting date of preparation"), null=True, blank=True)
     date_of_manure = models.DateField(_("Date of manure ready"), null=True, blank=True)
     quantity_obtained = models.IntegerField(_("Qty obtained (Kg)"), null=True, blank=True)
@@ -319,11 +317,10 @@ class NutrientManagement(BaseModel):
     
 
 class PestDiseaseManagement(BaseModel):
-    organic_crop = models.OneToOneField(OrganicCropDetails, related_name='pest_disease', on_delete=models.PROTECT)
-    crop_name = models.CharField(_("Name of crop"), max_length=100)
+    organic_crop = models.ForeignKey(OrganicCropDetails, related_name='pest_disease', on_delete=models.PROTECT)
     name_of_input = models.CharField(_("Name of input used"), max_length=255)
     quantity_of_input = models.IntegerField(_("Qty of input used (Kg or lit)"))
-    souce_of_input = models.CharField(_("Source of input"), max_length=100, choices=NutrientManagement.SOURCE_CHOICES)
+    source_of_input = models.CharField(_("Source of input"), max_length=100, choices=NutrientManagement.SOURCE_CHOICES)
     date_of_application = models.DateField(_("Date of application"))
     APPLICATION_CHOICES = [
         ('BRAODCASTING', 'Braodcasting'),
@@ -348,7 +345,7 @@ class PestDiseaseManagement(BaseModel):
     
     
 class WeedManagement(BaseModel):
-    organic_crop = models.OneToOneField(OrganicCropDetails, related_name='weed', on_delete=models.PROTECT)
+    organic_crop = models.ForeignKey(OrganicCropDetails, related_name='weed', on_delete=models.PROTECT)
     activity_name = models.CharField(_("Name of activity carried out"), max_length=255)
     date_of_activity = models.DateField(_("Date of activity"))
     METHOD_CHOICES = [
@@ -361,8 +358,7 @@ class WeedManagement(BaseModel):
     
     
 class HarvestAndIncomeDetails(BaseModel): 
-    organic_crop = models.OneToOneField(OrganicCropDetails, related_name='harvest_income', on_delete=models.PROTECT)
-    name = models.CharField(verbose_name=_('Name of crop'), max_length=500)
+    organic_crop = models.ForeignKey(OrganicCropDetails, related_name='harvest_income', on_delete=models.PROTECT)
     TYPE_CHOICES = [
         ('SINGLE', 'Single'),
         ('MULTIPLE', 'Multiple'),
@@ -398,8 +394,7 @@ class HarvestAndIncomeDetails(BaseModel):
     
     
 class CostOfCultivation(BaseModel):
-    organic_crop = models.OneToOneField(OrganicCropDetails, related_name='cost_of_cultivation', on_delete=models.PROTECT)
-    name = models.CharField(verbose_name=_('Name of crop'), max_length=500)
+    organic_crop = models.ForeignKey(OrganicCropDetails, related_name='cost_of_cultivation', on_delete=models.PROTECT)
     area = models.IntegerField(verbose_name=_('Crop Area (Ha)'))
     input_source = models.CharField(verbose_name=_('Source of Input'), max_length=500)
     manure_preparation_cost = models.IntegerField(verbose_name=_('Cost of Manure Preparation'))
@@ -423,7 +418,7 @@ class CostOfCultivation(BaseModel):
         
     
 class ContaminationControl(BaseModel):
-    organic_crop = models.OneToOneField(OrganicCropDetails, related_name='contamination_control', on_delete=models.PROTECT)
+    organic_crop = models.ForeignKey(OrganicCropDetails, related_name='contamination_control', on_delete=models.PROTECT)
     CHANCES_CHOICES = [
         ('Seed', 'Seed'),
         ('machinery', 'machinery'),

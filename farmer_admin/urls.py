@@ -18,27 +18,28 @@ urlpatterns = [
     
     path('farmer/<uuid:pk>/organic_crop/create/', views.FarmerOrganicCropDetailCreateView.as_view(), name="farmer_organic_crop_create"),
     path('farmer/organic_crop/<uuid:pk>/update/', views.FarmerOrganicCropDetailUpdateView.as_view(), name="farmer_organic_crop_update"),
+    path('farmer/organic_crop/<uuid:pk>/details/', views.FarmerOrganicCropDetailsView.as_view(), name="farmer_organic_crop_details"),
+
+    path('farmer/organic_crop/<uuid:pk>/seed_details/create/', views.FarmerSeedDetailCreateView.as_view(), name="farmer_seed_details_create"),
+    path('farmer/organic_crop/seed_details/<uuid:pk>/update/', views.FarmerSeedDetailUpdateView.as_view(), name="farmer_seed_details_update"),
     
-    path('farmer/<uuid:pk>/seed_details/create/', views.FarmerSeedDetailCreateView.as_view(), name="farmer_seed_details_create"),
-    path('farmer/seed_details/<uuid:pk>/update/', views.FarmerSeedDetailUpdateView.as_view(), name="farmer_seed_details_update"),
+    path('farmer/organic_crop/<uuid:pk>/nutrient_details/create/', views.FarmerNutrientDetailCreateView.as_view(), name="farmer_nutrient_details_create"),
+    path('farmer/organic_crop/nutrient_details/<uuid:pk>/update/', views.FarmerNutrientDetailUpdateView.as_view(), name="farmer_nutrient_details_update"),
     
-    path('farmer/<uuid:pk>/nutrient_details/create/', views.FarmerNutrientDetailCreateView.as_view(), name="farmer_nutrient_details_create"),
-    path('farmer/nutrient_details/<uuid:pk>/update/', views.FarmerNutrientDetailUpdateView.as_view(), name="farmer_nutrient_details_update"),
+    path('farmer/organic_crop/<uuid:pk>/pest_disease_management/create/', views.FarmerPestDiseaseManagementCreateView.as_view(), name="farmer_pest_disease_management_create"),
+    path('farmer/organic_crop/pest_disease_management/<uuid:pk>/update/', views.FarmerPestDiseaseManagementUpdateView.as_view(), name="farmer_pest_disease_management_update"),
     
-    path('farmer/<uuid:pk>/pest_disease_management/create/', views.FarmerPestDiseaseManagementCreateView.as_view(), name="farmer_pest_disease_management_create"),
-    path('farmer/pest_disease_management/<uuid:pk>/update/', views.FarmerPestDiseaseManagementUpdateView.as_view(), name="farmer_pest_disease_management_update"),
+    path('farmer/organic_crop/<uuid:pk>/weed_management/create/', views.FarmerWeedManagementCreateView.as_view(), name="farmer_weed_management_create"),
+    path('farmer/organic_crop/weed_management/<uuid:pk>/update/', views.FarmerWeedManagementUpdateView.as_view(), name="farmer_weed_management_update"),
     
-    path('farmer/<uuid:pk>/weed_management/create/', views.FarmerWeedManagementCreateView.as_view(), name="farmer_weed_management_create"),
-    path('farmer/weed_management/<uuid:pk>/update/', views.FarmerWeedManagementUpdateView.as_view(), name="farmer_weed_management_update"),
+    path('farmer/organic_crop/<uuid:pk>/harvest_income/create/', views.FarmerHarvestIncomeCreateView.as_view(), name="farmer_harvest_income_create"),
+    path('farmer/organic_crop/harvest_income/<uuid:pk>/update/', views.FarmerHarvestIncomeUpdateView.as_view(), name="farmer_harvest_income_update"),
     
-    path('farmer/<uuid:pk>/harvest_income/create/', views.FarmerHarvestIncomeCreateView.as_view(), name="farmer_harvest_income_create"),
-    path('farmer/harvest_income/<uuid:pk>/update/', views.FarmerHarvestIncomeUpdateView.as_view(), name="farmer_harvest_income_update"),
+    path('farmer/organic_crop/<uuid:pk>/cost_of_cultivation/create/', views.FarmerCostOfCultivationCreateView.as_view(), name="farmer_cost_of_cultivation_create"),
+    path('farmer/organic_crop/cost_of_cultivation/<uuid:pk>/update/', views.FarmerCostOfCultivationUpdateView.as_view(), name="farmer_cost_of_cultivation_update"),
     
-    path('farmer/<uuid:pk>/cost_of_cultivation/create/', views.FarmerCostOfCultivationCreateView.as_view(), name="farmer_cost_of_cultivation_create"),
-    path('farmer/cost_of_cultivation/<uuid:pk>/update/', views.FarmerCostOfCultivationUpdateView.as_view(), name="farmer_cost_of_cultivation_update"),
-    
-    path('farmer/<uuid:pk>/contamination_control/create/', views.FarmerContaminationControlCreateView.as_view(), name="farmer_contamination_control_create"),
-    path('farmer/contamination_control/<uuid:pk>/update/', views.FarmerContaminationControlUpdateView.as_view(), name="farmer_contamination_control_update"),
+    path('farmer/organic_crop/<uuid:pk>/contamination_control/create/', views.FarmerContaminationControlCreateView.as_view(), name="farmer_contamination_control_create"),
+    path('farmer/organic_crop/contamination_control/<uuid:pk>/update/', views.FarmerContaminationControlUpdateView.as_view(), name="farmer_contamination_control_update"),
     
     
     path('vendor/list/', views.VendorListView.as_view(), name="vendor_list"),

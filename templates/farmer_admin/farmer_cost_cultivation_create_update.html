@@ -1,0 +1,24 @@
+{% extends 'farmer_admin/base_create_edit.html' %}
+{% load static %}
+
+{% block title %}
+Farmer Seed Details {% if farmer_seed_object %} Edit {% else %} Create {% endif %}
+{% endblock title %}
+
+
+{% block js %}
+{{block.super}}
+<script>
+    $("#id_date_of_purchase").daterangepicker({
+        singleDatePicker: true,
+        showDropdowns: true,
+        minYear: 1901,
+        locale: {
+            format: 'YYYY-MM-DD'
+        },
+        maxYear: parseInt(moment().format("YYYY"),12)
+    });
+    
+
+</script>
+{% endblock js %}

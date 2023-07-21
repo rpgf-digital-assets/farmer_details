@@ -7,7 +7,10 @@ register = template.Library()
 def model_to_dict(instance):
     data = {}
     for field in instance._meta.get_fields():
-        data[field.verbose_name] = field.value_from_object(instance)
+        try:
+            data[field.verbose_name] = field.value_from_object(instance)
+        except: 
+            pass
     return data
 
 

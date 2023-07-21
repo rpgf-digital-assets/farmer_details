@@ -1,0 +1,5 @@
+Delete Organic crop
+Delete individual entry of organic crop details
+show information of farmer at the top of organic crop details
+View all organic crop details
+Create views for organic crop details

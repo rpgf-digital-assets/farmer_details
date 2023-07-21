@@ -1,55 +1,47 @@
 {% load base_extras %}
 <div class="flex-column current" id="form-container" data-kt-stepper-element="content">
     <div class="row">
-    {% for field, value in all_form_data.items %}
-        {% if value|is_list %}
-        <!--begin::Table-->
-        <table class="table align-middle p-10" id="table_contamination_control">
-            <thead>
-                <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0">
-                    <th class="min-w-125px">Chances of contamination</th>
-                    <th class="min-w-125px">Details of contamination</th>
-                    <th class="min-w-125px">Details of Preventive measure taken</th>
-                    <th class="min-w-125px">Details of control measures taken </th>
-                    <th class="min-w-125px">Remark</th>
-                </tr>
-            </thead>
-            <tbody class="text-gray-600 fw-semibold">
-                {% for contamination in value %}
-                <tr>
-                    <td class="d-flex align-items-center">
-                       <p>{{contamination.chances}}</p>
-                    </td>
-                    <td>
-                        <p>{{contamination.details}}</p>
-                    </td>
-                    <td>
-                        <p>{{contamination.preventive_measure_details}}</p>
-                    </td>
-                    <td>
-                        <p>{{contamination.control_measures_details}}</p>
-                    </td>
-                    <td>
-                        <p>{{contamination.remark}}</p>
-                    </td>
-                    
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <!--end::Table-->
-        {% else %}
-        <!--begin::Input group-->
-        <div class="form-floating mb-7 col-xl-6">
-            <!--begin::Input-->
-            <input disabled class="form-control" type="text" id="input_{{forloop.counter}}" value="{{value}}">
-            <!--end::Input-->
-            <!--begin::Label-->
-            <label for="input_{{forloop.counter}}" class="required fs-6 fw-semibold ml-4 mb-2" style="margin-left: 5px;">{{field}}</label>
-            <!--end::Label-->
-        </div>
-        <!--end::Input group-->
-        {% endif %}
-    {% endfor %}
+        <hr class="hr" />
+        {% for form in form_list %}
+            <div class="col-xl-12 py-5">
+                <h4>{{form.form_title}}</h4>
+            </div>
+            {% if form.form_data|is_list %}
+            <table class="table table-bordered align-middle p-0 datatable mb-10 ">
+                <thead>
+                    <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0">
+                    {% for field_name in form.form_data.0.keys %}
+                    <th class="min-w-125px ">{{field_name}}</th>
+                    {% endfor %}
+                    </tr>
+                </thead>
+                <tbody class="text-gray-600 fw-semibold">
+                    {% for form_data in form.form_data %}
+                        <tr>
+                        {% for field, value in form_data.items %}
+                            <td>
+                            {{value}}
+                            </td>
+                        {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            {% for field, value in form.form_data.items %}
+            <!--begin::Input group-->
+            <div class="form-floating mb-10 col-xl-6">
+                <!--begin::Input-->
+                <input disabled class="form-control" type="text" id="input_{{forloop.counter}}" value="{{value}}">
+                <!--end::Input-->
+                <!--begin::Label-->
+                <label for="input_{{forloop.counter}}" class="required fs-6 fw-semibold ml-4 mb-2" style="margin-left: 5px;">{{field}}</label>
+                <!--end::Label-->
+            </div>
+            <!--end::Input group--> 
+            {% endfor %}         
+            {% endif %}
+            <hr class="hr mt-10" />
+        {% endfor %}
     </div>
 </div>
