@@ -8,6 +8,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.db import transaction
 from django.forms import Form, ValidationError
+from django.forms.models import BaseModelForm
 from django.http import HttpResponse
 from django.db.models import Avg
 from django.shortcuts import redirect, render
@@ -144,25 +145,39 @@ class OtherFarmerCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, Create
     success_url = reverse_lazy('farmer_admin:farmers_list')
 
 
-class FarmerSocialCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, BaseFarmerDetailsCreateView):
+class FarmerSocialCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = FarmerSocial
     template_name = 'farmer_admin/farmer_socials_create_edit.html'
     form_class = FarmerSocialCreationFrom
+
+    def form_valid(self, form):
+        farmer = Farmer.objects.get(user__id=self.kwargs['pk'])
+        form.instance.farmer = farmer
+        self.object = form.save()
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('farmer_admin:farmer_overview', kwargs={'pk': self.kwargs['pk']})
 
 
 class FarmerSocialUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
     model = FarmerSocial
     template_name = 'farmer_admin/farmer_socials_create_edit.html'
     form_class = FarmerSocialCreationFrom
-    success_url = reverse_lazy('farmer_admin:farmers_list')
     context_object_name = 'farmer_social_object'
+    
+    def get_success_url(self):
+        instance = self.get_object()
+        return reverse('farmer_admin:farmer_overview', kwargs={'pk': instance.farmer.pk})
 
 
 class FarmerLandDetailCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = FarmerLand
     template_name = 'farmer_admin/farmer_land_details_create_edit.html'
     form_class = FarmerLandDetailsCreationFrom
-    success_url = reverse_lazy('farmer_admin:farmers_list')
+    
+    def get_success_url(self):
+        return reverse('farmer_admin:farmer_overview', kwargs={'pk': self.kwargs['pk']})
 
     def form_valid(self, form):
         farmer = Farmer.objects.get(user__id=self.kwargs['pk'])
@@ -183,8 +198,11 @@ class FarmerLandDetailUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, U
     model = FarmerLand
     template_name = 'farmer_admin/farmer_land_details_create_edit.html'
     form_class = FarmerLandDetailsCreationFrom
-    success_url = reverse_lazy('farmer_admin:farmers_list')
     context_object_name = 'farmer_land_object'
+    
+    def get_success_url(self):
+        instance = self.get_object()
+        return reverse('farmer_admin:farmer_overview', kwargs={'pk': instance.farmer.pk})
 
     def form_valid(self, form):
         if not form.cleaned_data['soil_test_conducted']:
