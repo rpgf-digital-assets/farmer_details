@@ -8,6 +8,45 @@ Farmer Seed Details {% if farmer_seed_object %} Edit {% else %} Create {% endif 
 
 {% block js %}
 {{block.super}}
+
+<script>
+
+    $(document).ready(function() {
+        
+
+        var initialVal = $(`#id_source_of_input`).val()
+        toggleSourcingFields(initialVal)
+
+        $(`#id_source_of_input`).on('change', function(element) {
+            let sourcing = $(this).find(":selected").val()
+            toggleSourcingFields(sourcing)
+        })
+
+        
+    })
+
+    const toggleSourcingFields = (sourcing) => {
+        console.log('sourcing', sourcing)
+        if (sourcing === 'ON_FARM'){
+            $('.on-farm-input').parent().css('display', 'block')
+            $('.off-farm-input').parent().css('display', 'none')
+        }
+        else if (sourcing === 'OUTSOURCED'){
+            $('.on-farm-input').parent().css('display', 'none')
+            $('.off-farm-input').parent().css('display', 'block')
+        }
+        else{
+            // hide both
+            $('.on-farm-input').parent().css('display', 'none')
+            $('.off-farm-input').parent().css('display', 'none')
+        }
+    }
+
+    
+    
+</script>
+
+
 <script>
     $("#id_date_of_purchase").daterangepicker({
         singleDatePicker: true,

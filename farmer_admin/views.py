@@ -45,6 +45,11 @@ class BaseFarmerDetailsCreateView(CreateView):
         form.instance.organic_crop = organic_crop
         self.object = form.save()
         return super().form_valid(form)
+    
+class BaseFarmerDetailsUpdateView(UpdateView):
+    def get_success_url(self):
+        instance = self.get_object()
+        return reverse('farmer_admin:farmer_organic_crop_details', kwargs={'pk': instance.organic_crop.pk})
 
 
 class FarmersListView(CustomLoginRequiredMixin, AdminRequiredMixin, ListView):
@@ -327,6 +332,9 @@ class FarmerOrganicCropDetailUpdateView(CustomLoginRequiredMixin, AdminRequiredM
     success_url = reverse_lazy('farmer_admin:farmers_list')
     context_object_name = 'farmer_organic_object'
 
+    def get_success_url(self):
+        return reverse('farmer_admin:farmer_organic_crop_details', kwargs={'pk': self.kwargs['pk']})
+
 
 class FarmerOrganicCropDetailsView(CustomLoginRequiredMixin, AdminRequiredMixin, TemplateView):
     # model = OrganicCropDetails
@@ -345,11 +353,10 @@ class FarmerSeedDetailCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, B
     form_class = FarmerSeedDetailsForm
 
 
-class FarmerSeedDetailUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
+class FarmerSeedDetailUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, BaseFarmerDetailsUpdateView):
     model = SeedDetails
     template_name = 'farmer_admin/farmer_seed_detail_create_edit.html'
     form_class = FarmerSeedDetailsForm
-    success_url = reverse_lazy('farmer_admin:farmers_list')
     context_object_name = 'farmer_seed_object'
 
 
@@ -358,7 +365,7 @@ class FarmerNutrientDetailCreateView(CustomLoginRequiredMixin, AdminRequiredMixi
     template_name = 'farmer_admin/farmer_nutrient_create_edit.html'
     form_class = FarmerNutritionManagementForm
     success_url = reverse_lazy('farmer_admin:farmers_list')
-    source_field_name = 'souce_of_fertilizer'
+    source_field_name = 'source_of_fertilizer'
 
     def form_valid(self, form):
         organic_crop = OrganicCropDetails.objects.get(user__id=self.kwargs['pk'])
@@ -378,13 +385,12 @@ class FarmerNutrientDetailCreateView(CustomLoginRequiredMixin, AdminRequiredMixi
         return super().form_valid(form)
 
 
-class FarmerNutrientDetailUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
+class FarmerNutrientDetailUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, BaseFarmerDetailsUpdateView):
     model = NutrientManagement
     template_name = 'farmer_admin/farmer_nutrient_create_edit.html'
     form_class = FarmerNutritionManagementForm
-    success_url = reverse_lazy('farmer_admin:farmers_list')
     context_object_name = 'farmer_nutrient_object'
-    source_field_name = 'souce_of_fertilizer'
+    source_field_name = 'source_of_fertilizer'
 
     def form_valid(self, form):
         if form.cleaned_data[self.source_field_name] == NutrientManagement.ON_FARM:
@@ -407,16 +413,15 @@ class FarmerPestDiseaseManagementCreateView(FarmerNutrientDetailCreateView):
     template_name = 'farmer_admin/farmer_pest_management_create_update.html'
     form_class = FarmerPestDiseaseManagementForm
     success_url = reverse_lazy('farmer_admin:farmers_list')
-    source_field_name = 'souce_of_input'
+    source_field_name = 'source_of_input'
 
 
 class FarmerPestDiseaseManagementUpdateView(FarmerNutrientDetailUpdateView):
     model = PestDiseaseManagement
     template_name = 'farmer_admin/farmer_pest_management_create_update.html'
     form_class = FarmerPestDiseaseManagementForm
-    success_url = reverse_lazy('farmer_admin:farmers_list')
     context_object_name = 'farmer_pest_object'
-    source_field_name = 'souce_of_input'
+    source_field_name = 'source_of_input'
 
 
 class FarmerWeedManagementCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, BaseFarmerDetailsCreateView):
@@ -425,11 +430,10 @@ class FarmerWeedManagementCreateView(CustomLoginRequiredMixin, AdminRequiredMixi
     form_class = WeedManagementForm
 
 
-class FarmerWeedManagementUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
+class FarmerWeedManagementUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, BaseFarmerDetailsUpdateView):
     model = WeedManagement
     template_name = 'farmer_admin/farmer_weed_create_update.html'
     form_class = WeedManagementForm
-    success_url = reverse_lazy('farmer_admin:farmers_list')
     context_object_name = 'farmer_weed_object'
 
 
@@ -439,11 +443,10 @@ class FarmerHarvestIncomeCreateView(CustomLoginRequiredMixin, AdminRequiredMixin
     form_class = HarvestAndIncomeDetailForm
 
 
-class FarmerHarvestIncomeUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
+class FarmerHarvestIncomeUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, BaseFarmerDetailsUpdateView):
     model = HarvestAndIncomeDetails
     template_name = 'farmer_admin/farmer_harvest_create_update.html'
     form_class = HarvestAndIncomeDetailForm
-    success_url = reverse_lazy('farmer_admin:farmers_list')
     context_object_name = 'farmer_harvest_object'
 
 
@@ -453,11 +456,10 @@ class FarmerCostOfCultivationCreateView(CustomLoginRequiredMixin, AdminRequiredM
     form_class = CostOfCultivationForm
 
 
-class FarmerCostOfCultivationUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
+class FarmerCostOfCultivationUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, BaseFarmerDetailsUpdateView):
     model = CostOfCultivation
     template_name = 'farmer_admin/farmer_cost_cultivation_create_update.html'
     form_class = CostOfCultivationForm
-    success_url = reverse_lazy('farmer_admin:farmers_list')
     context_object_name = 'farmer_cost_object'
 
 
@@ -474,11 +476,10 @@ class FarmerContaminationControlCreateView(CustomLoginRequiredMixin, AdminRequir
         return super().form_valid(form)
 
 
-class FarmerContaminationControlUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
+class FarmerContaminationControlUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, BaseFarmerDetailsUpdateView):
     model = ContaminationControl
     template_name = 'farmer_admin/farmer_contamination_control_create_update.html'
     form_class = ContaminationControlForm
-    success_url = reverse_lazy('farmer_admin:farmers_list')
     context_object_name = 'farmer_contamination_object'
 
     def form_valid(self, form):
