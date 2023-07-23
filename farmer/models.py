@@ -438,4 +438,6 @@ class ContaminationControl(BaseModel):
     
     
     
-    
+class FarmerOrganicCropPdf(BaseModel):
+    farmer = models.ForeignKey(Farmer, related_name='organic_crop_pdf', on_delete=models.PROTECT)
+    pdf = models.FileField(upload_to='farmer/organic_crop_pdf', verbose_name=_("Organic Crop Pdf"))

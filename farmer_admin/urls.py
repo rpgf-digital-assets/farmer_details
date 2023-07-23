@@ -41,6 +41,7 @@ urlpatterns = [
     path('farmer/organic_crop/<uuid:pk>/contamination_control/create/', views.FarmerContaminationControlCreateView.as_view(), name="farmer_contamination_control_create"),
     path('farmer/organic_crop/contamination_control/<uuid:pk>/update/', views.FarmerContaminationControlUpdateView.as_view(), name="farmer_contamination_control_update"),
     
+    path('farmer/<uuid:farmer_pk>/organic_crop/generate_pdf/', views.GenerateOrganicCropPdfView.as_view(), name="generate_organic_crop_pdf"),
     
     path('vendor/list/', views.VendorListView.as_view(), name="vendor_list"),
     path('vendor/create/', views.VendorCreateView.as_view(), name="vendor_create"),

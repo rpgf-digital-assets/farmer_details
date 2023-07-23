@@ -1,0 +1,475 @@
+{% load static %}
+{% load base_extras %}
+<!DOCTYPE html>
+<html lang="en">
+	<!--begin::Head-->
+	<head>
+        <base href=""/>
+		<title>Farmer</title>
+		<meta charset="utf-8" />
+		<!--begin::Fonts(mandatory for all pages)-->
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700" />
+		<!--end::Fonts-->
+		<!--begin::Global Stylesheets Bundle(mandatory for all pages)-->
+		<link href="{% static 'assets/css/style.bundle.css' %}" rel="stylesheet" type="text/css" />
+		<!--end::Global Stylesheets Bundle-->
+        <style>
+            @page{
+                size: A4 landscape;
+                margin: 4px;
+            }
+            
+            @page small-margin{
+                size: A4 landscape;
+                margin: 2px;
+            }
+
+            table {
+                width: 100%; /* Set the table width to 100% of the page width */
+                table-layout: fixed; /* Make sure the table width is fixed */
+            }
+            
+            td, th {
+                word-wrap: break-word; /* Allow long text to wrap within cells */
+            }
+
+            /* Set the number of columns based on the available width */
+            .column-container {
+                column-count: auto; /* Automatically set the number of columns based on available width */
+                column-gap: 100px; /* Optional: Set the gap between columns */
+            }
+        </style>
+		<script>// Frame-busting to prevent site from being loaded within a frame without permission (click-jacking) if (window.top != window.self) { window.top.location.replace(window.self.location.href); }</script>
+	</head>
+	<!--end::Head-->
+	<!--begin::Body-->
+	<body id="kt_body" class="header-fixed header-tablet-and-mobile-fixed toolbar-enabled">
+        <!--begin::Post-->
+        <div class="content flex-row-fluid" id="kt_content">
+            <!--begin::Layout - Overview-->
+            <div class="d-flex flex-column flex-xl-row">
+                
+                <!--begin::Content-->
+                <div class="flex-lg-row-fluid ms-lg-5">
+                    <!--begin::details View-->
+                    <div class="card" style="break-before: page;">
+                        <!--begin::Card header-->
+                        <div class="card-header" >
+                            <!--begin::Card title-->
+                            <div class="card-title m-0">
+                                <h3 class="fw-bold m-0">Organic Crop Details</h3>
+                            </div>
+                            <!--end::Card title-->
+                        </div>
+                        <!--begin::Card header-->
+
+                        <!--begin::Card body-->
+                        <table class="table table-bordered " style="break-inside: avoid;">
+                            <thead>
+                                <tr class="">
+                                {% with crops|first as crop %}
+                                {% model_to_dict crop as crop_dict %}
+                                {% for field_name in crop_dict.keys %}
+                                {% if field_name == 'id' or field_name == 'is Active?' or field_name == 'farmer' %}
+                                {% else %}
+                                <th class="">{{field_name}}</th>
+                                {% endif %}
+                                {% endfor %}
+                                {% endwith %}
+                                </tr>
+                            </thead>
+                            <tbody class="">
+                                {% for crop in crops %}
+                                    {% if crop.is_active %}    
+                                    <tr>
+                                        <td>{{crop.name}}</td>
+                                        <td>{{crop.type}}</td>
+                                        <td>{{crop.area}}</td>
+                                        <td>{{crop.date_of_sowing}}</td>
+                                        <td>{{crop.expected_date_of_harvesting}}</td>
+                                        <td>{{crop.expected_yield}}</td>
+                                        <td>{{crop.expected_productivity}}</td>
+                                        <td>{{crop.season}}</td>
+                                        <td>{{crop.year}}</td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <!--end::Card body-->
+                    </div>
+                    <!--end::details View-->
+                    <!--begin::details View-->
+                    <div class="card" style="break-before: page;">
+                        <!--begin::Card header-->
+                        <div class="card-header" >
+                            <!--begin::Card title-->
+                            <div class="card-title m-0">
+                                <h3 class="fw-bold m-0">Seed Details</h3>
+                            </div>
+                            <!--end::Card title-->
+                        </div>
+                        <!--begin::Card header-->
+                        
+                        {% if crops.first %}
+                        <!--begin::Card body-->
+                        <table class="table table-bordered " style="break-inside: avoid;">
+                            <thead>
+                                <tr class="">
+                                {% model_to_dict crops.first.seed.all.first as seed_detail %}
+                                {% for field_name in seed_detail.keys %}
+                                {% if field_name == 'id' or field_name == 'is Active?' %}
+                                {% else %}
+                                <th class="">{{field_name}}</th>
+                                {% endif %}
+                                {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody class="">
+                                {% for crop in crops %}
+                                {% for seed_detail in crop.seed.all %}
+                                    {% if seed_detail.is_active %}    
+                                    <tr>
+                                        <td>{{seed_detail.organic_crop}}</td>
+                                        <td>{{seed_detail.date_of_purchase}}</td>
+                                        <td>{{seed_detail.name_of_supplier}}</td>
+                                        <td>{{seed_detail.seed_for_sowing}}</td>
+                                        <td>{{seed_detail.variety}}</td>
+                                        <td>{{seed_detail.seed_type}}</td>
+                                        <td>{{seed_detail.source_of_seed}}</td>
+                                        <td>{{seed_detail.treatment}}</td>
+                                        <td>{{seed_detail.no_of_plants}}</td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <!--end::Card body-->
+                        {% endif %}
+                    </div>
+                    <!--end::details View-->
+
+                    <!--begin::details View-->
+                    <div class="card"  style="break-before: page;">
+                        <!--begin::Card header-->
+                        <div class="card-header" >
+                            <!--begin::Card title-->
+                            <div class="card-title m-0">
+                                <h3 class="fw-bold m-0">Nutrition Management</h3>
+                                
+                            </div>
+                            <!--end::Card title-->
+                        </div>
+                        <!--begin::Card header-->
+                        {% if crops.first and crops.first.nutrient.all.first %}
+                        <!--begin::Card body-->
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr class="">
+                                {% model_to_dict crops.first.nutrient.all.first as nutrition %}
+                                {% for field_name in nutrition.keys %}
+                                {% if field_name == 'id' or field_name == 'is Active?' %}
+                                {% else %}
+                                <th class="">{{field_name}}</th>
+                                {% endif %}
+                                {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody class="">
+                                {% for crop  in crops %}    
+                                {% for nutrition in crop.nutrient.all %}
+                                    {% if nutrition.is_active %}
+                                    <tr>
+                                        <td>{{nutrition.organic_crop}}</td>
+                                        <td>{{nutrition.type}}</td>
+                                        <td>{{nutrition.source_of_fertilizer}}</td>
+                                        <td>{{nutrition.quantity_of_fertilizer}}</td>
+                                        <td>{{nutrition.date_of_application}}</td>
+                                        <td>{{nutrition.type_of_application}}</td>
+                                        <td>{{nutrition.no_of_workdays_required}}</td>
+                                        <td>{{nutrition.type_of_raw_material}}</td>
+                                        <td>{{nutrition.quantity_used}}</td>
+                                        <td>{{nutrition.starting_date}}</td>
+                                        <td>{{nutrition.date_of_manure}}</td>
+                                        <td>{{nutrition.quantity_obtained}}</td>
+                                        <td>{{nutrition.no_of_workdays_used}}</td>
+                                        <td>{{nutrition.sourcing_date}}</td>
+                                        <td>{{nutrition.quantity_sourced}}</td>
+                                        <td>{{nutrition.supplier_name}}</td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <!--end::Card body-->
+                        {% endif %}
+                    </div>
+                    <!--end::details View-->  
+
+                    <!--begin::details View-->
+                    <div class="card" style="break-before: page;">
+                        <!--begin::Card header-->
+                        <div class="card-header" >
+                            <!--begin::Card title-->
+                            <div class="card-title m-0">
+                                <h3 class="fw-bold m-0">Pest Disease Management</h3>
+                            </div>
+                            <!--end::Card title-->
+                        </div>
+                        <!--begin::Card header-->
+                        <!--begin::Card body-->
+                        {% if crops.first.pest_disease.all.first  %}
+                        <table class="table table-bordered" style="">
+                            <thead>
+                                <tr class="">
+                                {% model_to_dict crops.first.pest_disease.all.first as pest_disease %}
+                                {% for field_name in pest_disease.keys %}
+                                {% if field_name == 'id' or field_name == 'is Active?' %}
+                                {% else %}
+                                <th class="">{{field_name}}</th>
+                                {% endif %}
+                                {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody class="">
+                                {% for crop in crops %}
+                                {% for pest_disease in crop.pest_disease.all %}
+                                    {% if pest_disease.is_active %}
+                                    <tr>
+                                        <td>{{pest_disease.organic_crop}}</td>
+                                        <td>{{pest_disease.name_of_input}}</td>
+                                        <td>{{pest_disease.quantity_of_input}}</td>
+                                        <td>{{pest_disease.source_of_input}}</td>
+                                        <td>{{pest_disease.date_of_application}}</td>
+                                        <td>{{pest_disease.type_of_application}}</td>
+                                        <td>{{pest_disease.targeted_pest_diseases}}</td>
+                                        <td>{{pest_disease.type_of_raw_material}}</td>
+                                        <td>{{pest_disease.quantity_used}}</td>
+                                        <td>{{pest_disease.starting_date}}</td>
+                                        <td>{{pest_disease.date_of_manure}}</td>
+                                        <td>{{pest_disease.quantity_obtained}}</td>
+                                        <td>{{pest_disease.no_of_workdays_used}}</td>
+                                        <td>{{pest_disease.sourcing_date}}</td>
+                                        <td>{{pest_disease.quantity_sourced}}</td>
+                                        <td>{{pest_disease.supplier_name}}</td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% endif %}
+                        <!--end::Card body-->
+                    </div>
+                    <!--end::details View-->
+                   
+                    <!--begin::details View-->
+                    <div class="card" style="break-before: page;">
+                        <!--begin::Card header-->
+                        <div class="card-header" >
+                            <!--begin::Card title-->
+                            <div class="card-title m-0">
+                                <h3 class="fw-bold m-0">Weed Management</h3>
+                                
+                            </div>
+                            <!--end::Card title-->
+                        </div>
+                        <!--begin::Card header-->
+                        <!--begin::Card body-->
+                        {% if crops.first.weed.all.first %}
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr class="">
+                                {% model_to_dict crops.first.weed.all.first as weed %}
+                                {% for field_name in weed.keys %}
+                                {% if field_name == 'id' or field_name == 'is Active?' %}
+                                {% else %}
+                                <th class="">{{field_name}}</th>
+                                {% endif %}
+                                {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody class="">
+                                {% for crop in crops %}
+                                {% for weed in crop.weed.all %}
+                                    {% if weed.is_active %}
+                                    <tr>
+                                        <td>{{weed.organic_crop}}</td>
+                                        <td>{{weed.activity_name}}</td>
+                                        <td>{{weed.date_of_activity}}</td>
+                                        <td>{{weed.method}}</td>
+                                        <td>{{weed.workdays_utilized}}</td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% endif %}
+                        <!--end::Card body-->
+                    </div>
+                    <!--end::details View-->
+
+                    
+                    <!--begin::details View-->
+                    <div class="card" style="break-before: page;">
+                        <!--begin::Card header-->
+                        <div class="card-header" >
+                            <!--begin::Card title-->
+                            <div class="card-title m-0">
+                                <h3 class="fw-bold m-0">Harvest and Income Details</h3>
+                                
+                            </div>
+                            <!--end::Card title-->
+                        </div>
+                        <!--begin::Card header-->
+                        {% if crops.first.harvest_income.all.first %}
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr class="p-0 m-0">
+                                {% model_to_dict crops.first.harvest_income.all.first as harvest_income %}
+                                {% for field_name in harvest_income.keys %}
+                                {% if field_name == 'id' or field_name == 'is Active?' %}
+                                {% else %}
+                                <th class="">{{field_name}}</th>
+                                {% endif %}
+                                {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody class="">
+                                {% for crop in crops %}
+                                {% for harvest_income in crop.harvest_income.all %}
+                                    {% if harvest_income.is_active %}
+                                    <tr style="">
+                                        {% model_to_dict harvest_income as harvest_income_dict %}
+                                        {% for key, value in harvest_income_dict.items %}
+                                        {% if key == 'id' or key == 'is Active?' %}
+                                        {% elif key == 'organic crop' %}
+                                        <td>{{harvest_income.organic_crop}}</td>
+                                        {% else %}
+                                        <td>{{value}}</td>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% endif %}
+                    </div>
+                    <!--end::details View-->
+
+                    
+                    <!--begin::details View-->
+                    <div class="card" style="break-before: page;">
+                        <!--begin::Card header-->
+                        <div class="card-header" >
+                            <!--begin::Card title-->
+                            <div class="card-title m-0">
+                                <h3 class="fw-bold m-0">Cost Of Cultivation Details</h3>
+                                
+                            </div>
+                            <!--end::Card title-->
+                        </div>
+                        <!--begin::Card header-->
+                        {% if crops.first.cost_of_cultivation.all.first %}
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr class="">
+                                {% model_to_dict crops.first.cost_of_cultivation.all.first as cost_of_cultivation %}
+                                {% for field_name in cost_of_cultivation.keys %}
+                                {% if field_name == 'id' or field_name == 'is Active?' %}
+                                {% else %}
+                                <th class="">{{field_name}}</th>
+                                {% endif %}
+                                {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody class="">
+                                {% for crop in crops %}
+                                {% for cost_of_cultivation in crop.cost_of_cultivation.all %}
+                                    {% if cost_of_cultivation.is_active %}
+                                    <tr>
+                                        {% model_to_dict cost_of_cultivation as cost_of_cultivation_dict %}
+                                        {% for key, value in cost_of_cultivation_dict.items %}
+                                        {% if key == 'id' or key == 'is Active?' %}
+                                        {% elif key == 'organic crop' %}
+                                        <td> {{cost_of_cultivation.organic_crop}} </td>
+                                        {% else %}
+                                        <td>{{value}}</td>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% endif %}
+                    </div>
+                    <!--end::details View-->
+
+                    <!--begin::details View-->
+                    <div class="card" style="break-before: page;">
+                        <!--begin::Card header-->
+                        <div class="card-header" >
+                            <!--begin::Card title-->
+                            <div class="card-title m-0">
+                                <h3 class="fw-bold m-0">Contamination Control Details</h3>
+                                
+                            </div>
+                            <!--end::Card title-->
+                        </div>
+                        <!--begin::Card header-->
+                        {% if crops.first.contamination_control.all.first %}    
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr class="">
+                                {% model_to_dict crops.first.contamination_control.all.first as contamination_control %}
+                                {% for field_name in contamination_control.keys %}
+                                {% if field_name == 'id' or field_name == 'is Active?' %}
+                                {% else %}
+                                <th class="min-w-125px ">{{field_name}}</th>
+                                {% endif %}
+                                {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody class="">
+                                {% for crop in crops %}
+                                {% for contamination_control in crop.contamination_control.all %}
+                                    {% if contamination_control.is_active %}
+                                    <tr>
+                                        {% model_to_dict contamination_control as contamination_control_dict %}
+                                        {% for key, value in contamination_control_dict.items %}
+                                        {% if key == 'id' or key == 'is Active?' %}
+                                        {% elif key == 'organic crop' %}
+                                        <td> {{contamination_control.organic_crop}} </td>
+                                        {% else %}
+                                        <td>{{value}}</td>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% endif %}
+                    </div>
+                    <!--end::details View--> 
+
+
+
+
+                </div>
+                <!--end::Content-->
+            </div>
+            <!--end::Layout - Overview-->
+        </div>
+        <!--end::Post-->
+    </body>
+</html>
+

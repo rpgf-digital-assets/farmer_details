@@ -92,6 +92,16 @@
 {% block js %}
 {{block.super}}
 <script>
+    
+    $(".datetimepicker-input").daterangepicker({
+        singleDatePicker: true,
+        showDropdowns: true,
+        minYear: 1901,
+        locale: {
+            format: 'YYYY-MM-DD'
+        },
+        maxYear: parseInt(moment().format("YYYY"),12)
+    });
 
 </script>
 {% endblock js %}

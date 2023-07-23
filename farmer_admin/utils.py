@@ -1,3 +1,7 @@
+from django.conf import settings
+from django.template.loader import render_to_string
+from weasyprint import HTML, CSS
+
 
 country_list = [
     ("Afghanistan", "Afghanistan"),
@@ -276,3 +280,15 @@ country_list = [
     ("Zambia", "Zambia"),
     ("Zimbabwe", "Zimbabwe")
 ]
+
+
+page_width = "297mm"  # Width of the page in millimeters
+page_height = "210mm" # Height of the page in millimeters
+
+
+def generate_certificate(context, request):
+    template_name = 'farmer_admin/organic_crop_pdf.html'
+    html_string = render_to_string(template_name,
+                                context=context)
+    html = HTML(string=html_string, base_url=request.build_absolute_uri())
+    return html.write_pdf()

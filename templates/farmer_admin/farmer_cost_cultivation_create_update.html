@@ -9,15 +9,6 @@ Farmer Seed Details {% if farmer_seed_object %} Edit {% else %} Create {% endif 
 {% block js %}
 {{block.super}}
 <script>
-    $("#id_date_of_purchase").daterangepicker({
-        singleDatePicker: true,
-        showDropdowns: true,
-        minYear: 1901,
-        locale: {
-            format: 'YYYY-MM-DD'
-        },
-        maxYear: parseInt(moment().format("YYYY"),12)
-    });
     
 
 </script>

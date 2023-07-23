@@ -1,8 +1,10 @@
+import io
 from typing import Any
 from PIL import Image
 from io import BytesIO
 from django.conf import settings
 
+from django.core.files import File
 from django.core.files.base import ContentFile
 from django.conf import settings
 from django.contrib import messages
@@ -21,9 +23,10 @@ from django.views.generic import (
     DetailView
 )
 
-from farmer.models import ContaminationControl, CostOfCultivation, Farmer, FarmerLand, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
+from farmer.models import ContaminationControl, CostOfCultivation, Farmer, FarmerLand, FarmerOrganicCropPdf, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
 from farmer_admin.forms import ContaminationControlForm, ContaminationControlFormSet, CostOfCultivationForm, CostOfCultivationFormSet, FarmerCreationForm, FarmerLandDetailsCreationFrom, FarmerNutritionManagementForm, FarmerNutritionManagementFormSet, FarmerOrganicCropDetailForm, FarmerPestDiseaseManagementForm, FarmerPestDiseaseManagementFormSet, FarmerSeedDetailsForm, FarmerSeedDetailsFormSet, FarmerSocialCreationFrom, GinningMappingForm, HarvestAndIncomeDetailForm, HarvestAndIncomeDetailFormSet, OtherFarmerCreationForm, SeasonCreateForm, SelectedGinningFarmerForm, SelectedGinningFarmerFormSet, VendorCreateForm, WeedManagementForm, WeedManagementFormSet
 from farmer_admin.mixins import AdminRequiredMixin
+from farmer_admin.utils import generate_certificate
 from farmer_details_app.mixins import CustomLoginRequiredMixin
 from farmer_details_app.models import GinningMapping, SelectedGinningFarmer, Vendor
 from users.models import User
@@ -125,6 +128,7 @@ class FarmerUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView)
         user.phone = form_data['phone']
         user.save()
         return redirect_url
+
 
 
 class FarmerDetailsView(CustomLoginRequiredMixin, AdminRequiredMixin, DetailView):
@@ -305,11 +309,11 @@ class FarmerOrganicCropDetailCreateView(CustomLoginRequiredMixin, AdminRequiredM
                     NutrientManagement.objects.create(
                         organic_crop=organic_crop, **cleaned_data)
                 for cleaned_data in cleaned_data_form_3:
-                    if cleaned_data['source_of_fertilizer'] == NutrientManagement.ON_FARM:
+                    if cleaned_data['source_of_input'] == NutrientManagement.ON_FARM:
                         cleaned_data['sourcing_date'] = None
                         cleaned_data['quantity_sourced'] = None
                         cleaned_data['supplier_name'] = None
-                    elif cleaned_data['source_of_fertilizer'] == NutrientManagement.OUTSOURCED:
+                    elif cleaned_data['source_of_input'] == NutrientManagement.OUTSOURCED:
                         cleaned_data['type_of_raw_material'] = None
                         cleaned_data['quantity_used'] = None
                         cleaned_data['starting_date'] = None
@@ -331,10 +335,11 @@ class FarmerOrganicCropDetailCreateView(CustomLoginRequiredMixin, AdminRequiredM
                     ContaminationControl.objects.create(
                         organic_crop=organic_crop, **cleaned_data)
             except Exception as e:
+                print("🐍 File: farmer_admin/views.py | Line: 334 | done ~ e",e)
                 errors = form_list[8]._errors.setdefault(
                     forms.NON_FIELD_ERRORS, ErrorList())
                 errors.append(e)
-                self.render_revalidation_failure(3, form_list[8], **kwargs)
+                self.render_revalidation_failure(8, form_list[8], **kwargs)
 
         return render(self.request, 'farmer_admin/farmer_organic_wizard/farmer_organic_wizard_done.html', {
             'form_data': [form.cleaned_data for form in form_list],
@@ -361,7 +366,8 @@ class FarmerOrganicCropDetailsView(CustomLoginRequiredMixin, AdminRequiredMixin,
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["crop"] = OrganicCropDetails.objects.get(id=self.kwargs["pk"])
+        organic_crop = OrganicCropDetails.objects.filter(id=self.kwargs["pk"], is_active=True).first()
+        context["crop"] = organic_crop
         return context
 
 
@@ -509,6 +515,16 @@ class FarmerContaminationControlUpdateView(CustomLoginRequiredMixin, AdminRequir
                 form.add_error('chances', ValidationError('Chances already exists'))
                 return super().form_invalid(form)
         return super().form_valid(form)
+
+
+class GenerateOrganicCropPdfView(CustomLoginRequiredMixin, AdminRequiredMixin, TemplateView):
+    template_name = 'farmer_admin/organic_crop_pdf.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        organic_crop = OrganicCropDetails.objects.filter(farmer__user__id=self.kwargs['farmer_pk'], is_active=True)
+        context["crops"] = organic_crop
+        return context
+    
 
 
 class VendorListView(CustomLoginRequiredMixin, AdminRequiredMixin, ListView):
