@@ -283,6 +283,10 @@ class FarmerOrganicCropDetailForm(BaseCreationForm):
         model = OrganicCropDetails
         exclude = ['farmer']
 
+    def clean(self):
+        cleaned_data = super().clean()
+
+
 
 class FarmerSeedDetailsForm(BaseCreationForm):
     date_of_purchase = DateField(input_formats=['%Y-%m-%d'], widget=DateInput(attrs={

@@ -286,6 +286,11 @@ class FarmerOrganicCropDetailCreateView(CustomLoginRequiredMixin, AdminRequiredM
         cleaned_data_form_5 = all_cleaned_data[5]
         cleaned_data_form_6 = all_cleaned_data[6]
         cleaned_data_form_7 = all_cleaned_data[7]
+        farmer_land = FarmerLand.objects.get(farmer__user__id=self.kwargs['pk'])
+        if farmer_land.total_land < cleaned_data_form_0['area']:
+            messages.warning(self.request, "Farmer land area is less than the crop area")
+            return self.render_revalidation_failure(0, form_list[0])
+
         with transaction.atomic():
             try:
                 farmer = Farmer.objects.get(user__id=self.kwargs['pk'])
@@ -339,7 +344,7 @@ class FarmerOrganicCropDetailCreateView(CustomLoginRequiredMixin, AdminRequiredM
                 errors = form_list[8]._errors.setdefault(
                     forms.NON_FIELD_ERRORS, ErrorList())
                 errors.append(e)
-                self.render_revalidation_failure(8, form_list[8], **kwargs)
+                return self.render_revalidation_failure(8, form_list[8], **kwargs)
 
         return render(self.request, 'farmer_admin/farmer_organic_wizard/farmer_organic_wizard_done.html', {
             'form_data': [form.cleaned_data for form in form_list],
