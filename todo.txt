@@ -1,5 +1,46 @@
-Delete Organic crop
-Delete individual entry of organic crop details
-show information of farmer at the top of organic crop details
-View all organic crop details
-Create views for organic crop details
+Delete Organic crop                                             done
+Delete individual entry of organic crop details                 done
+show confirmation before delete                                 done
+show information of farmer at the top of organic crop details   done
+View all organic crop details                                   done
+Create views for organic crop details                           done
+
+
+generate pdf                                                    done
+
+add total land condition in validation                          done
+
+ERD of inventory                                                
+
+Show other farmers                                              done
+remove other farmer menu                                        done
+remove traceability                                             done
+year dropdown                                                   done
+
+
+ 
+
+Export to csv -> all Organic crop, farmer, other farmer, all farmer all organic crop
+
+
+
+PDF first page => farmer profile and land details and logo                                  done
+Geotagging -> income details                                                                done
+Business phone => Mobile Number in edit profile                                             done                                     
+validation => Positive number                                                               done                                             
+land input field => Float field                                                             done
+Remove total actual organic field from form                                                 done
+Farmer List => Area in (Ha)                                                                 done
+concerened person => vendor                                                                 done
+vendor => type, id no, file, website                                                        done
+other farmer => lat, lang, id no, file, non mandatory                                       done
+icon in navbar                                                                              done
+change landing page                                                                         done      
+create only organic crop details                                                            done
+
+back button
+Title rename                                                                                done
+
+
+
+
