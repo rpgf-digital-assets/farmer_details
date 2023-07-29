@@ -8,6 +8,7 @@ from simple_history.models import HistoricalRecords
 from django.core.validators import MaxValueValidator
 
 from users.models import User
+from users.validators import validate_positive_number
 from utils.helpers import BaseModel
 
 
@@ -33,7 +34,7 @@ class Farmer(models.Model):
         verbose_name_plural = _("Farmers")
 
     user = models.OneToOneField(
-        User, on_delete=models.PROTECT, primary_key=True)
+        User, verbose_name=_('User Name'), on_delete=models.PROTECT, primary_key=True)
     MALE = 'MALE'
     FEMALE = 'FEMALE'
     UNDEFINED = 'UNDEFINED'
@@ -44,8 +45,8 @@ class Farmer(models.Model):
     ]
     gender = models.CharField(_("Gender"), max_length=30, choices=GENDER_CHOICES, default=UNDEFINED)
     birth_date = models.DateField(_("BirthDate"))
-    aadhar_number = models.IntegerField(_("Aadhar Number"))
-    registration_number = models.IntegerField(_("Farmer Tracnet Registration Number"))
+    aadhar_number = models.PositiveIntegerField(_("Aadhar Number"))
+    registration_number = models.PositiveIntegerField(_("Farmer Tracnet Registration Number"))
     date_of_joining_of_program = models.DateField(_("Date of Joining of Program"))
     village = models.CharField(_("Village"), max_length=255)
     taluka = models.CharField(_("Taluka"), max_length=255)
@@ -74,8 +75,8 @@ class OtherFarmer(BaseModel):
     first_name = models.CharField(_("First Name"), max_length=255)
     last_name = models.CharField(_("Last Name"), max_length=255)
     gender = models.CharField(_("Gender"), max_length=30, choices=Farmer.GENDER_CHOICES, default=Farmer.UNDEFINED)
-    owned_land = models.IntegerField(_("Owned land in Hectare"), null=True, blank=True)
-    identification_number = models.IntegerField(_("Identification Number"), null=True, blank=True)
+    owned_land = models.PositiveIntegerField(_("Owned land in Hectare"), null=True, blank=True)
+    identification_number = models.PositiveIntegerField(_("Identification Number"), null=True, blank=True)
     identification_file = models.FileField(_("Identification File"), upload_to="other_farmer/identification", null=True, blank=True)
     latitude = models.FloatField(_("Latitude of land"), null=True, blank=True)
     longitude = models.FloatField(_("Longitude of land"), null=True, blank=True)
@@ -119,10 +120,10 @@ class FarmerSocial(BaseModel):
     """
     farmer = models.ForeignKey(Farmer, related_name='social', on_delete=models.PROTECT)
     education = models.ForeignKey(FarmerEducation, verbose_name=_("Education"), related_name='social', on_delete=models.PROTECT)
-    number_of_members_gt_18 = models.IntegerField(_("Number of members greater than 18"))
-    number_of_members_lt_18 = models.IntegerField(_("Number of members less than 18"))
-    total_family_members = models.IntegerField(_("Total family members"))
-    number_of_members_attending_school = models.IntegerField(_("Number of members attending school"))
+    number_of_members_gt_18 = models.PositiveIntegerField(_("Number of members greater than 18"))
+    number_of_members_lt_18 = models.PositiveIntegerField(_("Number of members less than 18"))
+    total_family_members = models.PositiveIntegerField(_("Total family members"))
+    number_of_members_attending_school = models.PositiveIntegerField(_("Number of members attending school"))
     HOUSING_CHOICES = [
         ('PUCCA', 'Puccs'),
         ('SEMI_PUCCA', 'Semi-Puccs'),
@@ -139,7 +140,7 @@ class FarmerSocial(BaseModel):
         ('OTHERS', 'others'),
     ]
     drinking_water_source = models.CharField(max_length=100, choices=SOURCE_CHOICES)
-    distance_from_water_sources = models.IntegerField(_("Distance from water sources"))
+    distance_from_water_sources = models.PositiveIntegerField(_("Distance from water sources"))
     is_toilet_available = models.BooleanField(_("Is toilet available?"))
     COOKING_FUEL_CHOICES = [
         ('KEROSENE', 'Kerosene'),
@@ -159,27 +160,27 @@ class FarmerSocial(BaseModel):
         ('SMARTPHONE_WITH_INTERNET', 'Smartphone with internet'),
     ]
     mobile_phone_type = models.CharField(_("Mobile phone type"), max_length=100, choices=MOBILE_TYPES)
-    bank_account_number = models.IntegerField(_("Bank account number"))
+    bank_account_number = models.PositiveIntegerField(_("Bank account number"))
     bank_account_name = models.CharField(_("Bank account name"), max_length=100)
     bank_ifsc_code = models.CharField(_("Bank ifsc code"), max_length=100)
     
     
 class FarmerLivestock(BaseModel):
     farmer = models.ForeignKey(Farmer, related_name='livestock', on_delete=models.PROTECT)
-    cow = models.IntegerField(_("Number of cow"))
-    buffalo = models.IntegerField(_("Number of buffalo"))
-    bullock = models.IntegerField(_("Number of bullock"))
-    goat = models.IntegerField(_("Number of goat"))
-    poultry = models.IntegerField(_("Number of poultry"))
-    young_ones = models.IntegerField(_("Number of Heifer/Young ones"))
-    total = models.IntegerField(_("Number of total livestock"))
+    cow = models.PositiveIntegerField(_("Number of cow"))
+    buffalo = models.PositiveIntegerField(_("Number of buffalo"))
+    bullock = models.PositiveIntegerField(_("Number of bullock"))
+    goat = models.PositiveIntegerField(_("Number of goat"))
+    poultry = models.PositiveIntegerField(_("Number of poultry"))
+    young_ones = models.PositiveIntegerField(_("Number of Heifer/Young ones"))
+    total = models.PositiveIntegerField(_("Number of total livestock"))
  
 
 class FarmerLand(BaseModel):
     farmer = models.ForeignKey(Farmer, related_name='land', on_delete=models.PROTECT)
-    owned_land = models.IntegerField(_("Owned land in Hectare"))
-    leased_land = models.IntegerField(_("Leased land in Hectare"))
-    land_under_irrigation = models.IntegerField(_("Land under irrigation in Hectare"))
+    owned_land = models.PositiveIntegerField(_("Owned land in Hectare"))
+    leased_land = models.PositiveIntegerField(_("Leased land in Hectare"))
+    land_under_irrigation = models.PositiveIntegerField(_("Land under irrigation in Hectare"))
     IRRIGATION_CHOICES = [
         ('BOREWELL', 'Borewell'),
         ('OPEN_WELL', 'Open Well'),
@@ -196,21 +197,21 @@ class FarmerLand(BaseModel):
         ('OTHERS', 'Others'),
     ]
     type_of_irrigation = models.CharField(_("Type of irregation"), max_length=100, choices=IRRIGATION_TYPE_CHOICES)
-    total_organic_land = models.IntegerField(_("Totalorganic Land in hectares"))
-    number_of_plots_under_organic = models.IntegerField(_("Number of plots under organic management"), )
+    total_organic_land = models.PositiveIntegerField(_("Totalorganic Land in hectares"))
+    number_of_plots_under_organic = models.PositiveIntegerField(_("Number of plots under organic management"), )
     PRODUCTION_SYSTEM_CHOICES = [
         ('PARALLEL', 'Parallel'),
         ('SPLIT', 'Split'),
         ('COMPLETE_ORGANIC', 'Complete Organic'),
     ]
     present_production_system = models.CharField(_("Current Production system"), max_length=100, choices=PRODUCTION_SYSTEM_CHOICES)
-    organic_farming_start_year = models.IntegerField(_("Organ Farming Start Year"), )
+    organic_farming_start_year = models.PositiveIntegerField(_("Organ Farming Start Year"), )
     latitude = models.FloatField(_("Latitude of land"))
     longitude = models.FloatField(_("Longitude of land"))
     image = models.ImageField(verbose_name=_("Image of the land"), upload_to="farmer_land_images")
-    survey_number = models.IntegerField(_("Survey Number"))
+    survey_number = models.PositiveIntegerField(_("Survey Number"))
     soil_test_conducted = models.BooleanField(_('Is soil testing done?'), )
-    last_conducted = models.IntegerField(_("Last Soil test conducted in year"), null=True, blank=True)
+    last_conducted = models.PositiveIntegerField(_("Last Soil test conducted in year"), null=True, blank=True)
     soil_type = models.CharField(_("Soil type"), max_length=255, null=True, blank=True)
     soil_texture = models.CharField(_("Soil texture"), max_length=255, null=True, blank=True)
     soil_organic_matter = models.CharField(_("Soil organic matter"), max_length=255, null=True, blank=True)
@@ -241,13 +242,13 @@ class OrganicCropDetails(BaseModel):
         ("MIXED_CROP", 'Mixed crop'),
     ]
     type = models.CharField(_("Type of crop"), max_length=100, choices=TYPE_CHOICES)
-    area = models.IntegerField(_("Area of land in hectare"))
+    area = models.FloatField(_("Area of land in hectare"))
     date_of_sowing = models.DateField(_("Date of sowing of crop"))
     expected_date_of_harvesting = models.DateField(_("Expected date of harvest"))
-    expected_yield = models.IntegerField(_("Expected yield in kg"))
-    expected_productivity = models.IntegerField(_("Expected productivity in kg/ha"))
+    expected_yield = models.PositiveIntegerField(_("Expected yield in kg"))
+    expected_productivity = models.PositiveIntegerField(_("Expected productivity in kg/ha"))
     season = models.ForeignKey(Season, verbose_name=_("Season"), related_name='organic_crop', on_delete=models.PROTECT)
-    year = models.IntegerField(_("Season Year"), validators=[MaxValueValidator(9999)])
+    year = models.PositiveIntegerField(_("Season Year"), validators=[MaxValueValidator(9999)])
     
     def __str__(self):
         return f"{self.name}"
@@ -257,7 +258,7 @@ class SeedDetails(BaseModel):
     organic_crop = models.ForeignKey(OrganicCropDetails, related_name='seed', on_delete=models.PROTECT)
     date_of_purchase = models.DateField(_("Date of purchase"))
     name_of_supplier = models.CharField(_("Name of supplier"), max_length=255)
-    seed_for_sowing = models.IntegerField(_("Amount of seed used for sowing (Kg)"))
+    seed_for_sowing = models.PositiveIntegerField(_("Amount of seed used for sowing (Kg)"))
     variety = models.CharField(_("Name of variety"), max_length=500)
     SEED_TYPES = [
         ('HYBRID', 'Hybrid'),
@@ -273,7 +274,7 @@ class SeedDetails(BaseModel):
     ]
     source_of_seed = models.CharField(_("Main Source of Seed"), max_length=100, choices=SEED_SOURCES)
     treatment = models.CharField(_("Details of seed treatment"), max_length=500)
-    no_of_plants = models.IntegerField(_("No of plants (Perennial crops)"))
+    no_of_plants = models.PositiveIntegerField(_("No of plants (Perennial crops)"))
 
 
 class NutrientManagement(BaseModel):
@@ -292,7 +293,7 @@ class NutrientManagement(BaseModel):
         ('OUTSOURCED', 'outsourced'),
     ]
     source_of_fertilizer = models.CharField(_("Source of fertiliser"), max_length=100, choices=SOURCE_CHOICES)
-    quantity_of_fertilizer = models.IntegerField(_("Qty of fertiliser applied (Kg)"))
+    quantity_of_fertilizer = models.PositiveIntegerField(_("Qty of fertiliser applied (Kg)"))
     date_of_application = models.DateField(_("Date of application"))
     APPLICATION_CHOICES = [
         ('BROADCASTING', 'Broadcasting'),
@@ -301,25 +302,25 @@ class NutrientManagement(BaseModel):
         ('DRENCHING', 'drenching'),
     ]
     type_of_application = models.CharField(_("Type of application"), max_length=100, choices=APPLICATION_CHOICES)
-    no_of_workdays_required = models.IntegerField(_("No of workdays required for activity"))
+    no_of_workdays_required = models.PositiveIntegerField(_("No of workdays required for activity"))
     
     # on farm inputs
     type_of_raw_material = models.CharField(_("Type of raw material used"), max_length=500, null=True, blank=True)
-    quantity_used = models.IntegerField(_("Quantity used"), null=True, blank=True)
+    quantity_used = models.PositiveIntegerField(_("Quantity used"), null=True, blank=True)
     starting_date = models.DateField(_("Starting date of preparation"), null=True, blank=True)
     date_of_manure = models.DateField(_("Date of manure ready"), null=True, blank=True)
-    quantity_obtained = models.IntegerField(_("Qty obtained (Kg)"), null=True, blank=True)
-    no_of_workdays_used = models.IntegerField(_("No of workdays used for activity"), null=True, blank=True)
+    quantity_obtained = models.PositiveIntegerField(_("Qty obtained (Kg)"), null=True, blank=True)
+    no_of_workdays_used = models.PositiveIntegerField(_("No of workdays used for activity"), null=True, blank=True)
     # Off Farm inputs
     sourcing_date = models.DateField(_("Date of sourcing"), null=True, blank=True)
-    quantity_sourced = models.IntegerField(_("Qty sourced (Kg)"), null=True, blank=True)
+    quantity_sourced = models.PositiveIntegerField(_("Qty sourced (Kg)"), null=True, blank=True)
     supplier_name = models.CharField(_("Name of supplier"), max_length=500, null=True, blank=True)
     
 
 class PestDiseaseManagement(BaseModel):
     organic_crop = models.ForeignKey(OrganicCropDetails, related_name='pest_disease', on_delete=models.PROTECT)
     name_of_input = models.CharField(_("Name of input used"), max_length=255)
-    quantity_of_input = models.IntegerField(_("Qty of input used (Kg or lit)"))
+    quantity_of_input = models.PositiveIntegerField(_("Qty of input used (Kg or lit)"))
     source_of_input = models.CharField(_("Source of input"), max_length=100, choices=NutrientManagement.SOURCE_CHOICES)
     date_of_application = models.DateField(_("Date of application"))
     APPLICATION_CHOICES = [
@@ -333,14 +334,14 @@ class PestDiseaseManagement(BaseModel):
     
     # on farm inputs
     type_of_raw_material = models.CharField(_("Type of raw material used"), max_length=500, null=True, blank=True)
-    quantity_used = models.IntegerField(_("No of workdays required for activity"), null=True, blank=True)
+    quantity_used = models.PositiveIntegerField(_("No of workdays required for activity"), null=True, blank=True)
     starting_date = models.DateField(_("Starting date of preparation"), null=True, blank=True)
     date_of_manure = models.DateField(_("Date of manure ready"), null=True, blank=True)
-    quantity_obtained = models.IntegerField(_("Qty obtained (Kg)"), null=True, blank=True)
-    no_of_workdays_used = models.IntegerField(_("No of workdays used for activity"), null=True, blank=True)
+    quantity_obtained = models.PositiveIntegerField(_("Qty obtained (Kg)"), null=True, blank=True)
+    no_of_workdays_used = models.PositiveIntegerField(_("No of workdays used for activity"), null=True, blank=True)
     # Off Farm inputs
     sourcing_date = models.DateField(_("Date of sourcing"), null=True, blank=True)
-    quantity_sourced = models.IntegerField(_("Qty sourced (Kg)"), null=True, blank=True)
+    quantity_sourced = models.PositiveIntegerField(_("Qty sourced (Kg)"), null=True, blank=True)
     supplier_name = models.CharField(_("Name of supplier"), max_length=500, null=True, blank=True)
     
     
@@ -354,67 +355,74 @@ class WeedManagement(BaseModel):
         ('MACHINERY', 'Machinery'),
     ]
     method = models.CharField(_("Method of activity"), max_length=100, choices=METHOD_CHOICES)
-    workdays_utilized = models.IntegerField(_("No of workdays utilized for activity"))
+    workdays_utilized = models.PositiveIntegerField(_("No of workdays utilized for activity"))
     
     
 class HarvestAndIncomeDetails(BaseModel): 
     organic_crop = models.ForeignKey(OrganicCropDetails, related_name='harvest_income', on_delete=models.PROTECT)
+    SINGLE = 'SINGLE'
+    MULTIPLE = 'MULTIPLE'
     TYPE_CHOICES = [
-        ('SINGLE', 'Single'),
-        ('MULTIPLE', 'Multiple'),
+        (SINGLE, 'Single'),
+        (MULTIPLE, 'Multiple'),
     ]
     type = models.CharField(verbose_name=_('Type of harvest (Single/multiple)'), max_length=100, choices=TYPE_CHOICES)
-    first_harvest = models.CharField(verbose_name=_('First harvest'), max_length=255)
+    first_harvest = models.PositiveIntegerField(verbose_name=_('First harvest'))
     first_harvest_date = models.DateField(verbose_name=_('First harvest date'))
-    second_harvest = models.CharField(verbose_name=_('Second harvest'), max_length=255)
-    second_harvest_date = models.DateField(verbose_name=_('Second harvest date'))
-    third_harvest = models.CharField(verbose_name=_('Third harvest'), max_length=255)
-    third_harvest_date = models.DateField(verbose_name=_('Third harvest date'))
-    total_crop_harvested = models.IntegerField(_('Total Actual organic crop harvested (kg)'))
-    actual_crop_production = models.IntegerField(_('Actual organic crop productivity (kg/ha)'))
+    second_harvest = models.PositiveIntegerField(verbose_name=_('Second harvest'), null=True, blank=True)
+    second_harvest_date = models.DateField(verbose_name=_('Second harvest date'), null=True, blank=True)
+    third_harvest = models.PositiveIntegerField(verbose_name=_('Third harvest'), null=True, blank=True)
+    third_harvest_date = models.DateField(verbose_name=_('Third harvest date'), null=True, blank=True)
+    actual_crop_production = models.PositiveIntegerField(_('Actual organic crop productivity (kg/ha)'))
     
-    quantity_sold_fpo = models.IntegerField(_('Quantity Sold through FPO (Kg)'))
+    quantity_sold_fpo = models.PositiveIntegerField(_('Quantity Sold through FPO (Kg)'))
     buyer_name = models.CharField(verbose_name=_('Name of Buyer'), max_length=500)
-    price_paid_fpo = models.IntegerField(_('Unit Sale Price paid by FPO Rs/kg'))
-    premium_paid_fpo = models.IntegerField(_('Premium paid by FPO(Rs/kg)'))
-    total_price_received_fpo = models.IntegerField(_('Total price received (Rs/Kg) including premium'))
-    total_organic_sale_fpo = models.IntegerField(_('Total income from sale of organic product through FPO'))
+    price_paid_fpo = models.PositiveIntegerField(_('Unit Sale Price paid by FPO Rs/kg'))
+    premium_paid_fpo = models.PositiveIntegerField(_('Premium paid by FPO(Rs/kg)'))
+    total_price_received_fpo = models.PositiveIntegerField(_('Total price received (Rs/Kg) including premium'))
+    total_organic_sale_fpo = models.PositiveIntegerField(_('Total income from sale of organic product through FPO'))
     
-    quantity_sold_outside = models.IntegerField(_('Quantity Sold Outside (Kg)'))
+    quantity_sold_outside = models.PositiveIntegerField(_('Quantity Sold Outside (Kg)'))
     outside_buyer_name = models.CharField(verbose_name=_('Name of Buyer outside'), max_length=500)
-    price_paid_outside = models.IntegerField(_('Unit Sale Price outside Rs/kg'))
-    premium_paid_outside = models.IntegerField(_('Premium paid outside (Rs/kg)'))
-    total_price_received_outside = models.IntegerField(_('Total price received (Rs/Kg) including premium'))
-    total_organic_sale_outside = models.IntegerField(_('Total income from sale of organic product outside'))
+    price_paid_outside = models.PositiveIntegerField(_('Unit Sale Price outside Rs/kg'))
+    premium_paid_outside = models.PositiveIntegerField(_('Premium paid outside (Rs/kg)'))
+    total_price_received_outside = models.PositiveIntegerField(_('Total price received (Rs/Kg) including premium'))
+    total_organic_sale_outside = models.PositiveIntegerField(_('Total income from sale of organic product outside'))
     
-    gross_income = models.IntegerField(_('Gross Income from sale of Organic crop (Rs) {sum of column U & P)'))
+    gross_income = models.PositiveIntegerField(_('Gross Income from sale of Organic crop (Rs) {sum of column U & P)'))
     payment_mode = models.CharField(verbose_name=_('Mode of payment'), max_length=500)
-    payment_reference_number = models.IntegerField(verbose_name=_('Payment Reference number '))
-    unsold_quantity = models.IntegerField(_('Quantity of organic harvest unsold/Balance (kg)'))
+    payment_reference_number = models.PositiveIntegerField(verbose_name=_('Payment Reference number '))
+    unsold_quantity = models.PositiveIntegerField(_('Quantity of organic harvest unsold/Balance (kg)'))
+
+    @property
+    def total_crop_harvested(self):
+        if self.first_harvest and self.second_harvest and self.third_harvest:
+            return self.first_harvest + self.second_harvest + self.third_harvest
+        return self.first_harvest
     
     
 class CostOfCultivation(BaseModel):
     organic_crop = models.ForeignKey(OrganicCropDetails, related_name='cost_of_cultivation', on_delete=models.PROTECT)
-    area = models.IntegerField(verbose_name=_('Crop Area (Ha)'))
+    area = models.FloatField(verbose_name=_('Crop Area (Ha)'))
     input_source = models.CharField(verbose_name=_('Source of Input'), max_length=500)
-    manure_preparation_cost = models.IntegerField(verbose_name=_('Cost of Manure Preparation'))
-    biofertilizer_preparation_cost = models.IntegerField(verbose_name=_('Cost of Biofertilizer Preparation'))
-    biopesticide_preparation_cost = models.IntegerField(verbose_name=_('Cost of Bio pesticide Preparation'))
-    seed_purchase_cost = models.IntegerField(verbose_name=_('Seed Purchase Costs'))
-    irrigation_cost = models.IntegerField(verbose_name=_('Irrigation Costs'))
-    machinery_cost = models.IntegerField(verbose_name=_('Machinery charges - owned & Hired'))
-    input_cost = models.IntegerField(verbose_name=_('Input Costs '))
-    animal_labour_cost = models.IntegerField(verbose_name=_('Animal labour cost - owned & hired'))
-    land_preparation_labour_cost = models.IntegerField(verbose_name=_('Labour Cost for land preparation'))
-    sowing_labour_cost = models.IntegerField(verbose_name=_('Labour Cost for Sowing'))
-    weed_management_labour_cost = models.IntegerField(verbose_name=_('Labour Cost for Weed management'))
-    manure_application_labour_cost = models.IntegerField(verbose_name=_('Labour Cost for Manure Application'))
-    biofertilizer_application_labour_cost = models.IntegerField(verbose_name=_('Labour Cost for Biofertilizer Application'))
-    biopesticide_application_labour_cost = models.IntegerField(verbose_name=_('Labour Cost for Bio pesticide Application'))
-    harvest_labour_cost = models.IntegerField(verbose_name=_('Labour Cost for Harvest'))
-    total_labour_hiring_cost = models.IntegerField(verbose_name=_('Total Labour Hiring Costs'))
-    other_cost = models.IntegerField(verbose_name=_('Other Costs (E.g Transport to Gin, Equipment Purchase etc.)'))
-    total_cost = models.IntegerField(verbose_name=_('Total Cost'))
+    manure_preparation_cost = models.PositiveIntegerField(verbose_name=_('Cost of Manure Preparation'))
+    biofertilizer_preparation_cost = models.PositiveIntegerField(verbose_name=_('Cost of Biofertilizer Preparation'))
+    biopesticide_preparation_cost = models.PositiveIntegerField(verbose_name=_('Cost of Bio pesticide Preparation'))
+    seed_purchase_cost = models.PositiveIntegerField(verbose_name=_('Seed Purchase Costs'))
+    irrigation_cost = models.PositiveIntegerField(verbose_name=_('Irrigation Costs'))
+    machinery_cost = models.PositiveIntegerField(verbose_name=_('Machinery charges - owned & Hired'))
+    input_cost = models.PositiveIntegerField(verbose_name=_('Input Costs '))
+    animal_labour_cost = models.PositiveIntegerField(verbose_name=_('Animal labour cost - owned & hired'))
+    land_preparation_labour_cost = models.PositiveIntegerField(verbose_name=_('Labour Cost for land preparation'))
+    sowing_labour_cost = models.PositiveIntegerField(verbose_name=_('Labour Cost for Sowing'))
+    weed_management_labour_cost = models.PositiveIntegerField(verbose_name=_('Labour Cost for Weed management'))
+    manure_application_labour_cost = models.PositiveIntegerField(verbose_name=_('Labour Cost for Manure Application'))
+    biofertilizer_application_labour_cost = models.PositiveIntegerField(verbose_name=_('Labour Cost for Biofertilizer Application'))
+    biopesticide_application_labour_cost = models.PositiveIntegerField(verbose_name=_('Labour Cost for Bio pesticide Application'))
+    harvest_labour_cost = models.PositiveIntegerField(verbose_name=_('Labour Cost for Harvest'))
+    total_labour_hiring_cost = models.PositiveIntegerField(verbose_name=_('Total Labour Hiring Costs'))
+    other_cost = models.PositiveIntegerField(verbose_name=_('Other Costs (E.g Transport to Gin, Equipment Purchase etc.)'))
+    total_cost = models.PositiveIntegerField(verbose_name=_('Total Cost'))
         
     
 class ContaminationControl(BaseModel):

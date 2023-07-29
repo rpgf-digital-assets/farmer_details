@@ -1,9 +1,12 @@
+from datetime import datetime
+
 from django.forms import (
     BaseFormSet,
     CharField,
     EmailField,
     EmailInput,
     FileInput,
+    FloatField,
     HiddenInput,
     ImageField,
     Form,
@@ -28,10 +31,13 @@ from django.forms import (
 from farmer.models import ContaminationControl, CostOfCultivation, Farmer, FarmerEducation, FarmerLand, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
 from farmer_details_app.models import SelectedGinningFarmer, Vendor
 from users.models import User
-from users.validators import validate_name, validate_phonenumber
+from users.validators import validate_name, validate_phonenumber, validate_positive_number
 
 from django.db import transaction
 
+
+class PositiveIntegerField(IntegerField):
+    default_validators = [validate_positive_number]
 
 class BaseSelectedFarmerFormSet(BaseFormSet):
     def clean(self):
@@ -140,9 +146,9 @@ class FarmerCreationForm(BaseCreationForm):
                          widget=Select(attrs={
                              'class': 'form-control form-select'
                          }))
-    phone = CharField(label='Business Phone', validators=[validate_phonenumber],
+    phone = CharField(label='Phone Number', validators=[validate_phonenumber],
                       widget=TextInput(attrs={
-                          'placeholder': 'Business Phone',
+                          'placeholder': 'Phone Number',
                       }))
 
     class Meta:
@@ -194,8 +200,11 @@ class FarmerCreationForm(BaseCreationForm):
 
 
 class OtherFarmerCreationForm(BaseCreationForm):
+    identification_file = FileField(required=False, widget=FileInput())
+
     class Meta:
         model = OtherFarmer
+        
         fields = '__all__'
 
 
@@ -267,7 +276,16 @@ class FarmerLandDetailsCreationFrom(BaseCreationForm):
 
 ######################### Organic Crop Forms::BEGIN ################################
 
+
 class FarmerOrganicCropDetailForm(BaseCreationForm):
+
+    def get_year_choices():
+        year_choices = []
+        current_date = datetime.now()
+        for i in range(-2, 5):
+            year_choices.append((current_date.year + i, current_date.year + i))
+        return year_choices
+
     date_of_sowing = DateField(input_formats=['%Y-%m-%d'], widget=DateInput(attrs={
         'class': 'form-control datetimepicker-input w-auto',
         'placeholder': 'Enter date in YYYY-MM-DD',
@@ -279,13 +297,17 @@ class FarmerOrganicCropDetailForm(BaseCreationForm):
         'data-target': '#kt_datetimepicker_3'
     }))
 
+    year = ChoiceField(choices=get_year_choices(), widget=Select(
+        attrs={
+            'class': 'form-control'
+        }
+    ))
+
+    season = ModelChoiceField(queryset=Season.objects.filter(is_active=True))
+
     class Meta:
         model = OrganicCropDetails
         exclude = ['farmer']
-
-    def clean(self):
-        cleaned_data = super().clean()
-
 
 
 class FarmerSeedDetailsForm(BaseCreationForm):
@@ -310,7 +332,7 @@ class FarmerNutritionManagementForm(BaseCreationForm):
     type_of_raw_material = CharField(required=False, widget=TextInput(attrs={
         'class': 'on-farm-input'
     }))
-    quantity_used = IntegerField(required=False, widget=NumberInput(attrs={
+    quantity_used = PositiveIntegerField(required=False, widget=NumberInput(attrs={
         'class': 'on-farm-input',
     }))
 
@@ -330,10 +352,10 @@ class FarmerNutritionManagementForm(BaseCreationForm):
         'placeholder': 'Enter date in YYYY-MM-DD',
         'data-target': '#kt_datetimepicker_3'
     }))
-    quantity_obtained = IntegerField(required=False, widget=NumberInput(attrs={
+    quantity_obtained = PositiveIntegerField(required=False, widget=NumberInput(attrs={
         'class': 'on-farm-input',
     }))
-    no_of_workdays_used = IntegerField(required=False, widget=NumberInput(attrs={
+    no_of_workdays_used = PositiveIntegerField(required=False, widget=NumberInput(attrs={
         'class': 'on-farm-input',
     }))
     # Off Farm inputs
@@ -342,7 +364,7 @@ class FarmerNutritionManagementForm(BaseCreationForm):
         'placeholder': 'Enter date in YYYY-MM-DD',
         'data-target': '#kt_datetimepicker_3'
     }))
-    quantity_sourced = IntegerField(required=False, widget=NumberInput(attrs={
+    quantity_sourced = PositiveIntegerField(required=False, widget=NumberInput(attrs={
         'class': 'off-farm-input',
     }))
     supplier_name = CharField(required=False, widget=TextInput(attrs={
@@ -426,12 +448,12 @@ class HarvestAndIncomeDetailForm(BaseCreationForm):
         'placeholder': 'Enter date in YYYY-MM-DD',
         'data-target': '#kt_datetimepicker_3'
     }))
-    second_harvest_date = DateField(input_formats=['%Y-%m-%d'], widget=DateInput(attrs={
+    second_harvest_date = DateField(required=False, input_formats=['%Y-%m-%d'], widget=DateInput(attrs={
         'class': 'off-farm-input datetimepicker-input w-auto',
         'placeholder': 'Enter date in YYYY-MM-DD',
         'data-target': '#kt_datetimepicker_3'
     }))
-    third_harvest_date = DateField(input_formats=['%Y-%m-%d'], widget=DateInput(attrs={
+    third_harvest_date = DateField(required=False, input_formats=['%Y-%m-%d'], widget=DateInput(attrs={
         'class': 'off-farm-input datetimepicker-input w-auto',
         'placeholder': 'Enter date in YYYY-MM-DD',
         'data-target': '#kt_datetimepicker_3'
@@ -440,6 +462,13 @@ class HarvestAndIncomeDetailForm(BaseCreationForm):
     class Meta:
         model = HarvestAndIncomeDetails
         exclude = ['organic_crop']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        type = cleaned_data.get('type')
+        if type == HarvestAndIncomeDetails.MULTIPLE:
+            if not cleaned_data.get('second_harvest', None) and not cleaned_data.get('third_harvest', None):
+                self.add_error('second_harvest', ValidationError("Second harvest is required if type is multiple"))
 
 
 HarvestAndIncomeDetailFormSet = formset_factory(
@@ -464,14 +493,13 @@ class ContaminationControlForm(BaseCreationForm):
     def clean(self):
         chances = self.cleaned_data.get('chances', None)
         # if self.instance.pk:
-            # Its an update request
-            # Check if the chances field has changed
-            # if 'chances' in self.changed_data:
-            #     # Chances changed check if it already exists
-            #     if ContaminationControl.objects.filter(organic_crop=self.instance.organic_crop, chances=chances).exists():
-            #         self.add_error('chances', ValidationError('Chances already exists'))
+        # Its an update request
+        # Check if the chances field has changed
+        # if 'chances' in self.changed_data:
+        #     # Chances changed check if it already exists
+        #     if ContaminationControl.objects.filter(organic_crop=self.instance.organic_crop, chances=chances).exists():
+        #         self.add_error('chances', ValidationError('Chances already exists'))
         # For Create request add condition in view
-            
 
 
 ContaminationControlFormSet = formset_factory(
@@ -497,7 +525,7 @@ class SelectedGinningFarmerForm(ModelForm):
             'class': 'form-control'
         }
     ))
-    quantity = IntegerField(widget=NumberInput(attrs={
+    quantity = PositiveIntegerField(widget=NumberInput(attrs={
         'class': 'form-control'
     }))
 
@@ -529,7 +557,7 @@ SelectedGinningFarmerFormSet = formset_factory(
 
 class GinningMappingForm(Form):
 
-    vendor = ModelChoiceField(required=True, queryset=Vendor.objects.all(), widget=Select(
+    vendor = ModelChoiceField(required=True, queryset=Vendor.objects.filter(is_active=True), widget=Select(
         attrs={
             'class': 'form-control'
         }

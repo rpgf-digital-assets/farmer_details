@@ -8,7 +8,7 @@ from api.farmer_admin.serializers import FarmerDetailsSerializer, FarmerLandCoor
 from django.db.models import ProtectedError
 from django.db import transaction
 from api.permissions import IsAdminOrSuperUser
-from farmer.models import ContaminationControl, CostOfCultivation, Farmer, FarmerLand, FarmerOrganicCropPdf, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, PestDiseaseManagement, Season, SeedDetails, WeedManagement
+from farmer.models import ContaminationControl, CostOfCultivation, Farmer, FarmerLand, FarmerOrganicCropPdf, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
 from farmer_admin.utils import generate_certificate
 from farmer_details_app.models import Vendor
 from users.models import User
@@ -136,7 +136,12 @@ class FarmerOrganicCropGeneratePDFAPIView(APIView):
             # if _created:
             organic_crops = OrganicCropDetails.objects.filter(farmer=farmer, is_active=True)
             if organic_crops:
-                result = generate_certificate({'crops': organic_crops}, request=self.request)
+                context = {
+                    'crops': organic_crops,
+                    'farmer': farmer,
+                    'farmer_land': farmer.land.all().first()
+                }
+                result = generate_certificate(context=context, request=self.request)
                 filename = (f'{farmer.user.user_display_name}_crop.pdf')
                 organic_crop_pdf.pdf.save(filename, File(io.BytesIO(result)))
                 organic_crop_pdf.save()
@@ -150,6 +155,7 @@ class FarmerOrganicCropGeneratePDFAPIView(APIView):
 
         return Response(response)
 
-            
 
+class DeleteOtherFarmerAPIView(DeleteBaseAPIView):
+    model = OtherFarmer
         

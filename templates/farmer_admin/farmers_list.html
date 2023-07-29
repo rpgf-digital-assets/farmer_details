@@ -3,13 +3,13 @@
 
 
 {% block title %}
-Farmers list
+RPGF Farmers
 {% endblock title %}
 
 {% block breadcrumb_items %}
 <!--begin::Item-->
 <li class="breadcrumb-item text-white opacity-75">
-    <a href="#" class="text-white text-hover-primary">Farmer</a>
+    <a href="#" class="text-white text-hover-primary">RPGF Farmer</a>
 </li>
 <!--end::Item-->
 <!--begin::Item-->
@@ -59,10 +59,7 @@ Farmers list
                     <i class="ki-duotone ki-plus fs-2"></i>Add Farmer</a>
                     <!--end::Add user-->
                     <!--begin::Add user-->
-                    {% comment %} <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#kt_modal_add_user"> {% endcomment %}
-                    <a class="btn btn-primary" href="{% url 'farmer_admin:other_farmer_create' %}">
-                    <i class="ki-duotone ki-plus fs-2"></i>Add Other Farmer</a>
-                    <!--end::Add user-->
+                    
                 </div>
                 <!--end::Toolbar-->
                 <!--begin::Group actions-->
@@ -382,7 +379,7 @@ Farmers list
                         </th>
                         <th class="min-w-125px">User</th>
                         <th class="min-w-125px">Village</th>
-                        <th class="min-w-125px">Area of land</th>
+                        <th class="min-w-125px">Area in (Ha)</th>
                         <th class="min-w-125px">Aadhar </th>
                         <th class="min-w-125px">Date of joining</th>
                         <th class="text-end min-w-100px">Actions</th>

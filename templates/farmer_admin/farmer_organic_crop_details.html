@@ -154,6 +154,7 @@
                 <div id="seeds_collapsible" class="collapse show">
                     <!--begin::Card body-->
                     <div class="card-body p-9">
+                        {% if crop.seed.all.first  %}
                         <table class="table table-bordered align-middle p-0 datatable mb-10 ">
                             <thead>
                                 <tr class="text-start fw-bold fs-7 text-uppercase gs-0">
@@ -201,6 +202,7 @@
                                 {% endfor %}
                             </tbody>
                         </table>
+                        {% endif %}
                     </div>
                     <!--end::Card body-->
                 </div>
@@ -233,6 +235,7 @@
                 <div id="nutrition_collapsible" class="collapse show">
                     <!--begin::Card body-->
                     <div class="card-body p-9">
+                        {% if crop.nutrient.all.first  %}
                         <table class="table table-bordered align-middle p-0 datatable mb-10 ">
                             <thead>
                                 <tr class="text-start fw-bold fs-7 text-uppercase gs-0">
@@ -287,6 +290,7 @@
                                 {% endfor %}
                             </tbody>
                         </table>
+                        {% endif %}
                     </div>
                     <!--end::Card body-->
                 </div>

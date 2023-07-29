@@ -17,9 +17,9 @@ class IndexView(TemplateView):
             return redirect('users:login')
         else:
             if self.request.user.role == User.SUPER_USER:
-                return redirect('farmer_admin:farmers_list')
+                return redirect('farmer_admin:dashboard_farmer_view')
             if self.request.user.role == User.ADMIN:
-                return redirect('farmer_admin:farmers_list')
+                return redirect('farmer_admin:dashboard_farmer_view')
             if self.request.user.role == User.FARMER:
                 return 'farmer_admin/base.html'
         return super().dispatch(request, *args, **kwargs)

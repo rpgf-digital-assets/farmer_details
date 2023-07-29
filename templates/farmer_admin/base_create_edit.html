@@ -34,7 +34,7 @@
                     {{field}}
                     <!--end::Input-->
                     <!--begin::Label-->
-                    <label for="{{field.auto_id}}" class="required fs-6 fw-semibold ml-4 mb-2" style="margin-left: 5px;">{{field.label}}</label>
+                    <label for="{{field.auto_id}}" class="fs-6 fw-semibold ml-4 mb-2 {% if field.field.required %}required{% endif %}" style="margin-left: 5px;">{{field.label}}</label>
                     <!--end::Label-->
                     <div class="text-danger" style="text-align:start">
                         {{ field.errors }}

@@ -149,6 +149,14 @@ class OtherFarmerCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, Create
     success_url = reverse_lazy('farmer_admin:farmers_list')
 
 
+class OtherFarmerUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
+    model = OtherFarmer
+    template_name = 'farmer_admin/other_farmer_create_edit.html'
+    form_class = OtherFarmerCreationForm
+    success_url = reverse_lazy('farmer_admin:other_farmers_list')
+    context_object_name = 'other_farmer'
+     
+
 class FarmerSocialCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = FarmerSocial
     template_name = 'farmer_admin/farmer_socials_create_edit.html'
@@ -219,9 +227,23 @@ class FarmerLandDetailUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, U
             form.instance.soil_moisture = None
         self.object = form.save()
         return super().form_valid(form)
+    
 
+class FarmerOrganicCropDetailCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, CreateView):
+    model = OrganicCropDetails
+    form_class = FarmerOrganicCropDetailForm
+    template_name = 'farmer_admin/farmer_organic_crop_create_edit.html'
+    
+    def get_success_url(self):
+        return reverse('farmer_admin:farmer_organic_crop_details', kwargs={'pk': self.kwargs['pk']})
 
-class FarmerOrganicCropDetailCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, SessionWizardView):
+    def form_valid(self, form):
+        farmer = Farmer.objects.get(user__id=self.kwargs['pk'])
+        form.instance.farmer = farmer
+        self.object = form.save()
+        return super().form_valid(form)
+
+class FarmerOrganicCropDetailSessionWizardView(CustomLoginRequiredMixin, AdminRequiredMixin, SessionWizardView):
 
     template_name = 'farmer_admin/farmer_organic_wizard/farmer_organic_wizard_base.html'
     form_list = [FarmerOrganicCropDetailForm,
@@ -233,6 +255,20 @@ class FarmerOrganicCropDetailCreateView(CustomLoginRequiredMixin, AdminRequiredM
                  CostOfCultivationFormSet,
                  ContaminationControlFormSet,
                  Form]
+    
+    # def post(self, *args, **kwargs):
+    #     if self.request.POST.get('skip_step'):
+    #         print("🐍 File: farmer_admin/views.py | Line: 246 | post ~ skip_step")
+    #         # Set a flag in the session to indicate that the current step should be skipped.
+    #         self.storage.extra_data['skip_step'] = True
+    #         # Move to the next step and redirect.
+    #         next_step = self.get_next_step()
+    #         self.storage.current_step = next_step
+    #         print("🐍 File: farmer_admin/views.py | Line: 250 | post ~ self.steps.current",self.steps.current)
+    #         print("🐍 File: farmer_admin/views.py | Line: 250 | post ~  self.storage.current_step", self.storage.current_step)
+    #         return self.render_goto_step(next_step)
+
+    #     return super().post(*args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
         farmer = Farmer.objects.get(user__id=self.kwargs['pk'])
@@ -243,7 +279,11 @@ class FarmerOrganicCropDetailCreateView(CustomLoginRequiredMixin, AdminRequiredM
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, form, **kwargs):
+        
         context = super().get_context_data(form=form, **kwargs)
+        
+        # Check if the current step should be skipped based on the flag in the session.
+        # context['skip_current_step'] = self.storage.extra_data.get('skip_step', False)
 
         if self.steps.current != '0':
             context.update({
@@ -357,7 +397,6 @@ class FarmerOrganicCropDetailUpdateView(CustomLoginRequiredMixin, AdminRequiredM
     model = OrganicCropDetails
     template_name = 'farmer_admin/farmer_organic_crop_create_edit.html'
     form_class = FarmerOrganicCropDetailForm
-    success_url = reverse_lazy('farmer_admin:farmers_list')
     context_object_name = 'farmer_organic_object'
 
     def get_success_url(self):
@@ -393,11 +432,13 @@ class FarmerNutrientDetailCreateView(CustomLoginRequiredMixin, AdminRequiredMixi
     model = NutrientManagement
     template_name = 'farmer_admin/farmer_nutrient_create_edit.html'
     form_class = FarmerNutritionManagementForm
-    success_url = reverse_lazy('farmer_admin:farmers_list')
     source_field_name = 'source_of_fertilizer'
 
+    def get_success_url(self):
+        return reverse('farmer_admin:farmer_organic_crop_details', kwargs={'pk': self.kwargs['pk']})
+    
     def form_valid(self, form):
-        organic_crop = OrganicCropDetails.objects.get(user__id=self.kwargs['pk'])
+        organic_crop = OrganicCropDetails.objects.get(id=self.kwargs['pk'])
         form.instance.organic_crop = organic_crop
         if form.cleaned_data[self.source_field_name] == NutrientManagement.ON_FARM:
             form.instance.sourcing_date = None
@@ -441,7 +482,6 @@ class FarmerPestDiseaseManagementCreateView(FarmerNutrientDetailCreateView):
     model = PestDiseaseManagement
     template_name = 'farmer_admin/farmer_pest_management_create_update.html'
     form_class = FarmerPestDiseaseManagementForm
-    success_url = reverse_lazy('farmer_admin:farmers_list')
     source_field_name = 'source_of_input'
 
 
@@ -526,8 +566,11 @@ class GenerateOrganicCropPdfView(CustomLoginRequiredMixin, AdminRequiredMixin, T
     template_name = 'farmer_admin/organic_crop_pdf.html'
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        organic_crop = OrganicCropDetails.objects.filter(farmer__user__id=self.kwargs['farmer_pk'], is_active=True)
+        farmer = Farmer.objects.get(user__id=self.kwargs['farmer_pk'])
+        organic_crop = OrganicCropDetails.objects.filter(farmer=farmer, is_active=True)
         context["crops"] = organic_crop
+        context["farmer"] = farmer
+        context["farmer_land"] = farmer.land.all().first()
         return context
     
 

@@ -1357,11 +1357,22 @@ crossorigin=""></script>
                     <div class="row my-3 w-100" style="border-bottom: 1px solid #1A4441; ">
                         <div class="col-xl-6 d-flex flex-column align-items-start">
                             <h5>Season</h5>
-                            <p>Rabi</p>
+                            <p>${data.organic_crop[0]?.season.name || ''}</p>
                         </div>
                         <div class="col-xl-6 d-flex flex-column align-items-start">
                             <h5>Estimated Harvest date</h5>
                             <p>${data.organic_crop[0]?.expected_date_of_harvesting || ''}</p>
+                        </div>
+                    </div>
+
+                    <div class="row my-3 w-100" style="border-bottom: 1px solid #1A4441; ">
+                        <div class="col-xl-6 d-flex flex-column align-items-start">
+                            <h5>Gross Income</h5>
+                            <p>${data.organic_crop[0]?.harvest_income[0]?.gross_income || ''}</p>
+                        </div>
+                        <div class="col-xl-6 d-flex flex-column align-items-start">
+                            <h5>Total Crop Harvested</h5>
+                            <p>${data.organic_crop[0]?.harvest_income[0]?.total_crop_harvested || ''}</p>
                         </div>
                     </div>
 

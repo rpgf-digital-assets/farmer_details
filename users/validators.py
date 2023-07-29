@@ -18,6 +18,12 @@ def validate_phonenumber(phone):
 def validate_name(name):
     if name.isnumeric():
         raise(ValidationError('Enter a valid name.'))
+    
+
+def validate_positive_number(number):
+    if number < 1:
+        raise ValidationError(
+            'Number should not be less than 1.')
 
 
 class NumberValidator(object):

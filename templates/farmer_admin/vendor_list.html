@@ -454,9 +454,11 @@ Vendor list
                         </td>
                         <td>{{vendor.identification_number}}</td>
                         <td>
+                            {% if vendor.identification_file %}
                             <a href="{{vendor.identification_file.url}}" target="_blank">
                                 <i class="bi bi-file-earmark text-primary fs-2x"></i>
                             </a>
+                            {% endif %}
                         </td>
                         <td class="text-end">
                             <a href="#" class="btn btn-light btn-active-light-primary btn-flex btn-center btn-sm" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">Actions

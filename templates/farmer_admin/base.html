@@ -55,7 +55,7 @@
                                                 <!--begin:Menu link-->
                                                 <a class="menu-link py-3 {% navactive request 'farmer_admin:dashboard_farmer_view' %}" href="{% url 'farmer_admin:dashboard_farmer_view' %}">
                                                     <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
+                                                        <i class="fa-solid fa-chart-simple"></i>
                                                     </span>
                                                     <span class="menu-title">Farmer</span>
                                                 </a>
@@ -67,7 +67,7 @@
                                                 <!--begin:Menu link-->
                                                 <a class="menu-link py-3" href="{% url 'farmer_admin:dashboard_vendor' %}">
                                                     <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
+                                                        <i class="fa-solid fa-chart-simple"></i>
                                                     </span>
                                                     <span class="menu-title">Vendor</span>
                                                 </a>
@@ -93,9 +93,9 @@
                                                 <!--begin:Menu link-->
                                                 <a class="menu-link py-3 {% navactive request 'farmer_admin:farmers_list' %}" href="{% url 'farmer_admin:farmers_list' %}">
                                                     <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
+                                                        <i class="fa-solid fa-person"></i>
                                                     </span>
-                                                    <span class="menu-title">Farmers list</span>
+                                                    <span class="menu-title">RPGF Farmers</span>
                                                 </a>
                                                 <!--end:Menu link-->
                                             </div>
@@ -103,11 +103,11 @@
                                              <!--begin:Menu item-->
                                              <div class="menu-item">
                                                 <!--begin:Menu link-->
-                                                <a class="menu-link py-3 {% navactive request 'farmer_admin:other_farmers_list' %}" href="{% url 'farmer_admin:farmers_list' %}">
+                                                <a class="menu-link py-3 {% navactive request 'farmer_admin:other_farmers_list' %}" href="{% url 'farmer_admin:other_farmers_list' %}">
                                                     <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
+                                                        <i class="fa-solid fa-person"></i>
                                                     </span>
-                                                    <span class="menu-title">Other Farmers list</span>
+                                                    <span class="menu-title">Other Farmers</span>
                                                 </a>
                                                 <!--end:Menu link-->
                                             </div>
@@ -131,7 +131,7 @@
                                                 <!--begin:Menu link-->
                                                 <a class="menu-link py-3 {% navactive request 'farmer_admin:vendor_list' %} {% if vendor_object %}{% navactive request 'farmer_admin:vendor_update' vendor_object.pk %}{% endif %} " href="{% url 'farmer_admin:vendor_list' %}">
                                                     <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
+                                                        <i class="fa-solid fa-person"></i>
                                                     </span>
                                                     <span class="menu-title">Manage Vendor</span>
                                                 </a>
@@ -143,7 +143,7 @@
                                     </div>
                                     <!--end:Menu item-->
                                     
-                                    <!--begin:Menu item-->
+                                    {% comment %} <!--begin:Menu item-->
                                     <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" class="menu-item menu-lg-down-accordion me-lg-1">
                                         <!--begin:Menu link-->
                                         <span class="menu-link py-3 {% navactive request 'farmer_admin:traceability_ginning_mapping_create' %}">
@@ -168,7 +168,7 @@
                                         </div>
                                         <!--end:Menu sub-->
                                     </div>
-                                    <!--end:Menu item-->
+                                    <!--end:Menu item--> {% endcomment %}
                                     <!--begin:Menu item-->
                                     <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" class="menu-item menu-lg-down-accordion me-lg-1">
                                         <!--begin:Menu link-->
@@ -184,7 +184,7 @@
                                                 <!--begin:Menu link-->
                                                 <a class="menu-link py-3 {% navactive request 'farmer_admin:season_list' %}" href="{% url 'farmer_admin:season_list' %}">
                                                     <span class="menu-icon">
-                                                        <i class="ki-duotone ki-handcart fs-2"></i>
+                                                        <i class="fa-solid fa-bolt"></i>
                                                     </span>
                                                     <span class="menu-title">Manage Season</span>
                                                 </a>
