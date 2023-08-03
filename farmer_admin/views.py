@@ -683,7 +683,8 @@ class DashboardVendorView(CustomLoginRequiredMixin, AdminRequiredMixin, ListView
         context["completed_mapping_count"] = GinningMapping.objects.filter(
             status=GinningMapping.COMPLETED).count()
         return context
-from django.core.serializers import serialize
+    
+
 class DashboardFarmerView(TemplateView):
     template_name = 'farmer_admin/dashboard_farmer.html'
 
@@ -774,11 +775,7 @@ class DashboardFarmerView(TemplateView):
 
 
 import csv
-from io import StringIO
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.files import File
-from django.http import HttpResponse, StreamingHttpResponse
-from django.utils.text import slugify
 from django.views.generic import View
 
 
@@ -823,6 +820,27 @@ class OtherFarmerCSV(LoginRequiredMixin, View):
             output.append([farmer.user_display_name, farmer.gender, farmer.owned_land, 
                            farmer.identification_number, farmer.latitude, farmer.longitude,
                            farmer.village, farmer.taluka, farmer.district, farmer.state])
+        #CSV Data
+        writer.writerows(output)
+        return response
+    
+
+class VendorCSV(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        output = []
+        response = HttpResponse(content_type='text/csv')
+        writer = csv.writer(response)
+        query_set = Vendor.objects.filter(is_active=True)
+        #Header
+        writer.writerow(['Name', 'Company Name', 'Concerned Person', 'Date of Joining',
+                          'Role', 'email', 'phone', 'ID type', 'Identification Number',
+                         'website', 'address', 'city', 'state', 'pincode'])
+        
+        for vendor in query_set:
+            output.append([vendor.user_display_name, vendor.company_name, vendor.concerned_person, 
+                           vendor.date_of_joining, vendor.role, vendor.email,
+                           vendor.phone, vendor.identification_type, vendor.identification_number, vendor.website,
+                           vendor.address, vendor.city, vendor.state, vendor.pincode])
         #CSV Data
         writer.writerows(output)
         return response

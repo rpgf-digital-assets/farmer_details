@@ -86,11 +86,11 @@ Vendor list
                     <!--end::Menu 1-->
                     <!--end::Filter-->
                     <!--begin::Export-->
-                    <button type="button" class="btn btn-light-primary me-3" data-bs-toggle="modal" data-bs-target="#kt_modal_export_users">
+                    <a target="_blank" class="btn btn-light-primary me-3" href="{% url 'farmer_admin:vendor_download_csv' %}">
                     <i class="ki-duotone ki-exit-up fs-2">
                         <span class="path1"></span>
                         <span class="path2"></span>
-                    </i>Export</button>
+                    </i>Export to CSV</a>
                     <!--end::Export-->
                     <!--begin::Add user-->
                     {% comment %} <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#kt_modal_add_user"> {% endcomment %}

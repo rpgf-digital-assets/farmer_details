@@ -247,7 +247,6 @@ crossorigin=""></script>
         ext: 'png'
     }).addTo(map)
 
-    // Fetch farmers land data and add markers to the map
     window.onload = () => {
         const farmers_land_data_url = "{% url 'api:api_farmer_admin:farmers_land_coordinates_api_view' %}"
         fetch(farmers_land_data_url, {
@@ -272,8 +271,6 @@ crossorigin=""></script>
                     farmer_land_marker.farmer_id = coordinate.farmer
                 })
             }
-
-
         })
 
         const markerOnClick = (e) => {
@@ -402,13 +399,6 @@ crossorigin=""></script>
             })
 
         }
-    }
-
-</script>
-
-
-<script>
-    window.onload = () => {
 
         // Select Button data fetching 
         let crop_url = "{% url 'api:api_farmer_admin:get_crop_names_api_view' %}"
@@ -1102,14 +1092,6 @@ crossorigin=""></script>
             }
         })
     });
-
-
-
-    
-
-
-
-
 
 </script>
 
