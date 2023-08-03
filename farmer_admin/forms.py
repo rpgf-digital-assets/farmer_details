@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any, Dict
 
 from django.forms import (
     BaseFormSet,
@@ -204,8 +205,8 @@ class OtherFarmerCreationForm(BaseCreationForm):
 
     class Meta:
         model = OtherFarmer
-        
         fields = '__all__'
+
 
 
 class FarmerSocialCreationFrom(BaseCreationForm):

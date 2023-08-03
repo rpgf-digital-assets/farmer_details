@@ -42,4 +42,3 @@ def is_list(value):
     return isinstance(value, list)
 
 
-

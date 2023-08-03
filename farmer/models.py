@@ -197,7 +197,7 @@ class FarmerLand(BaseModel):
         ('OTHERS', 'Others'),
     ]
     type_of_irrigation = models.CharField(_("Type of irregation"), max_length=100, choices=IRRIGATION_TYPE_CHOICES)
-    total_organic_land = models.PositiveIntegerField(_("Totalorganic Land in hectares"))
+    total_organic_land = models.PositiveIntegerField(_("Total organic Land in hectares"))
     number_of_plots_under_organic = models.PositiveIntegerField(_("Number of plots under organic management"), )
     PRODUCTION_SYSTEM_CHOICES = [
         ('PARALLEL', 'Parallel'),
@@ -279,10 +279,13 @@ class SeedDetails(BaseModel):
 
 class NutrientManagement(BaseModel):
     organic_crop = models.ForeignKey(OrganicCropDetails, related_name='nutrient', on_delete=models.PROTECT)
+    FYM = 'FYM'
+    COMPOST = 'COMPOST'
+    VERMICOMPOST = 'VERMICOMPOST'
     TYPE_CHOICES = [
-        ('FYM', 'FYM'),
-        ('COMPOST', 'Compost'),
-        ('VERMICOMPOST', 'Vermicompost'),
+        (FYM, 'FYM'),
+        (COMPOST, 'Compost'),
+        (VERMICOMPOST, 'Vermicompost'),
     ]
     type = models.CharField(_("Type of fertiliser used"), max_length=100, choices=TYPE_CHOICES)
     
@@ -321,7 +324,7 @@ class PestDiseaseManagement(BaseModel):
     organic_crop = models.ForeignKey(OrganicCropDetails, related_name='pest_disease', on_delete=models.PROTECT)
     name_of_input = models.CharField(_("Name of input used"), max_length=255)
     quantity_of_input = models.PositiveIntegerField(_("Qty of input used (Kg or lit)"))
-    source_of_input = models.CharField(_("Source of input"), max_length=100, choices=NutrientManagement.SOURCE_CHOICES)
+    source_of_input = models.CharField(_("Source of input"), max_length=100, choices=NutrientManagement.TYPE_CHOICES)
     date_of_application = models.DateField(_("Date of application"))
     APPLICATION_CHOICES = [
         ('BRAODCASTING', 'Braodcasting'),

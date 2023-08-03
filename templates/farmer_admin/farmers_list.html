@@ -47,11 +47,11 @@ RPGF Farmers
                 <!--begin::Toolbar-->
                 <div class="d-flex justify-content-end" data-kt-user-table-toolbar="base">
                     <!--begin::Export-->
-                    <button type="button" class="btn btn-light-primary me-3" data-bs-toggle="modal" data-bs-target="#kt_modal_export_users">
+                    <a class="btn btn-light-primary me-3" target="_blank" href="{% url 'farmer_admin:farmer_download_csv' %}">
                     <i class="ki-duotone ki-exit-up fs-2">
                         <span class="path1"></span>
                         <span class="path2"></span>
-                    </i>Export</button>
+                    </i>Export to Csv</a>
                     <!--end::Export-->
                     <!--begin::Add user-->
                     {% comment %} <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#kt_modal_add_user"> {% endcomment %}

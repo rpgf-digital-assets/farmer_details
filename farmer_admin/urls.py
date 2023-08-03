@@ -59,6 +59,9 @@ urlpatterns = [
     
     
     path('dashboard/farmer/', views.DashboardFarmerView.as_view(), name="dashboard_farmer_view"),
+    path('farmer/list/download/', views.FarmerCSV.as_view(), name='farmer_download_csv'),
+    path('other_farmer/list/download/', views.OtherFarmerCSV.as_view(), name='other_farmer_download_csv'),
+    path('organic_crop/csv/', views.OrganicCropCsv.as_view(), name="organic_crop_download_csv"),
     
     path('dashboard/vendor/', views.DashboardVendorView.as_view(), name="dashboard_vendor"),
 ]

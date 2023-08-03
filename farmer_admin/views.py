@@ -1,4 +1,5 @@
 import io
+import json
 from typing import Any
 from PIL import Image
 from io import BytesIO
@@ -13,6 +14,8 @@ from django.forms import Form, ValidationError
 from django.forms.models import BaseModelForm
 from django.http import HttpResponse
 from django.db.models import Avg
+from django.db.models import Sum
+from django.db.models import Count
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import (
@@ -26,7 +29,7 @@ from django.views.generic import (
 from farmer.models import ContaminationControl, CostOfCultivation, Farmer, FarmerLand, FarmerOrganicCropPdf, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
 from farmer_admin.forms import ContaminationControlForm, ContaminationControlFormSet, CostOfCultivationForm, CostOfCultivationFormSet, FarmerCreationForm, FarmerLandDetailsCreationFrom, FarmerNutritionManagementForm, FarmerNutritionManagementFormSet, FarmerOrganicCropDetailForm, FarmerPestDiseaseManagementForm, FarmerPestDiseaseManagementFormSet, FarmerSeedDetailsForm, FarmerSeedDetailsFormSet, FarmerSocialCreationFrom, GinningMappingForm, HarvestAndIncomeDetailForm, HarvestAndIncomeDetailFormSet, OtherFarmerCreationForm, SeasonCreateForm, SelectedGinningFarmerForm, SelectedGinningFarmerFormSet, VendorCreateForm, WeedManagementForm, WeedManagementFormSet
 from farmer_admin.mixins import AdminRequiredMixin
-from farmer_admin.utils import generate_certificate
+from farmer_admin.utils import generate_certificate, get_lookup_fields, get_model_field_names, qs_to_dataset
 from farmer_details_app.mixins import CustomLoginRequiredMixin
 from farmer_details_app.models import GinningMapping, SelectedGinningFarmer, Vendor
 from users.models import User
@@ -37,6 +40,7 @@ from formtools.wizard.views import SessionWizardView
 
 from django.forms import forms
 from django.forms.utils import ErrorList
+
 # Create your views here.
 
 
@@ -235,12 +239,20 @@ class FarmerOrganicCropDetailCreateView(CustomLoginRequiredMixin, AdminRequiredM
     template_name = 'farmer_admin/farmer_organic_crop_create_edit.html'
     
     def get_success_url(self):
-        return reverse('farmer_admin:farmer_organic_crop_details', kwargs={'pk': self.kwargs['pk']})
+        return reverse('farmer_admin:farmers_list')
 
     def form_valid(self, form):
+        cleaned_data = form.cleaned_data
         farmer = Farmer.objects.get(user__id=self.kwargs['pk'])
         form.instance.farmer = farmer
-        self.object = form.save()
+        self.object = form.save(commit=False)
+        farmer_land = FarmerLand.objects.get(farmer=farmer)
+        organic_crops = OrganicCropDetails.objects.filter(is_active=True, farmer=farmer)
+        total_organic_crop_area = sum([item.area for item in organic_crops])
+        print("🐍 File: farmer_admin/views.py | Line: 249 | form_valid ~ total_organic_crop_area",total_organic_crop_area)
+        if int(farmer_land.total_organic_land) < int(total_organic_crop_area + cleaned_data['area']):
+            form.add_error('area', ValidationError("Farmer land area is less than the organic crop area"))
+            return super().form_invalid(form)
         return super().form_valid(form)
 
 class FarmerOrganicCropDetailSessionWizardView(CustomLoginRequiredMixin, AdminRequiredMixin, SessionWizardView):
@@ -401,6 +413,16 @@ class FarmerOrganicCropDetailUpdateView(CustomLoginRequiredMixin, AdminRequiredM
 
     def get_success_url(self):
         return reverse('farmer_admin:farmer_organic_crop_details', kwargs={'pk': self.kwargs['pk']})
+
+    def form_valid(self, form):
+        cleaned_data = form.cleaned_data
+        farmer_land = FarmerLand.objects.get(farmer=self.get_object().farmer)
+        organic_crops = OrganicCropDetails.objects.filter(is_active=True, farmer=self.get_object().farmer)
+        total_organic_crop_area = sum([item.area for item in organic_crops]) 
+        if int(farmer_land.total_organic_land) < int(total_organic_crop_area + cleaned_data['area']):
+            form.add_error('area', ValidationError("Farmer land area is less than the organic crop area"))
+            return super().form_invalid(form)
+        return super().form_valid(form)
 
 
 class FarmerOrganicCropDetailsView(CustomLoginRequiredMixin, AdminRequiredMixin, TemplateView):
@@ -661,32 +683,176 @@ class DashboardVendorView(CustomLoginRequiredMixin, AdminRequiredMixin, ListView
         context["completed_mapping_count"] = GinningMapping.objects.filter(
             status=GinningMapping.COMPLETED).count()
         return context
-
-
+from django.core.serializers import serialize
 class DashboardFarmerView(TemplateView):
     template_name = 'farmer_admin/dashboard_farmer.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # map = folium.Map(location=[19.206217, 74.297705], zoom_start=9)
-        # farmer_lands = FarmerLand.objects.all()
-        average_latitude = FarmerLand.objects.aggregate(avg=Avg('latitude'))[
+        average_latitude = FarmerLand.objects.filter(is_active=True).aggregate(avg=Avg('latitude'))[
             'avg']
-        average_longitude = FarmerLand.objects.aggregate(avg=Avg('longitude'))[
+        average_longitude = FarmerLand.objects.filter(is_active=True).aggregate(avg=Avg('longitude'))[
             'avg']
-
-        # for farmer_land in farmer_lands:
-        #     farmer_details_url = reverse('farmer_admin:farmer_overview', kwargs={'pk': farmer_land.farmer.pk})
-        #     html = f"""
-        #     <div class=''>
-        #         <a target='_blank' href='{farmer_details_url}'> Farmer </a>
-        #     </div>
-        #     """
-        #     pp = folium.Html(html, script=True)
-        #     popup = folium.Popup(pp, max_width=400)
-        #     coordinates = (farmer_land.latitude, farmer_land.longitude)
-        #     folium.Marker(coordinates, popup=popup).add_to(map)
-        # context["map"] = map._repr_html_()
         context["average_latitude"] = average_latitude
+        print("🐍 File: farmer_admin/views.py | Line: 697 | get_context_data ~ average_latitude",average_latitude)
         context["average_longitude"] = average_longitude
+
+        # Total Farmer data
+        context["farmers_count"] = Farmer.objects.all().count() + OtherFarmer.objects.filter(is_active=True).count()
+        context["organic_crop_count"] = OrganicCropDetails.objects.filter(is_active=True).count()
+        
+        # Total Organic crop data
+        total_organic_crop_area = OrganicCropDetails.objects.filter(is_active=True).aggregate(total_area=Sum('area'))['total_area']
+        context["total_organic_crop_area"] = total_organic_crop_area
+        
+        # Piechart data
+        piechart_data = OrganicCropDetails.objects.filter(is_active=True).values('name').annotate(category=Count("name"), value=Sum('area')).order_by()
+        piechart_data = [{"value": chart['value'], "category": chart['name']} for chart in piechart_data]
+        context["piechart"] = json.dumps(piechart_data)
+
+        # Nutrition Bar graph data
+        nutrient_management_fym = NutrientManagement.objects.filter(is_active=True, type=NutrientManagement.FYM) \
+                                .aggregate(total_fertilizer_quantity=Sum('quantity_of_fertilizer'), 
+                                            total_on_farm_quantity=Sum('quantity_used'), total_off_farm_quantity=Sum('quantity_sourced'))
+        nutrient_management_vermicompost = NutrientManagement.objects.filter(is_active=True, type=NutrientManagement.VERMICOMPOST) \
+                                .aggregate(total_fertilizer_quantity=Sum('quantity_of_fertilizer'), 
+                                            total_on_farm_quantity=Sum('quantity_used'), total_off_farm_quantity=Sum('quantity_sourced'))
+        nutrient_management_compost = NutrientManagement.objects.filter(is_active=True, type=NutrientManagement.COMPOST) \
+                                .aggregate(total_fertilizer_quantity=Sum('quantity_of_fertilizer'), 
+                                            total_on_farm_quantity=Sum('quantity_used'), total_off_farm_quantity=Sum('quantity_sourced'))
+        nutrition_bar_graph_data = [{
+            "year": "On Farm",
+            "vermicompost": nutrient_management_vermicompost['total_fertilizer_quantity'],
+            "vermicompost-used": nutrient_management_vermicompost['total_on_farm_quantity'],
+            "compost": nutrient_management_compost['total_fertilizer_quantity'],
+            "compost-used": nutrient_management_compost['total_on_farm_quantity'],
+            "FYM": nutrient_management_fym['total_fertilizer_quantity'],
+            "FYM-used": nutrient_management_fym['total_on_farm_quantity'],
+        },{
+            "year": "Outsourced",
+            "vermicompost": nutrient_management_vermicompost['total_fertilizer_quantity'],
+            "vermicompost-used": nutrient_management_vermicompost['total_off_farm_quantity'],
+            "compost": nutrient_management_compost['total_fertilizer_quantity'],
+            "compost-used": nutrient_management_compost['total_off_farm_quantity'],
+            "FYM": nutrient_management_fym['total_fertilizer_quantity'],
+            "FYM-used": nutrient_management_fym['total_off_farm_quantity'],
+        }]
+
+        context["nutrition_bar_graph_data"] = json.dumps(nutrition_bar_graph_data)
+
+        # Pest and Disease Bar graph data
+        pest_management_fym = PestDiseaseManagement.objects.filter(is_active=True, source_of_input=NutrientManagement.FYM) \
+                                .aggregate(total_fertilizer_quantity=Sum('quantity_of_input'), 
+                                            total_on_farm_quantity=Sum('quantity_used'), total_off_farm_quantity=Sum('quantity_sourced'))
+        pest_management_vermicompost = PestDiseaseManagement.objects.filter(is_active=True, source_of_input=NutrientManagement.VERMICOMPOST) \
+                                .aggregate(total_fertilizer_quantity=Sum('quantity_of_input'), 
+                                            total_on_farm_quantity=Sum('quantity_used'), total_off_farm_quantity=Sum('quantity_sourced'))
+        pest_management_compost = PestDiseaseManagement.objects.filter(is_active=True, source_of_input=NutrientManagement.COMPOST) \
+                                .aggregate(total_fertilizer_quantity=Sum('quantity_of_input'), 
+                                            total_on_farm_quantity=Sum('quantity_used'), total_off_farm_quantity=Sum('quantity_sourced'))
+        pest_bar_graph_data = [{
+            "year": "On Farm",
+            "vermicompost": pest_management_vermicompost['total_fertilizer_quantity'],
+            "vermicompost-used": pest_management_vermicompost['total_on_farm_quantity'],
+            "compost": pest_management_compost['total_fertilizer_quantity'],
+            "compost-used": pest_management_compost['total_on_farm_quantity'],
+            "FYM": pest_management_fym['total_fertilizer_quantity'],
+            "FYM-used": pest_management_fym['total_on_farm_quantity'],
+        },{
+            "year": "Outsourced",
+            "vermicompost": pest_management_vermicompost['total_fertilizer_quantity'],
+            "vermicompost-used": pest_management_vermicompost['total_off_farm_quantity'],
+            "compost": pest_management_compost['total_fertilizer_quantity'],
+            "compost-used": pest_management_compost['total_off_farm_quantity'],
+            "FYM": pest_management_fym['total_fertilizer_quantity'],
+            "FYM-used": pest_management_fym['total_off_farm_quantity'],
+        }]
+
+        context["pest_bar_graph_data"] = json.dumps(pest_bar_graph_data)
+
         return context
+
+
+import csv
+from io import StringIO
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.files import File
+from django.http import HttpResponse, StreamingHttpResponse
+from django.utils.text import slugify
+from django.views.generic import View
+
+
+class Echo:
+    """An object that implements just the write method of the file-like
+    interface.
+    """
+    def write(self, value):
+        """Write the value by returning it, instead of storing in a buffer."""
+        return value
+
+
+class FarmerCSV(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        output = []
+        response = HttpResponse(content_type='text/csv')
+        writer = csv.writer(response)
+        query_set = Farmer.objects.all()
+        print("🐍 File: farmer_admin/views.py | Line: 800 | get ~ query_set",query_set)
+        #Header
+        writer.writerow(['Name', 'gender', 'Birth Date', 'Aadhar Number', 'Registration Number', 'Date of joining the program', 
+                        'village', 'taluka', 'district', 'state', 'country'])
+        for farmer in query_set:
+            output.append([farmer.user.user_display_name, farmer.gender, farmer.birth_date, 
+                           farmer.aadhar_number, farmer.registration_number, farmer.date_of_joining_of_program,
+                           farmer.village, farmer.taluka, farmer.district, farmer.state, farmer.country])
+        #CSV Data
+        writer.writerows(output)
+        return response
+    
+
+class OtherFarmerCSV(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        output = []
+        response = HttpResponse(content_type='text/csv')
+        writer = csv.writer(response)
+        query_set = OtherFarmer.objects.filter(is_active=True)
+        #Header
+        writer.writerow(['Name', 'gender', 'Owned Land', 'Identification Number', 'Latitude', 'Longitude', 
+                        'village', 'taluka', 'district', 'state', 'country'])
+        for farmer in query_set:
+            output.append([farmer.user_display_name, farmer.gender, farmer.owned_land, 
+                           farmer.identification_number, farmer.latitude, farmer.longitude,
+                           farmer.village, farmer.taluka, farmer.district, farmer.state])
+        #CSV Data
+        writer.writerows(output)
+        return response
+
+
+class OrganicCropCsv(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        output = []
+        response = HttpResponse(content_type='text/csv')
+        writer = csv.writer(response)
+        organic_crops = OrganicCropDetails.objects.filter(is_active=True)
+        organic_crop_ids = OrganicCropDetails.objects.filter(is_active=True).values_list('id', flat=True)
+        seeds = SeedDetails.objects.filter(is_active=True, organic_crop__in=organic_crop_ids)
+        nutrients = NutrientManagement.objects.filter(is_active=True, organic_crop__in=organic_crop_ids)
+        pests = PestDiseaseManagement.objects.filter(is_active=True, organic_crop__in=organic_crop_ids)
+        weeds = WeedManagement.objects.filter(is_active=True, organic_crop__in=organic_crop_ids)
+        harvests = HarvestAndIncomeDetails.objects.filter(is_active=True, organic_crop__in=organic_crop_ids)
+        costs = CostOfCultivation.objects.filter(is_active=True, organic_crop__in=organic_crop_ids)
+        contaminations = ContaminationControl.objects.filter(is_active=True, organic_crop__in=organic_crop_ids)
+
+        #Header
+        writer.writerow(['Name', 'Farmer Name', "Type", "Area", "Date of sowing", "Expected date of harvest", "Expected yield in kg", "Expected productivity in kg/ha", "Season", "Season Year"])
+        for organic_crop in organic_crops:
+            output.append([organic_crop.name, organic_crop.farmer.user.user_display_name, organic_crop.type, organic_crop.area, organic_crop.date_of_sowing, organic_crop.expected_date_of_harvesting, organic_crop.expected_yield, organic_crop.expected_productivity, organic_crop.season.name, organic_crop.year])
+        
+        writer.writerows(output)
+        writer.writerow([])
+
+        seed_fields = get_model_field_names(SeedDetails, ignore_fields=['id', 'is_active'])
+        writer.writerow(seed_fields)
+        output.append(qs_to_dataset(seeds, fields=seed_fields))
+        #CSV Data
+        return response
