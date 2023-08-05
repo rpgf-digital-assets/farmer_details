@@ -197,3 +197,5 @@ elasticsearch-7.13.4-windows-x86_64
 docker-compose.yml
 Dockerfile
 custom_logs
+
+*.docx

@@ -264,7 +264,6 @@ crossorigin=""></script>
             }
         })
         .then(function (data) {
-            console.log(data)
             if (data.length > 0){
                 data.forEach(coordinate => {
                     var farmer_land_marker = new L.marker([coordinate.latitude, coordinate.longitude]).addTo(map).on('click', markerOnClick)
@@ -417,7 +416,6 @@ crossorigin=""></script>
             }
         })
         .then((response) => {
-            console.log('data', response)
             if (response.status === 'success'){
                 for(var index=0; index < response.data.length; index++){
                     var newOption = new Option(response.data[index].name, response.data[index].name, false, false);
@@ -448,7 +446,6 @@ crossorigin=""></script>
             }
         })
         .then((response) => {
-            console.log('data', response)
             if (response.status === 'success'){
                 var element = document.getElementById('kt_apexcharts_3');
 
@@ -802,7 +799,6 @@ crossorigin=""></script>
             );
 
             var pest_bar_graph_data =  {{pest_bar_graph_data|safe}}
-            console.log('pest_bar_graph_data', pest_bar_graph_data)
             let data = pest_bar_graph_data
 
             // Create axes
@@ -981,7 +977,11 @@ crossorigin=""></script>
                         series: [{
                             name: 'Costs',
                             data: response.data.y_axis
-                        },],
+                        },
+                        {
+                            name: 'Average Costs',
+                            data: response.data.average_costs
+                        }],
                         chart: {
                             fontFamily: 'inherit',
                             type: 'bar',

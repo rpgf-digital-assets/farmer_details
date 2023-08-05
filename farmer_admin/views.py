@@ -695,7 +695,6 @@ class DashboardFarmerView(TemplateView):
         average_longitude = FarmerLand.objects.filter(is_active=True).aggregate(avg=Avg('longitude'))[
             'avg']
         context["average_latitude"] = average_latitude
-        print("🐍 File: farmer_admin/views.py | Line: 697 | get_context_data ~ average_latitude",average_latitude)
         context["average_longitude"] = average_longitude
 
         # Total Farmer data
@@ -853,7 +852,7 @@ class OrganicCropCsv(LoginRequiredMixin, View):
         writer = csv.writer(response)
         organic_crops = OrganicCropDetails.objects.filter(is_active=True)
         organic_crop_ids = OrganicCropDetails.objects.filter(is_active=True).values_list('id', flat=True)
-        seeds = SeedDetails.objects.filter(is_active=True, organic_crop__in=organic_crop_ids)
+        seeds = SeedDetails.objects.filter(is_active=True, organic_crop__in=organic_crop_ids).select_related('organic_crop')
         nutrients = NutrientManagement.objects.filter(is_active=True, organic_crop__in=organic_crop_ids)
         pests = PestDiseaseManagement.objects.filter(is_active=True, organic_crop__in=organic_crop_ids)
         weeds = WeedManagement.objects.filter(is_active=True, organic_crop__in=organic_crop_ids)
@@ -861,16 +860,23 @@ class OrganicCropCsv(LoginRequiredMixin, View):
         costs = CostOfCultivation.objects.filter(is_active=True, organic_crop__in=organic_crop_ids)
         contaminations = ContaminationControl.objects.filter(is_active=True, organic_crop__in=organic_crop_ids)
 
-        #Header
+        # Organic crops
         writer.writerow(['Name', 'Farmer Name', "Type", "Area", "Date of sowing", "Expected date of harvest", "Expected yield in kg", "Expected productivity in kg/ha", "Season", "Season Year"])
         for organic_crop in organic_crops:
             output.append([organic_crop.name, organic_crop.farmer.user.user_display_name, organic_crop.type, organic_crop.area, organic_crop.date_of_sowing, organic_crop.expected_date_of_harvesting, organic_crop.expected_yield, organic_crop.expected_productivity, organic_crop.season.name, organic_crop.year])
-        
         writer.writerows(output)
-        writer.writerow([])
 
-        seed_fields = get_model_field_names(SeedDetails, ignore_fields=['id', 'is_active'])
-        writer.writerow(seed_fields)
-        output.append(qs_to_dataset(seeds, fields=seed_fields))
-        #CSV Data
+        model_queryset_mapping = {SeedDetails: seeds, NutrientManagement: nutrients, PestDiseaseManagement: pests, WeedManagement: weeds, 
+                      HarvestAndIncomeDetails: harvests, CostOfCultivation: costs, ContaminationControl: contaminations}
+        
+        for model in model_queryset_mapping.keys():
+            output = []
+            writer.writerow([])
+            fields = ['organic_crop__name', *get_model_field_names(model, ignore_fields=['id', 'is_active', 'organic_crop'])]
+            writer.writerow(fields)
+            dataset = qs_to_dataset(model_queryset_mapping[model], fields=fields)
+            for data in dataset:
+                output.append(data.values())
+            writer.writerows(output)
+
         return response

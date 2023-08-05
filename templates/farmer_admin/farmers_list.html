@@ -51,8 +51,15 @@ RPGF Farmers
                     <i class="ki-duotone ki-exit-up fs-2">
                         <span class="path1"></span>
                         <span class="path2"></span>
-                    </i>Export to Csv</a>
-                    <!--end::Export-->
+                    </i>Farmers to CSV</a>
+
+                    <a class="btn btn-light-primary me-3" target="_blank" href="{% url 'farmer_admin:organic_crop_download_csv' %}">
+                        <i class="ki-duotone ki-exit-up fs-2">
+                            <span class="path1"></span>
+                            <span class="path2"></span>
+                        </i>All Crop to CSV
+                    </a>
+                
                     <!--begin::Add user-->
                     {% comment %} <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#kt_modal_add_user"> {% endcomment %}
                     <a class="btn btn-primary me-3" href="{% url 'farmer_admin:farmer_create' %}">
