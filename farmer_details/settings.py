@@ -24,6 +24,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-35&s6)5ot1t4hmcz7gt68ffy*m^jwdapf#5^n@$0f=elop#6__'
 
+environment = os.environ.get('FARMER_ENVIRONMENT', 'DEV')
+
+if environment == 'DEV':
+    from .dev_settings import *
+elif environment == 'PROD':
+    from .prod_settings import *
+
+
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -82,16 +91,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'farmer_details.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -146,13 +145,6 @@ AUTHENTICATION_BACKENDS = ['users.backends.EmailAuthenticationBackend',
                            ]
 LOGIN_REDIRECT_URL = 'farmer_details_app:index'
 LOGOUT_URL = 'users:logout'
-
-######################### MEDIA CONFIGURATION #################
-
-
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
-
 
 
 DEFAULT_PASSWORD = 'Abcd@1234'
