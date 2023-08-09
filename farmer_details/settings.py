@@ -165,49 +165,49 @@ REST_FRAMEWORK = {
 }
 
 
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'formatters': {
-#         'file': {
-#             'format': '{levelname} {asctime} {module} \t {message}',
-#             'style': '{',
-#         },
-#         'console': {
-#             'format': '{levelname} {message}',
-#             'style': '{',
-#         },
-#     },
-#     'handlers': {
-#         'console': {
-#             'level': 'DEBUG',
-#             'class': 'logging.StreamHandler',
-#             'formatter': 'console'
-#         },
-#         'file': {
-#             'level': 'DEBUG',
-#             'class': 'logging.FileHandler',
-#             'formatter': 'file',
-#             'filename': os.path.join(BASE_DIR, 'debug_logs/debug.log'),
-#         },
-#     },
-#     'loggers': {
-#         '': {
-#             'handlers': ['console', 'file'],
-#             'propagate': True,
-#         },
-#         'send_sms_logger': {
-#             'level': 'DEBUG',
-#             'handlers': ['console', 'file'],
-#             'propagate': True,
-#         },
-#         'debugging': {
-#             'level': 'DEBUG',
-#             'handlers': ['console', 'file'],
-#             'propagate': True,
-#         }
-#     }
-# }
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'file': {
+            'format': '{levelname} {asctime} {module} \t {message}',
+            'style': '{',
+        },
+        'console': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'console'
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'formatter': 'file',
+            'filename': os.path.join(BASE_DIR, 'debug_logs/debug.log'),
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console', 'file'],
+            'propagate': True,
+        },
+        'send_sms_logger': {
+            'level': 'DEBUG',
+            'handlers': ['console', 'file'],
+            'propagate': True,
+        },
+        'debugging': {
+            'level': 'DEBUG',
+            'handlers': ['console', 'file'],
+            'propagate': True,
+        }
+    }
+}
 
 
 ##################### SIMPLE JWT SETTINGS ##########################
