@@ -35,7 +35,6 @@ elif environment == 'PROD':
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', 'theartisanre.com', 'www.theartisanre.com']
 
