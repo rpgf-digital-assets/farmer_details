@@ -1,4 +1,6 @@
 import os
+from env import *
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 DEBUG = False
@@ -22,8 +24,7 @@ DATABASES = {
 }
 
 
-AWS_STORAGE_BUCKET_NAME = 'farm-portal'
-AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
+AWS_S3_CUSTOM_DOMAIN = f"{FARMER_AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
 PUBLIC_MEDIA_LOCATION = 'media'
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{PUBLIC_MEDIA_LOCATION}/'
 DEFAULT_FILE_STORAGE = 'farmer_details.storage_backends.MediaStorage'
