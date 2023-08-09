@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-35&s6)5ot1t4hmcz7gt68ffy*m^jwdapf#5^n@$0f=elop#6__'
 
-environment = os.environ.get('FARMER_ENVIRONMENT', 'DEV')
+environment = FARMER_ENVIRONMENT
 
 if environment == 'DEV':
     from .dev_settings import *
