@@ -36,7 +36,7 @@ elif environment == 'PROD':
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', 'theartisanre.com', 'www.theartisanre.com']
 
 
 # Application definition
@@ -165,6 +165,51 @@ REST_FRAMEWORK = {
 }
 
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'file': {
+            'format': '{levelname} {asctime} {module} \t {message}',
+            'style': '{',
+        },
+        'console': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'console'
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'formatter': 'file',
+            'filename': os.path.join(BASE_DIR, 'debug_logs/debug.log'),
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console', 'file'],
+            'propagate': True,
+        },
+        'send_sms_logger': {
+            'level': 'DEBUG',
+            'handlers': ['console', 'file'],
+            'propagate': True,
+        },
+        'debugging': {
+            'level': 'DEBUG',
+            'handlers': ['console', 'file'],
+            'propagate': True,
+        }
+    }
+}
+
+
 ##################### SIMPLE JWT SETTINGS ##########################
 
 SIMPLE_JWT = {
@@ -187,3 +232,10 @@ SIMPLE_JWT = {
     'AUTH_COOKIE_SAMESITE': 'Lax',
 
 }
+
+
+CSRF_TRUSTED_ORIGINS = ['https://theartisanre.com', 'https://www.theartisanre.com']
+
+
+AWS_ACCESS_KEY_ID = 'AKIA2CPKJQSKHJ37EUWO'
+AWS_SECRET_ACCESS_KEY = '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'
