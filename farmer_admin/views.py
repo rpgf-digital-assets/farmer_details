@@ -339,7 +339,7 @@ class FarmerOrganicCropDetailSessionWizardView(CustomLoginRequiredMixin, AdminRe
         cleaned_data_form_6 = all_cleaned_data[6]
         cleaned_data_form_7 = all_cleaned_data[7]
         farmer_land = FarmerLand.objects.get(farmer__user__id=self.kwargs['pk'])
-        if farmer_land.total_land < cleaned_data_form_0['area']:
+        if farmer_land.total_organic_land < cleaned_data_form_0['area']:
             messages.warning(self.request, "Farmer land area is less than the crop area")
             return self.render_revalidation_failure(0, form_list[0])
 
@@ -417,7 +417,8 @@ class FarmerOrganicCropDetailUpdateView(CustomLoginRequiredMixin, AdminRequiredM
     def form_valid(self, form):
         cleaned_data = form.cleaned_data
         farmer_land = FarmerLand.objects.get(farmer=self.get_object().farmer)
-        organic_crops = OrganicCropDetails.objects.filter(is_active=True, farmer=self.get_object().farmer)
+        instance = self.get_object()
+        organic_crops = OrganicCropDetails.objects.filter(is_active=True, farmer=self.get_object().farmer).exclude(id=instance.pk)
         total_organic_crop_area = sum([item.area for item in organic_crops]) 
         if int(farmer_land.total_organic_land) < int(total_organic_crop_area + cleaned_data['area']):
             form.add_error('area', ValidationError("Farmer land area is less than the organic crop area"))

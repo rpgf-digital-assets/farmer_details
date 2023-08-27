@@ -46,20 +46,27 @@ class BaseSelectedFarmerFormSet(BaseFormSet):
         if any(self.errors):
             # Don't bother validating the formset unless each form is valid on its own
             return
-        selected_farmer_list = []
+        distinct_inbound_quantity_mapping = {}
         for form in self.forms:
-
             if self.can_delete and self._should_delete_form(form):
                 continue
-            farmer = form.cleaned_data.get("farmer")
-            farmer_name = form.cleaned_data.get("farmer_name")
+            inbound = form.cleaned_data.get("inbound")
             quantity = form.cleaned_data.get("quantity")
-            if (farmer, farmer_name, quantity) in selected_farmer_list:
-                raise ValidationError(
-                    "Selected farmers in a set must be distinct.")
-            selected_farmer_list.append((farmer, farmer_name, quantity))
-            if not farmer and not farmer_name and not quantity:
-                raise ValidationError("Cannot submit an empty form")
+            # if distinct_inbound_quantity_mapping[inbound]:
+            distinct_inbound_quantity_mapping[inbound] += quantity
+            # else:
+            #     distinct_inbound_quantity_mapping[inbound] = quantity
+
+            # if (inbound, quantity) in selected_inbound_list:
+            #     raise ValidationError(
+            #         "Selected farmers in a set must be distinct.")
+            # selected_inbound_list.append((inbound, quantity))
+            # if not farmer and not farmer_name and not quantity:
+            #     raise ValidationError("Cannot submit an empty form")
+
+        print("🐍 File: farmer_admin/forms.py | Line: 68 | clean ~ distinct_inbound_quantity_mapping",distinct_inbound_quantity_mapping)
+
+        
 
 
 class BaseContaminationFormSet(BaseFormSet):
@@ -149,7 +156,9 @@ class FarmerCreationForm(BaseCreationForm):
                          }))
     phone = CharField(label='Phone Number', validators=[validate_phonenumber],
                       widget=TextInput(attrs={
-                          'placeholder': 'Phone Number',
+                            'placeholder': 'Phone Number',
+                            'autocomplete':"off",
+                            "data-intl-tel-input-id":"0"
                       }))
 
     class Meta:
@@ -159,8 +168,10 @@ class FarmerCreationForm(BaseCreationForm):
     field_order = ['first_name', 'last_name', 'gender', 'birth_date', 'aadhar_number', 'phone', 'registration_number', 'date_of_joining_of_program',
                    'village', 'taluka', 'district', 'state', 'profile_image']
 
+
     def clean(self):
         cleaned_data = super().clean()
+        print("🐍 File: farmer_admin/forms.py | Line: 178 | clean ~ cleaned_data",cleaned_data)
         validation_errors = []
         first_name = cleaned_data.get('first_name')
         last_name = cleaned_data.get('last_name')
@@ -168,6 +179,7 @@ class FarmerCreationForm(BaseCreationForm):
         birth_date = cleaned_data.get('birth_date')
         aadhar_number = cleaned_data.get('aadhar_number')
         phone = cleaned_data.get('phone')
+        print("🐍 File: farmer_admin/forms.py | Line: 178 | clean ~ phone",phone)
         registration_number = cleaned_data.get('registration_number')
         date_of_joining_of_program = cleaned_data.get(
             'date_of_joining_of_program')
@@ -214,7 +226,7 @@ class FarmerSocialCreationFrom(BaseCreationForm):
         model = FarmerSocial
         exclude = ['farmer']
 
-    field_order = ['education', 'number_of_members_gt_18', 'number_of_members_lt_18', 'total_family_members',
+    field_order = ['education', 'number_of_members_gt_18', 'number_of_members_lt_18',
                    'number_of_members_attending_school', 'housing', 'drinking_water_source',
                    'distance_from_water_sources', 'electrification', 'is_toilet_available', 'life_or_health_insurance', 'crop_insurance',
                    'crop_loan_taken', 'agriculture_loan_taken', 'cooking_fuel', 'mobile_phone_type',
@@ -251,7 +263,7 @@ class FarmerLandDetailsCreationFrom(BaseCreationForm):
 
     class Meta:
         model = FarmerLand
-        exclude = ['farmer']
+        exclude = ['farmer', 'total_organic_land']
 
     def clean(self):
         cleaned_data = super().clean()
@@ -308,7 +320,7 @@ class FarmerOrganicCropDetailForm(BaseCreationForm):
 
     class Meta:
         model = OrganicCropDetails
-        exclude = ['farmer']
+        exclude = ['farmer', 'expected_productivity']
 
 
 class FarmerSeedDetailsForm(BaseCreationForm):

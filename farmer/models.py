@@ -46,7 +46,7 @@ class Farmer(models.Model):
     gender = models.CharField(_("Gender"), max_length=30, choices=GENDER_CHOICES, default=UNDEFINED)
     birth_date = models.DateField(_("BirthDate"))
     aadhar_number = models.PositiveIntegerField(_("Aadhar Number"))
-    registration_number = models.PositiveIntegerField(_("Farmer Tracnet Registration Number"))
+    registration_number = models.CharField(_("Farmer Tracenet Registration Number"), max_length=255)
     date_of_joining_of_program = models.DateField(_("Date of Joining of Program"))
     village = models.CharField(_("Village"), max_length=255)
     taluka = models.CharField(_("Taluka"), max_length=255)
@@ -122,12 +122,11 @@ class FarmerSocial(BaseModel):
     education = models.ForeignKey(FarmerEducation, verbose_name=_("Education"), related_name='social', on_delete=models.PROTECT)
     number_of_members_gt_18 = models.PositiveIntegerField(_("Number of members greater than 18"))
     number_of_members_lt_18 = models.PositiveIntegerField(_("Number of members less than 18"))
-    total_family_members = models.PositiveIntegerField(_("Total family members"))
     number_of_members_attending_school = models.PositiveIntegerField(_("Number of members attending school"))
     HOUSING_CHOICES = [
-        ('PUCCA', 'Puccs'),
-        ('SEMI_PUCCA', 'Semi-Puccs'),
-        ('KACHA', 'Kacha')
+        ('Pukka', 'Pukka'),
+        ('Semi pukka', 'Semi pukka'),
+        ('Kucchha', 'Kucchha')
     ]
     housing = models.CharField(max_length=100, choices=HOUSING_CHOICES)
     electrification = models.BooleanField(_("Is there electricity?"))
@@ -160,9 +159,13 @@ class FarmerSocial(BaseModel):
         ('SMARTPHONE_WITH_INTERNET', 'Smartphone with internet'),
     ]
     mobile_phone_type = models.CharField(_("Mobile phone type"), max_length=100, choices=MOBILE_TYPES)
-    bank_account_number = models.PositiveIntegerField(_("Bank account number"))
-    bank_account_name = models.CharField(_("Bank account name"), max_length=100)
-    bank_ifsc_code = models.CharField(_("Bank ifsc code"), max_length=100)
+    bank_account_number = models.PositiveIntegerField(_("Bank account number"), null=True, blank=True)
+    bank_account_name = models.CharField(_("Bank account name"), max_length=100, null=True, blank=True)
+    bank_ifsc_code = models.CharField(_("Bank ifsc code"), max_length=100, null=True, blank=True)
+
+    @property
+    def total_family_members(self):
+        return self.number_of_members_gt_18 + self.number_of_members_lt_18
     
     
 class FarmerLivestock(BaseModel):
@@ -178,9 +181,9 @@ class FarmerLivestock(BaseModel):
 
 class FarmerLand(BaseModel):
     farmer = models.ForeignKey(Farmer, related_name='land', on_delete=models.PROTECT)
-    owned_land = models.PositiveIntegerField(_("Owned land in Hectare"))
-    leased_land = models.PositiveIntegerField(_("Leased land in Hectare"))
-    land_under_irrigation = models.PositiveIntegerField(_("Land under irrigation in Hectare"))
+    owned_land = models.FloatField(_("Owned land in Hectare"))
+    leased_land = models.FloatField(_("Leased land in Hectare"))
+    land_under_irrigation = models.FloatField(_("Land under irrigation in Hectare"))
     IRRIGATION_CHOICES = [
         ('BOREWELL', 'Borewell'),
         ('OPEN_WELL', 'Open Well'),
@@ -197,7 +200,7 @@ class FarmerLand(BaseModel):
         ('OTHERS', 'Others'),
     ]
     type_of_irrigation = models.CharField(_("Type of irregation"), max_length=100, choices=IRRIGATION_TYPE_CHOICES)
-    total_organic_land = models.PositiveIntegerField(_("Total organic Land in hectares"))
+    total_organic_land = models.FloatField(_("Total organic Land in hectares"))
     number_of_plots_under_organic = models.PositiveIntegerField(_("Number of plots under organic management"), )
     PRODUCTION_SYSTEM_CHOICES = [
         ('PARALLEL', 'Parallel'),
@@ -208,8 +211,8 @@ class FarmerLand(BaseModel):
     organic_farming_start_year = models.PositiveIntegerField(_("Organ Farming Start Year"), )
     latitude = models.FloatField(_("Latitude of land"))
     longitude = models.FloatField(_("Longitude of land"))
-    image = models.ImageField(verbose_name=_("Image of the land"), upload_to="farmer_land_images")
-    survey_number = models.PositiveIntegerField(_("Survey Number"))
+    image = models.ImageField(verbose_name=_("Image of the land"), upload_to="farmer_land_images", null=True, blank=True)
+    survey_number = models.CharField(_("Survey Number"), max_length=255)
     soil_test_conducted = models.BooleanField(_('Is soil testing done?'), )
     last_conducted = models.PositiveIntegerField(_("Last Soil test conducted in year"), null=True, blank=True)
     soil_type = models.CharField(_("Soil type"), max_length=255, null=True, blank=True)
@@ -219,9 +222,10 @@ class FarmerLand(BaseModel):
     soil_drainage = models.CharField(_("Soil drainage"), max_length=255, null=True, blank=True)
     soil_moisture = models.CharField(_("Soil Pressure"), max_length=255, null=True, blank=True)
     
-    @property
-    def total_land(self):
-        return self.owned_land + self.leased_land
+    
+    def save(self, *args, **kwargs):
+        self.total_organic_land = self.owned_land + self.leased_land
+        super(FarmerLand, self).save(*args, **kwargs)
     
 
 class Season(BaseModel):
@@ -245,14 +249,18 @@ class OrganicCropDetails(BaseModel):
     area = models.FloatField(_("Area of land in hectare"))
     date_of_sowing = models.DateField(_("Date of sowing of crop"))
     expected_date_of_harvesting = models.DateField(_("Expected date of harvest"))
-    expected_yield = models.PositiveIntegerField(_("Expected yield in kg"))
-    expected_productivity = models.PositiveIntegerField(_("Expected productivity in kg/ha"))
+    expected_yield = models.FloatField(_("Expected yield in kg"))
+    expected_productivity = models.FloatField(_("Expected Productivity"))
     season = models.ForeignKey(Season, verbose_name=_("Season"), related_name='organic_crop', on_delete=models.PROTECT)
     year = models.PositiveIntegerField(_("Season Year"), validators=[MaxValueValidator(9999)])
     
     def __str__(self):
         return f"{self.name}"
     
+    def save(self, *args, **kwargs):
+        self.expected_productivity = self.expected_yield / self.area
+        super(OrganicCropDetails, self).save(*args, **kwargs)
+
     
 class SeedDetails(BaseModel):
     organic_crop = models.ForeignKey(OrganicCropDetails, related_name='seed', on_delete=models.PROTECT)

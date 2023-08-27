@@ -10,6 +10,7 @@ def validate_phonenumber(phone):
     """
     try:
         formatted_phone = phonenumbers.parse(phone)
+        print("🐍 File: users/validators.py | Line: 13 | validate_phonenumber ~ formatted_phone",formatted_phone)
         assert phonenumbers.is_valid_number(formatted_phone)
     except (phonenumbers.NumberParseException, AssertionError):
         raise ValidationError(
