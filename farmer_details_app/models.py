@@ -41,7 +41,7 @@ class Vendor(BaseModel):
     date_of_joining = models.DateField(_("Date of joining"))
 
     profile_image = models.ImageField(
-        _("Profile image"), upload_to='vendor/profile_image')
+        _("Profile image"), upload_to='vendor/profile_image', default="farmer_profile_image/blank-profile-picture.png")
 
     SPINNING_VENDOR = 'SPINNING_VENDOR'
     GINNING_VENDOR = 'GINNING_VENDOR'
@@ -59,15 +59,15 @@ class Vendor(BaseModel):
     phone = models.CharField(verbose_name=_("Phone Number"),
                              validators=[validate_phonenumber], max_length=17, unique=True)
     ID_TYPE_CHOICES = [
-        ('AADHAR_CARD', 'Aadhar Card'),
+        ('AADHAR_CARD', 'Aadhar card-Registration certification'),
         ('PAN_CARD', 'Pan Card'),
-        ('DRIVERS_LICENSE', 'Drivers License'),
+        ('DRIVERS_LICENSE', 'Factory license-Driving license'),
         ('OTHER', 'Other'),
     ]
     identification_type = models.CharField(verbose_name=_(
         "Identification Type"), max_length=100, choices=ID_TYPE_CHOICES, null=True, blank=True)
-    identification_number = models.IntegerField(
-        verbose_name=_("Identification Number"), null=True, blank=True)
+    identification_number = models.CharField(
+        verbose_name=_("Identification Number"),max_length=255, null=True, blank=True)
     identification_file = models.FileField(verbose_name=_(
         "Identification File"), upload_to='vendor/identification', null=True, blank=True)
 

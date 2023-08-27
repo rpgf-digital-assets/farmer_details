@@ -464,6 +464,32 @@
                                 <!--end::Col-->
                             </div>
                             <!--end::Row-->
+                            {% elif field_name == 'Number of members less than 18' %}
+                            
+                            <!--begin::Row-->
+                            <div class="row mb-7">
+                                <!--begin::Label-->
+                                <label class="col-lg-4 fw-semibold text-muted">{{field_name}}</label>
+                                <!--end::Label-->
+                                <!--begin::Col-->
+                                <div class="col-lg-8">
+                                    <span class="fw-bold fs-6 text-dark">{{farmer.social.all.first.number_of_members_lt_18}}</span>
+                                </div>
+                                <!--end::Col-->
+                            </div>
+                            <!--end::Row-->
+                            <!--begin::Row-->
+                            <div class="row mb-7">
+                                <!--begin::Label-->
+                                <label class="col-lg-4 fw-semibold text-muted">Total number of family members</label>
+                                <!--end::Label-->
+                                <!--begin::Col-->
+                                <div class="col-lg-8">
+                                    <span class="fw-bold fs-6 text-dark">{{farmer.social.all.first.total_family_members}}</span>
+                                </div>
+                                <!--end::Col-->
+                            </div>
+                            <!--end::Row-->
                             {% else %}
                             <!--begin::Row-->
                             <div class="row mb-7">
@@ -524,7 +550,7 @@
                 <!--begin::Card header-->
                 <div id="land_collapsible" class="collapse show">
                     {% if farmer.land.all.first %}
-                        {% model_to_dict farmer.land.all.first as farmer_land %}
+                        {% model_to_dict farmer.land.all.first as farmer_land  %}
                         {% include 'utils/show_values_from_model_dict.html' with model_dict=farmer_land.items %}
                     {% endif %}
                 </div>

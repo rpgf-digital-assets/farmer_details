@@ -6,9 +6,150 @@
 {% endblock title %}
 
 
+{% block css %}
+{{block.super}}
+
+<link href="{% static 'assets/css/intlTelInput.css' %}" rel="stylesheet" type="text/css" />
+    
+
+<style>	
+	.iti { width: 100%; }
+    .iti__country-list{
+        z-index: 10;
+    }
+    
+</style>
+
+{% endblock css %}
+
+{% block content %}
+<!--begin::Post-->
+<div class="content flex-row-fluid" id="kt_content">
+    <!--begin::Card-->
+    <div class="card">
+        <!--begin::Card header-->
+        <div class="card-header border-0 pt-6">
+        </div>
+        <!--end::Card header-->
+        <!--begin::Card body-->
+        <div class="card-body py-4">
+            <!--begin::Form-->
+            <form id="farmer_form" class="form" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <!--begin::form body-->
+                <div class="row">
+                {% for field in form.visible_fields %}
+                {% if field.name == 'phone' %}
+                <div class="form-check form-floating mb-7 col-xl-6 ps-3">
+                    <div class="form-group">
+                        {{field}}
+                        <div class="text-danger">
+                            {{ field.errors }}
+                        </div>
+                    </div>
+                </div>
+                {% elif field.field.widget.input_type == 'checkbox' %}
+                <div class="form-check form-floating mb-7 col-xl-6">
+                    <div class="row">
+                        {{field}}
+                        <label class="form-check-label" for="{{field.auto_id}}">
+                            {{field.label}}
+                        </label>
+                    </div>
+                    <div class="text-danger">
+                        {{ field.errors }}
+                    </div>
+                </div>
+                {% else %}
+                <!--begin::Input group-->
+                <div class="form-floating mb-7 col-xl-6">
+                    <!--begin::Input-->
+                    {{field}}
+                    <!--end::Input-->
+                    <!--begin::Label-->
+                    <label for="{{field.auto_id}}" class="fs-6 fw-semibold ml-4 mb-2 {% if field.field.required %}required{% endif %}" style="margin-left: 5px;">{{field.label}}</label>
+                    <!--end::Label-->
+                    <div class="text-danger" style="text-align:start">
+                        {{ field.errors }}
+                    </div>
+                </div>
+                {% endif %}
+                    
+                {% endfor %}
+                {% for field in form.hidden_fields %}
+                <!--begin::Input-->
+                <div class="form-group d-flex my-4">
+                    {{field}}
+                </div>
+                <!--end::Input-->
+                {% endfor %}
+
+                </div>
+                <div class="row">
+                    <ul id="errorlist_ul" class="errorlist">
+                        {% for error in form.non_field_errors %}
+                        <li class="text-danger mt-3" style="text-align:start">
+                            {{error}}
+                        </li>
+                        {% endfor %}
+                    </ul>
+
+                </div>
+                <!--end::form body-->
+                <!--begin::Modal footer-->
+                <div class="modal-footer flex-center">
+                    <!--begin::Button-->
+                    <button type="reset" onclick="history.back()" class="btn btn-light me-3">Discard</button>
+                    <!--end::Button-->
+                    <!--begin::Button-->
+                    <button type="submit" id="kt_modal_add_customer_submit" class="btn btn-primary">
+                        <span class="indicator-label">Submit</span>
+                        <span class="indicator-progress">Please wait...
+                        <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
+                    </button>
+                    <!--end::Button-->
+                </div>
+                <!--end::Modal footer-->
+            </form>
+            <!--end::Form-->
+        </div>
+        <!--end::Card body-->
+    </div>
+    <!--end::Card-->
+</div>
+<!--end::Post-->
+{% endblock content %}
+
+
 {% block js %}
 {{block.super}}
+<script src="{% static 'assets/js/intlTelInput.min.js' %}"></script>
+
+
 <script>
+
+    form_element = document.getElementById('farmer_form');
+    form_element.onsubmit = function() {
+        phone_element = form_element.elements['id_phone']
+        phone_element.value = iti.getNumber()
+    };
+
+
+    // Intel input 
+    var input = document.getElementById("id_phone");
+    var iti = window.intlTelInput(input, {
+        allowExtensions: true,
+        formatOnDisplay: true,
+        nationalMode: false,
+        //onlyCountries: ['us', 'gb', 'ch', 'ca', 'do'],
+        preferredCountries: ['in','us'],
+        separateDialCode: false,
+        initialCountry: "in",
+        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.0/js/utils.js"
+        // any initialisation options go here
+    });
+
+
     $("#id_birth_date").daterangepicker({
         singleDatePicker: true,
         showDropdowns: true,
