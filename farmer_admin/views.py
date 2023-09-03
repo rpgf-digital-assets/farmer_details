@@ -594,6 +594,15 @@ class GenerateOrganicCropPdfView(CustomLoginRequiredMixin, AdminRequiredMixin, T
         context["crops"] = organic_crop
         context["farmer"] = farmer
         context["farmer_land"] = farmer.land.all().first()
+        context["crop_headings"] = {
+            "seed": SeedDetails._meta.get_fields(),
+            "nutrient": NutrientManagement._meta.get_fields(),
+            "pest": PestDiseaseManagement._meta.get_fields(),
+            "weed": WeedManagement._meta.get_fields(),
+            "harvest": HarvestAndIncomeDetails._meta.get_fields(),
+            "cost": CostOfCultivation._meta.get_fields(),
+            "contamination": ContaminationControl._meta.get_fields(),
+        }
         return context
     
 

@@ -199,3 +199,4 @@ Dockerfile
 custom_logs
 
 *.docx
+*.xlsx
