@@ -237,5 +237,6 @@ SIMPLE_JWT = {
 CSRF_TRUSTED_ORIGINS = ['https://theartisanre.com', 'https://www.theartisanre.com']
 
 
+AWS_STORAGE_BUCKET_NAME = 'farm-portal'
 AWS_ACCESS_KEY_ID = f"{FARMER_AWS_ACCESS_KEY_ID}"
 AWS_SECRET_ACCESS_KEY = f"{FARMER_AWS_SECRET_ACCESS_KEY}"

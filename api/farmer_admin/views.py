@@ -142,7 +142,16 @@ class FarmerOrganicCropGeneratePDFAPIView(APIView):
                 context = {
                     'crops': organic_crops,
                     'farmer': farmer,
-                    'farmer_land': farmer.land.all().first()
+                    'farmer_land': farmer.land.all().first(),
+                    "crop_headings": {
+                        "seed": SeedDetails._meta.get_fields(),
+                        "nutrient": NutrientManagement._meta.get_fields(),
+                        "pest": PestDiseaseManagement._meta.get_fields(),
+                        "weed": WeedManagement._meta.get_fields(),
+                        "harvest": HarvestAndIncomeDetails._meta.get_fields(),
+                        "cost": CostOfCultivation._meta.get_fields(),
+                        "contamination": ContaminationControl._meta.get_fields(),
+                    }
                 }
                 result = generate_certificate(context=context, request=self.request)
                 filename = (f'{farmer.user.user_display_name}_crop.pdf')
