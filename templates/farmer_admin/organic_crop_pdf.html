@@ -107,12 +107,7 @@
                         {% for field_name, value in farmer_dict.items %}
                         {% if field_name == 'id' or field_name == 'is Active?' or field_name == 'Profile Image' or field_name == 'User Name' %}
                         {% else %}
-                        <div class="row mb-7">        
-                            <label class="col-lg-4 fw-semibold text-muted">{{field_name}}</label>
-                            <div class="col-lg-8 fv-row">
-                                <span class="fw-semibold fs-6">{{value}}</span>
-                            </div>
-                        </div>
+                            <span class="fw-semibold text-muted">{{field_name}}</span>: <span class="fw-semibold fs-6">{{value}}</span><br><br>
                         {% endif %}
                         {% endfor %}
                         </div>
@@ -290,7 +285,7 @@
                         <table class="table table-bordered ">
                             <thead>
                                 <tr class="">
-                                {% for field in nutrition %}
+                                {% for field in crop_headings.nutrient %}
                                 {% if field.name == 'id' or field.name == 'is_active' %}
                                 {% else %}
                                 <th class=""><span>{{field.verbose_name}}</span></th>
@@ -299,7 +294,7 @@
                                 </tr>
                             </thead>
                             <tbody class="">
-                                {% for crop  in crop_headings.crops %}    
+                                {% for crop in crops %} 
                                 {% for nutrition in crop.nutrient.all %}
                                     {% if nutrition.is_active %}
                                     <tr>
