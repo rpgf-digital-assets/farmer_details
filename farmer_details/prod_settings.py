@@ -24,8 +24,6 @@ DATABASES = {
 }
 
 
-STORAGES = {"default": {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"}}
-
 
 AWS_S3_CUSTOM_DOMAIN = "farm-portal.s3.amazonaws.com"
 PUBLIC_MEDIA_LOCATION = 'media'
