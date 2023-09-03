@@ -12,6 +12,15 @@
 </style>
 {% endblock css %}
 
+{% block Actions %}
+<div class="d-flex align-items-center flex-wrap py-2">
+    <!--begin::back-->
+    <div class="d-flex justify-content-end align-items-center w-100px w-md-100px me-2 me-lg-6">
+        <button class="btn btn-primary" onclick="javascript:window.history.back()">Back</button> 
+    </div>
+    <!--end::back-->
+</div>
+{% endblock Actions %}
 
 
 {% block content %}

@@ -215,7 +215,12 @@ class FarmerLand(BaseModel):
     survey_number = models.CharField(_("Survey Number"), max_length=255)
     soil_test_conducted = models.BooleanField(_('Is soil testing done?'), )
     last_conducted = models.PositiveIntegerField(_("Last Soil test conducted in year"), null=True, blank=True)
-    soil_type = models.CharField(_("Soil type"), max_length=255, null=True, blank=True)
+    SOIL_TYPES = [
+        ("Black", "Black"),
+        ("Red", "Red"),
+        ("Alluvial", "Alluvial"),
+    ]
+    soil_type = models.CharField(_("Soil type"), max_length=255, choices=SOIL_TYPES, null=True, blank=True)
     soil_texture = models.CharField(_("Soil texture"), max_length=255, null=True, blank=True)
     soil_organic_matter = models.CharField(_("Soil organic matter"), max_length=255, null=True, blank=True)
     soil_ph = models.CharField(_("Soil ph"), max_length=255, null=True, blank=True)
@@ -266,7 +271,7 @@ class SeedDetails(BaseModel):
     organic_crop = models.ForeignKey(OrganicCropDetails, related_name='seed', on_delete=models.PROTECT)
     date_of_purchase = models.DateField(_("Date of purchase"))
     name_of_supplier = models.CharField(_("Name of supplier"), max_length=255)
-    seed_for_sowing = models.PositiveIntegerField(_("Amount of seed used for sowing (Kg)"))
+    seed_for_sowing = models.FloatField(_("Amount of seed used for sowing (Kg)"))
     variety = models.CharField(_("Name of variety"), max_length=500)
     SEED_TYPES = [
         ('HYBRID', 'Hybrid'),
@@ -282,7 +287,7 @@ class SeedDetails(BaseModel):
     ]
     source_of_seed = models.CharField(_("Main Source of Seed"), max_length=100, choices=SEED_SOURCES)
     treatment = models.CharField(_("Details of seed treatment"), max_length=500)
-    no_of_plants = models.PositiveIntegerField(_("No of plants (Perennial crops)"))
+    no_of_plants = models.FloatField(_("No of plants (Perennial crops)"))
 
 
 class NutrientManagement(BaseModel):
@@ -332,7 +337,7 @@ class PestDiseaseManagement(BaseModel):
     organic_crop = models.ForeignKey(OrganicCropDetails, related_name='pest_disease', on_delete=models.PROTECT)
     name_of_input = models.CharField(_("Name of input used"), max_length=255)
     quantity_of_input = models.PositiveIntegerField(_("Qty of input used (Kg or lit)"))
-    source_of_input = models.CharField(_("Source of input"), max_length=100, choices=NutrientManagement.TYPE_CHOICES)
+    source_of_input = models.CharField(_("Source of input"), max_length=100, choices=NutrientManagement.SOURCE_CHOICES)
     date_of_application = models.DateField(_("Date of application"))
     APPLICATION_CHOICES = [
         ('BRAODCASTING', 'Braodcasting'),

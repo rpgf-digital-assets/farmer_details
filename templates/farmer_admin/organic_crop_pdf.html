@@ -102,40 +102,24 @@
                         <!--begin::Card header-->
 
                         <!--begin::Card body-->
-                        <table class="" style="">
-                            <thead>
-                                <tr class="">
-                                {% model_to_dict farmer as farmer_dict %}
-                                {% for field_name in farmer_dict.keys %}
-                                {% if field_name == 'id' or field_name == 'is Active?' or field_name == 'Profile Image' %}
-                                {% else %}
-                                <th class=""><span>{{field_name}}</span></th>
-                                {% endif %}
-                                {% endfor %}
-                                </tr>
-                            </thead>
-                            <tbody class=""> 
-                                <tr>
-                                    <td>{{farmer.user.user_display_name}}</td>
-                                    <td>{{farmer.gender}}</td>
-                                    <td>{{farmer.birth_date}}</td>
-                                    <td>{{farmer.aadhar_number}}</td>
-                                    <td>{{farmer.registration_number}}</td>
-                                    <td>{{farmer.date_of_joining_of_program}}</td>
-                                    <td>{{farmer.village}}</td>
-                                    <td>{{farmer.taluka}}</td>
-                                    <td>{{farmer.district}}</td>
-                                    <td>{{farmer.state}}</td>
-                                    <td>{{farmer.country}}</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div class="card-body">
+                        {% model_to_dict farmer '{"user": "Full Name"}' as farmer_dict %}
+                        {% for field_name, value in farmer_dict.items %}
+                        {% if field_name == 'id' or field_name == 'is Active?' or field_name == 'Profile Image' or field_name == 'User Name' %}
+                        {% else %}
+                        <div class="row mb-7">        
+                            <label class="col-lg-4 fw-semibold text-muted">{{field_name}}</label>
+                            <div class="col-lg-8 fv-row">
+                                <span class="fw-semibold fs-6">{{value}}</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                        </div>
                         <!--end::Card body-->
                     </div>
                     <!--end::details View-->
 
-                    
-                    
                     {% if farmer_land %}
                     <!--begin::details View-->
                     <div class="card" style="break-before: page;">
@@ -254,16 +238,14 @@
                         </div>
                         <!--begin::Card header-->
                         
-                        {% if crops.first %}
                         <!--begin::Card body-->
-                        <table class="table table-bordered  " style="break-inside: avoid;">
+                        <table class="table table-bordered" style="break-inside: avoid;">
                             <thead>
                                 <tr class="">
-                                {% model_to_dict crops.first.seed.all.first as seed_detail %}
-                                {% for field_name in seed_detail.keys %}
-                                {% if field_name == 'id' or field_name == 'is Active?' %}
+                                {% for field in crop_headings.seed %}
+                                {% if field.name == 'id' or field.name == 'is_active' %}
                                 {% else %}
-                                <th class=""><span>{{field_name}}</span></th>
+                                <th class=""><span>{{field.verbose_name}}</span></th>
                                 {% endif %}
                                 {% endfor %}
                                 </tr>
@@ -289,7 +271,6 @@
                             </tbody>
                         </table>
                         <!--end::Card body-->
-                        {% endif %}
                     </div>
                     <!--end::details View-->
 
@@ -305,22 +286,20 @@
                             <!--end::Card title-->
                         </div>
                         <!--begin::Card header-->
-                        {% if crops.first and crops.first.nutrient.all.first %}
                         <!--begin::Card body-->
                         <table class="table table-bordered ">
                             <thead>
                                 <tr class="">
-                                {% model_to_dict crops.first.nutrient.all.first as nutrition %}
-                                {% for field_name in nutrition.keys %}
-                                {% if field_name == 'id' or field_name == 'is Active?' %}
+                                {% for field in nutrition %}
+                                {% if field.name == 'id' or field.name == 'is_active' %}
                                 {% else %}
-                                <th class=""><span>{{field_name}}</span></th>
+                                <th class=""><span>{{field.verbose_name}}</span></th>
                                 {% endif %}
                                 {% endfor %}
                                 </tr>
                             </thead>
                             <tbody class="">
-                                {% for crop  in crops %}    
+                                {% for crop  in crop_headings.crops %}    
                                 {% for nutrition in crop.nutrient.all %}
                                     {% if nutrition.is_active %}
                                     <tr>
@@ -347,7 +326,6 @@
                             </tbody>
                         </table>
                         <!--end::Card body-->
-                        {% endif %}
                     </div>
                     <!--end::details View-->  
 
@@ -363,15 +341,13 @@
                         </div>
                         <!--begin::Card header-->
                         <!--begin::Card body-->
-                        {% if crops.first.pest_disease.all.first  %}
                         <table class="table table-bordered " style="">
                             <thead>
                                 <tr class="">
-                                {% model_to_dict crops.first.pest_disease.all.first as pest_disease %}
-                                {% for field_name in pest_disease.keys %}
-                                {% if field_name == 'id' or field_name == 'is Active?' %}
+                                {% for field in crop_headings.pest %}
+                                {% if field.name == 'id' or field.name == 'is_active' %}
                                 {% else %}
-                                <th class=""><span>{{field_name}}</span></th>
+                                <th class=""><span>{{field.verbose_name}}</span></th>
                                 {% endif %}
                                 {% endfor %}
                                 </tr>
@@ -403,7 +379,6 @@
                                 {% endfor %}
                             </tbody>
                         </table>
-                        {% endif %}
                         <!--end::Card body-->
                     </div>
                     <!--end::details View-->
@@ -421,15 +396,13 @@
                         </div>
                         <!--begin::Card header-->
                         <!--begin::Card body-->
-                        {% if crops.first.weed.all.first %}
                         <table class="table table-bordered ">
                             <thead>
                                 <tr class="">
-                                {% model_to_dict crops.first.weed.all.first as weed %}
-                                {% for field_name in weed.keys %}
-                                {% if field_name == 'id' or field_name == 'is Active?' %}
+                                {% for field in crop_headings.weed %}
+                                {% if field.name == 'id' or field.name == 'is_active' %}
                                 {% else %}
-                                <th class=""><span>{{field_name}}</span></th>
+                                <th class=""><span>{{field.verbose_name}}</span></th>
                                 {% endif %}
                                 {% endfor %}
                                 </tr>
@@ -450,7 +423,6 @@
                                 {% endfor %}
                             </tbody>
                         </table>
-                        {% endif %}
                         <!--end::Card body-->
                     </div>
                     <!--end::details View-->
@@ -468,15 +440,13 @@
                             <!--end::Card title-->
                         </div>
                         <!--begin::Card header-->
-                        {% if crops.first.harvest_income.all.first %}
                         <table class="table table-bordered ">
                             <thead>
                                 <tr class="p-0 m-0">
-                                {% model_to_dict crops.first.harvest_income.all.first as harvest_income %}
-                                {% for field_name in harvest_income.keys %}
-                                {% if field_name == 'id' or field_name == 'is Active?' %}
+                                {% for field in crop_headings.harvest %}
+                                {% if field.name == 'id' or field.name == 'is_active' %}
                                 {% else %}
-                                <th class=""><span>{{field_name}}</span></th>
+                                <th class=""><span>{{field.verbose_name}}</span></th>
                                 {% endif %}
                                 {% endfor %}
                                 </tr>
@@ -501,7 +471,6 @@
                                 {% endfor %}
                             </tbody>
                         </table>
-                        {% endif %}
                     </div>
                     <!--end::details View-->
 
@@ -518,15 +487,13 @@
                             <!--end::Card title-->
                         </div>
                         <!--begin::Card header-->
-                        {% if crops.first.cost_of_cultivation.all.first %}
                         <table class="table table-bordered ">
                             <thead>
                                 <tr class="">
-                                {% model_to_dict crops.first.cost_of_cultivation.all.first as cost_of_cultivation %}
-                                {% for field_name in cost_of_cultivation.keys %}
-                                {% if field_name == 'id' or field_name == 'is Active?' %}
+                                {% for field in crop_headings.cost %}
+                                {% if field.name == 'id' or field.name == 'is_active' %}
                                 {% else %}
-                                <th class=""><span>{{field_name}}</span></th>
+                                <th class=""><span>{{field.verbose_name}}</span></th>
                                 {% endif %}
                                 {% endfor %}
                                 </tr>
@@ -551,7 +518,6 @@
                                 {% endfor %}
                             </tbody>
                         </table>
-                        {% endif %}
                     </div>
                     <!--end::details View-->
 
@@ -566,16 +532,14 @@
                             </div>
                             <!--end::Card title-->
                         </div>
-                        <!--begin::Card header-->
-                        {% if crops.first.contamination_control.all.first %}    
+                        <!--begin::Card header-->   
                         <table class="table table-bordered ">
                             <thead>
                                 <tr class="">
-                                {% model_to_dict crops.first.contamination_control.all.first as contamination_control %}
-                                {% for field_name in contamination_control.keys %}
-                                {% if field_name == 'id' or field_name == 'is Active?' %}
+                                {% for field in crop_headings.contamination %}
+                                {% if field.name == 'id' or field.name == 'is_active' %}
                                 {% else %}
-                                <th class="min-w-125px "><span>{{field_name}}</span></th>
+                                <th class=""><span>{{field.verbose_name}}</span></th>
                                 {% endif %}
                                 {% endfor %}
                                 </tr>
@@ -600,7 +564,6 @@
                                 {% endfor %}
                             </tbody>
                         </table>
-                        {% endif %}
                     </div>
                     <!--end::details View--> 
 

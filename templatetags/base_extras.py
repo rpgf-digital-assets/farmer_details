@@ -7,15 +7,15 @@ register = template.Library()
 @register.simple_tag
 def model_to_dict(instance, extra_fields=None):
     data = {}
+    if extra_fields:
+        extra_fields_dict = json.loads(extra_fields)
+        for field_name, field_verbose_name in extra_fields_dict.items():
+            data[field_verbose_name] = getattr(instance, field_name)
     for field in instance._meta.get_fields():
         try:
             data[field.verbose_name] = field.value_from_object(instance)
         except: 
             pass
-    if extra_fields:
-        extra_fields_dict = json.loads(extra_fields)
-        for field_name, field_verbose_name in extra_fields_dict.items():
-            data[field_verbose_name] = getattr(instance, field_name)
     return data
 
 
