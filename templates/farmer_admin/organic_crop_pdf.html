@@ -11,7 +11,7 @@
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700" />
 		<!--end::Fonts-->
 		<!--begin::Global Stylesheets Bundle(mandatory for all pages)-->
-		<link href="{% static 'assets/css/style.bundle.css' %}" rel="stylesheet" type="text/css" />
+		<!--<link href="{% static 'assets/css/style.bundle.css' %}" rel="stylesheet" type="text/css" />-->
         
 		<!--end::Global Stylesheets Bundle-->
         <style>
@@ -24,6 +24,40 @@
                 size: A4 landscape;
                 margin: 2px;
             }
+
+            
+            .table {
+                
+                -webkit-overflow-scrolling: touch;
+                border-collapse: collapse;
+                width: 100%;
+                margin-bottom: 1rem;
+                vertical-align: top;
+            }
+            .table > :not(caption) > * > * {
+                padding: 0.75rem 0.75rem;
+                border-bottom-width: 1px;
+            }
+            .table > tbody {
+                vertical-align: inherit;
+            }
+            .table > thead {
+                vertical-align: bottom;
+            }
+            
+            
+  
+            tr{page-break-inside: avoid; 
+                page-break-after: auto;}
+            
+            th, td {
+                border: 1px solid black;
+            }
+            
+            .header .header-logo .logo-default {
+                display: inline-block;
+            }
+
 
             table {
                 width: 100%; /* Set the table width to 100% of the page width */
@@ -66,6 +100,7 @@
                 transform: rotate(-90deg); /* Rotate the text 90 degrees counter-clockwise */
                 transform-origin: left bottom; /* Set the rotation origin to the bottom-left corner */
             }
+
         </style>
 		<script>// Frame-busting to prevent site from being loaded within a frame without permission (click-jacking) if (window.top != window.self) { window.top.location.replace(window.self.location.href); }</script>
 	</head>
@@ -86,9 +121,9 @@
                     <div class="card" style="break-before: page;">
                         <!--begin::Card header-->
                         <!--begin::Header Logo-->
-                        <div class="header-logo me-5 me-md-10 py-10" style="background-color:#1a4442">
-                            <a class="d-flex justify-content-center" href="#">
-                                <img alt="Logo" src="{% static 'assets/media/logos/logo.svg' %}" class="h-15px h-lg-20px logo-default" />
+                        <div class="header-logo" style="background-color:#1a4442; margin-right:5px; padding-bottom:10px; height: 40px;display:flex; justify-content:center; align-items:center;">
+                            <a class="d-flex justify-content-center" style="display:flex; justify-content:center; align-items:center;" href="#">
+                                <img alt="Logo" src="{% static 'assets/media/logos/logo.svg' %}" style="height:20px;" class="h-15px h-lg-20px logo-default" />
                             </a>
                         </div>
                         <!--end::Header Logo-->
@@ -129,7 +164,7 @@
                         <!--begin::Card header-->
 
                         <!--begin::Card body-->
-                        <table class="table table-bordered " style="break-inside: avoid; width:100%; font-size: 10px;">
+                        <table class="table table-bordered" style="break-inside: avoid; width:100%; font-size: 10px;">
                             <thead>
                                 <tr class="">
                                 {% model_to_dict farmer_land as farmer_land_dict %}
