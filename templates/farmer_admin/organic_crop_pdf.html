@@ -52,6 +52,7 @@
             
             th, td {
                 border: 1px solid black;
+                font-size: 13px;
             }
             
             .header .header-logo .logo-default {
@@ -470,9 +471,9 @@
                             <!--end::Card title-->
                         </div>
                         <!--begin::Card header-->
-                        <table class="table table-bordered ">
+                        <table class="table table-bordered">
                             <thead>
-                                <tr class="p-0 m-0">
+                                <tr class="">
                                 {% for field in crop_headings.harvest %}
                                 {% if field.name == 'id' or field.name == 'is_active' %}
                                 {% else %}
