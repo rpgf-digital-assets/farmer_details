@@ -4,6 +4,7 @@ from typing import Any, Dict
 from django.forms import (
     BaseFormSet,
     CharField,
+    DateTimeInput,
     EmailField,
     EmailInput,
     FileInput,
@@ -30,7 +31,7 @@ from django.forms import (
 )
 
 from farmer.models import ContaminationControl, CostOfCultivation, Farmer, FarmerEducation, FarmerLand, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
-from farmer_details_app.models import SelectedGinningFarmer, Vendor
+from farmer_details_app.models import Ginning, GinningStatus, SelectedGinning, SelectedGinningFarmer, SpinningStatus, Vendor
 from users.models import User
 from users.validators import validate_name, validate_phonenumber, validate_positive_number
 
@@ -39,35 +40,6 @@ from django.db import transaction
 
 class PositiveIntegerField(IntegerField):
     default_validators = [validate_positive_number]
-
-class BaseSelectedFarmerFormSet(BaseFormSet):
-    def clean(self):
-        """Checks that no two selected ginning farmer are same."""
-        if any(self.errors):
-            # Don't bother validating the formset unless each form is valid on its own
-            return
-        distinct_inbound_quantity_mapping = {}
-        for form in self.forms:
-            if self.can_delete and self._should_delete_form(form):
-                continue
-            inbound = form.cleaned_data.get("inbound")
-            quantity = form.cleaned_data.get("quantity")
-            # if distinct_inbound_quantity_mapping[inbound]:
-            distinct_inbound_quantity_mapping[inbound] += quantity
-            # else:
-            #     distinct_inbound_quantity_mapping[inbound] = quantity
-
-            # if (inbound, quantity) in selected_inbound_list:
-            #     raise ValidationError(
-            #         "Selected farmers in a set must be distinct.")
-            # selected_inbound_list.append((inbound, quantity))
-            # if not farmer and not farmer_name and not quantity:
-            #     raise ValidationError("Cannot submit an empty form")
-
-        print("🐍 File: farmer_admin/forms.py | Line: 68 | clean ~ distinct_inbound_quantity_mapping",distinct_inbound_quantity_mapping)
-
-        
-
 
 class BaseContaminationFormSet(BaseFormSet):
     def clean(self):
@@ -526,8 +498,9 @@ class VendorCreateForm(BaseCreationForm):
         model = Vendor
         exclude = ['id']
 
+######################### Ginning Forms::BEGIN ################################
 
-class SelectedGinningFarmerForm(ModelForm):
+class SelectFarmerForm(ModelForm):
     farmer = ModelChoiceField(required=False, queryset=Farmer.objects.all(), widget=Select(
         attrs={
             'class': 'form-control'
@@ -564,11 +537,144 @@ class SelectedGinningFarmerForm(ModelForm):
             raise ValidationError(validation_errors)
 
 
-SelectedGinningFarmerFormSet = formset_factory(
-    SelectedGinningFarmerForm, extra=0, formset=BaseSelectedFarmerFormSet, min_num=1)
+class SelectFarmerFormSet(BaseFormSet):
+    def clean(self):
+        """Checks that no two selected ginning farmer are same."""
+        if any(self.errors):
+            # Don't bother validating the formset unless each form is valid on its own
+            return
+        distinct_inbound_quantity_mapping = {}
+        for form in self.forms:
+            if self.can_delete and self._should_delete_form(form):
+                continue
+            # inbound = form.cleaned_data.get("inbound")
+            # quantity = form.cleaned_data.get("quantity")
+            # if distinct_inbound_quantity_mapping[inbound]:
+            # distinct_inbound_quantity_mapping[inbound] += quantity
+            # else:
+            #     distinct_inbound_quantity_mapping[inbound] = quantity
+
+            # if (inbound, quantity) in selected_inbound_list:
+            #     raise ValidationError(
+            #         "Selected farmers in a set must be distinct.")
+            # selected_inbound_list.append((inbound, quantity))
+            # if not farmer and not farmer_name and not quantity:
+            #     raise ValidationError("Cannot submit an empty form")
+
+        print("🐍 File: farmer_admin/forms.py | Line: 68 | clean ~ distinct_inbound_quantity_mapping",distinct_inbound_quantity_mapping)
+
+        
+SelectFarmerFormSet = formset_factory(
+    SelectFarmerForm, extra=0, formset=SelectFarmerFormSet, min_num=1)
 
 
-class GinningMappingForm(Form):
+######################### Ginning Forms::END ################################
+
+from django.db.models import Q, Avg, Count, Min, Sum, F
+from django.db.models.functions import Coalesce
+from django.db.models import ExpressionWrapper, F, FloatField as ModelFloatField
+######################### Spinning Forms::BEGIN ################################
+class CustomGinningModelChoiceField(ModelChoiceField): 
+
+    def label_from_instance(self, obj):
+        return f'{obj.vendor} ({round(obj.remaining_quantity, 2)} Kg)'
+
+
+class SelectGinningForm(ModelForm):
+    ginning = CustomGinningModelChoiceField(queryset=Ginning.objects.annotate(
+                sum_quantity=Coalesce(Sum('selected_ginnings__quantity'), 0.0), 
+                remaining_quantity=F('total_quantity') - Coalesce(Sum('selected_ginnings__quantity'), 0.0)).filter(
+                ginning_status__status=GinningStatus.QC_APPROVED, total_quantity__gt=F('sum_quantity')), 
+        widget=Select(attrs={
+            'class': 'form-control'
+        }
+    ))
+    
+    quantity = PositiveIntegerField(widget=NumberInput(attrs={
+        'class': 'form-control'
+    }))
+
+    class Meta:
+        model = SelectedGinning
+        exclude = ['id']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        validation_errors = []
+
+        ginning = cleaned_data.get('ginning')
+        
+        if validation_errors:
+            raise ValidationError(validation_errors)
+
+
+class SelectGinningFormSet(BaseFormSet):
+    def clean(self):
+        """Checks that no two selected ginning farmer are same."""
+        if any(self.errors):
+            # Don't bother validating the formset unless each form is valid on its own
+            return
+        distinct_inbound_quantity_mapping = {}
+        for form in self.forms:
+            if self.can_delete and self._should_delete_form(form):
+                continue
+            # inbound = form.cleaned_data.get("inbound")
+            # quantity = form.cleaned_data.get("quantity")
+            # if distinct_inbound_quantity_mapping[inbound]:
+            # distinct_inbound_quantity_mapping[inbound] += quantity
+            # else:
+            #     distinct_inbound_quantity_mapping[inbound] = quantity
+
+            # if (inbound, quantity) in selected_inbound_list:
+            #     raise ValidationError(
+            #         "Selected farmers in a set must be distinct.")
+            # selected_inbound_list.append((inbound, quantity))
+            # if not farmer and not farmer_name and not quantity:
+            #     raise ValidationError("Cannot submit an empty form")
+
+        print("🐍 File: farmer_admin/forms.py | Line: 68 | clean ~ distinct_inbound_quantity_mapping",distinct_inbound_quantity_mapping)
+
+        
+SelectGinningFormSet = formset_factory(
+    SelectGinningForm, extra=0, formset=SelectGinningFormSet, min_num=1)
+
+
+######################### Spinning Forms::END ################################
+
+class InboundRequestForm(Form):
+    timestamp = DateTimeField(required=True, label="Outbound Timestamp", widget=DateTimeInput(attrs={
+        'class': 'form-control datetimepicker-input-time',
+    }))
+    quantity = FloatField(required=True, label="Inbound Quantity", widget=NumberInput(attrs={
+        'class': 'form-control',
+    }))
+    rate = FloatField(required=True, label="Inbound Cost as per Invoice", widget=NumberInput(attrs={
+        'class': 'form-control',
+    }))
+    invoice_details = CharField(required=True, label="Invoice Details", widget=TextInput(attrs={
+        'class': 'form-control',
+    }))
+
+
+class QualityCheckForm(Form):
+    status = ChoiceField(label="Quality Check Status", 
+                        choices=[(GinningStatus.QC_APPROVED, "Approved"), 
+                                (GinningStatus.QC_REJECTED, 'Rejected'),],
+                        widget=Select(
+                            attrs={
+                                'class': 'form-control'
+                            }
+                        ))
+    remark = CharField(required=False, label="Remarks", widget=TextInput(attrs={
+        'class': 'form-control',
+    }))
+    # quality = ModelChoiceField(required=True, queryset=Quality.objects.filter(is_active=True), widget=Select(
+    #     attrs={
+    #         'class': 'form-control'
+    #     }
+    # ))
+
+class VendorMappingForm(Form):
 
     vendor = ModelChoiceField(required=True, queryset=Vendor.objects.filter(is_active=True), widget=Select(
         attrs={

@@ -1,0 +1,154 @@
+{% extends 'farmer_admin/base.html' %}
+{% load static %}
+
+
+{% block title %}
+Spinning Requests
+{% endblock title %}
+
+{% block breadcrumb_items %}
+<!--begin::Item-->
+<li class="breadcrumb-item text-white opacity-75">
+    <a href="#" class="text-white text-hover-primary">Vendor</a>
+</li>
+<!--end::Item-->
+<!--begin::Item-->
+<li class="breadcrumb-item">
+    <span class="bullet bg-white opacity-75 w-0.3125rem h-0.125rem"></span>
+</li>
+<!--end::Item-->
+<!--begin::Item-->
+<li class="breadcrumb-item text-white opacity-75">Spinning Requests</li>
+<!--end::Item-->
+{% endblock breadcrumb_items %}
+
+{% block content %}
+<!--begin::Post-->
+<div class="content flex-row-fluid" id="kt_content">
+    <!--begin::Table Widget 3-->
+    <div class="card card-flush h-lg-100">
+        <!--begin::Card header-->
+        <div class="card-header py-7">
+            <!--begin::Tabs-->
+            <div class="card-title pt-3 mb-0 gap-4 gap-lg-10 gap-xl-15 nav nav-tabs border-bottom-0" data-kt-table-widget-3="tabs_nav">
+                <!--begin::Tab item-->
+                <div class="fs-4 fw-bold pb-3 border-bottom border-3 border-primary cursor-pointer" data-kt-table-widget-3="tab" data-kt-table-widget-3-value="Show All">All Requests ({{spinnings.count}})</div>
+                <!--end::Tab item-->
+                <!--begin::Tab item-->
+                <div class="fs-4 fw-bold text-muted pb-3 cursor-pointer" data-kt-table-widget-3="tab" data-kt-table-widget-3-value="In Progress">In Progress</div>
+                <!--end::Tab item-->
+                
+                <!--begin::Tab item-->
+                <div class="fs-4 fw-bold text-muted pb-3 cursor-pointer" data-kt-table-widget-3="tab" data-kt-table-widget-3-value="QC Pending">QC Pending </div>
+                <!--end::Tab item-->
+                <!--begin::Tab item-->
+                <div class="fs-4 fw-bold text-muted pb-3 cursor-pointer" data-kt-table-widget-3="tab" data-kt-table-widget-3-value="QC Rejected">QC Rejected </div>
+                <!--end::Tab item-->
+                <!--begin::Tab item-->
+                <div class="fs-4 fw-bold text-muted pb-3 cursor-pointer" data-kt-table-widget-3="tab" data-kt-table-widget-3-value="QC Approved">QC Approved</div>
+                <!--end::Tab item-->
+            </div>
+            <!--end::Tabs-->
+            <!--begin::Create campaign button-->
+            <div class="card-toolbar">
+                <a href="{% url 'farmer_admin:traceability_spinning_mapping_create' %}" class="btn btn-primary">Create New Spinning Request</a>
+            </div>
+            <!--end::Create campaign button-->
+            
+        </div>
+        <!--end::Card header-->
+        <!--begin::Card body-->
+        <div class="card-body pt-1">
+            
+            <!--begin::Seprator-->
+            <div class="separator separator-dashed my-5"></div>
+            <!--end::Seprator-->
+            <!--begin::Table-->
+            <table id="kt_widget_table_3" class="table table-row-dashed align-middle fs-6 gy-4 my-0 pb-3" data-kt-table-widget-3="all">
+                <thead class="d-none">
+                    <tr>
+                        <th>Vendor Name</th>
+                        <th>Quantity</th>
+                        <th>Status</th>
+                        <th>Farmers</th>
+                        <th>Created on</th>
+                        <th>Progress</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody hx-trigger="load, listChanged from:body" hx-get="{% url 'farmer_admin:get_spinnings' %}" hx-target="this">
+                    {% include 'farmer_admin/spinning_rows.html' with spinnings=spinnings %}
+                </tbody>
+                <!--end::Table-->
+            </table>
+            <!--end::Table-->
+        </div>
+        <!--end::Card body-->
+    </div>
+    <!--end::Table Widget 3-->
+
+</div>
+<!--end::Post-->
+{% endblock content %}
+
+{% block modals %}
+{{block.super}}
+
+<div id="outbound_request_modal" class="modal fade">
+    <div id="outbound_request_container" class="modal-dialog" hx-target="this"></div>
+</div>
+
+{% endblock modals %}
+
+
+{% block js %}
+{{block.super}}
+<script src="{% static 'assets/js/custom/utilities/datatable/datatable_with_htmx.js' %}"></script>
+
+<script>
+
+    const modal = new bootstrap.Modal(document.getElementById("outbound_request_modal"))
+    
+    htmx.on("htmx:afterSwap", (e) => {
+
+        // Response targeting #dialog => show the modal
+        if (e.detail.target.id == "outbound_request_container") {
+            modal.show()
+            $(".datetimepicker-input").daterangepicker({
+                singleDatePicker: true,
+                showDropdowns: true,
+                minYear: 1901,
+                locale: {
+                    format: 'YYYY-MM-DD'
+                },
+                maxYear: parseInt(moment().format("YYYY"),12)
+            });
+            $('.datetimepicker-input-time').daterangepicker({
+                parentEl: ".modal-body",
+                singleDatePicker: true,
+                timePicker: true,
+                startDate: moment().startOf("hour"),
+                endDate: moment().startOf("hour").add(32, "hour"),
+                locale: {
+                    format: "YYYY-MM-DD HH:MM:SS"
+                }
+            });
+        }
+    })
+
+    htmx.on("htmx:beforeSwap", (e) => {
+        // Empty response targeting #dialog => hide the modal
+        if (e.detail.target.id == "outbound_request_container" && !e.detail.xhr.response) {
+            modal.hide()
+            e.detail.shouldSwap = false
+        }
+    })
+    
+    htmx.on("hidden.bs.modal", () => {
+        document.getElementById("outbound_request_container").innerHTML = ""
+    })
+      
+</script>
+
+
+{% endblock js %}

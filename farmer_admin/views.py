@@ -1,5 +1,6 @@
 import io
 import json
+import csv
 from typing import Any
 from PIL import Image
 from io import BytesIO
@@ -18,20 +19,23 @@ from django.db.models import Sum
 from django.db.models import Count
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import (
+    View,
     TemplateView,
     CreateView,
     ListView,
+    FormView,
     UpdateView,
     DetailView
 )
 
 from farmer.models import ContaminationControl, CostOfCultivation, Farmer, FarmerLand, FarmerOrganicCropPdf, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
-from farmer_admin.forms import ContaminationControlForm, ContaminationControlFormSet, CostOfCultivationForm, CostOfCultivationFormSet, FarmerCreationForm, FarmerLandDetailsCreationFrom, FarmerNutritionManagementForm, FarmerNutritionManagementFormSet, FarmerOrganicCropDetailForm, FarmerPestDiseaseManagementForm, FarmerPestDiseaseManagementFormSet, FarmerSeedDetailsForm, FarmerSeedDetailsFormSet, FarmerSocialCreationFrom, GinningMappingForm, HarvestAndIncomeDetailForm, HarvestAndIncomeDetailFormSet, OtherFarmerCreationForm, SeasonCreateForm, SelectedGinningFarmerForm, SelectedGinningFarmerFormSet, VendorCreateForm, WeedManagementForm, WeedManagementFormSet
+from farmer_admin.forms import ContaminationControlForm, ContaminationControlFormSet, CostOfCultivationForm, CostOfCultivationFormSet, FarmerCreationForm, FarmerLandDetailsCreationFrom, FarmerNutritionManagementForm, FarmerNutritionManagementFormSet, FarmerOrganicCropDetailForm, FarmerPestDiseaseManagementForm, FarmerPestDiseaseManagementFormSet, FarmerSeedDetailsForm, FarmerSeedDetailsFormSet, FarmerSocialCreationFrom, InboundRequestForm, QualityCheckForm, SelectGinningFormSet, VendorMappingForm, HarvestAndIncomeDetailForm, HarvestAndIncomeDetailFormSet, OtherFarmerCreationForm, SeasonCreateForm, SelectFarmerFormSet, VendorCreateForm, WeedManagementForm, WeedManagementFormSet
 from farmer_admin.mixins import AdminRequiredMixin
 from farmer_admin.utils import generate_certificate, get_lookup_fields, get_model_field_names, qs_to_dataset
 from farmer_details_app.mixins import CustomLoginRequiredMixin
-from farmer_details_app.models import GinningMapping, SelectedGinningFarmer, Vendor
+from farmer_details_app.models import Ginning, GinningInbound, GinningStatus, SelectedGinning, SelectedGinningFarmer, Spinning, SpinningInbound, SpinningStatus, Vendor
 from users.models import User
 from django.core.files.storage import FileSystemStorage
 
@@ -627,40 +631,6 @@ class VendorUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView)
     context_object_name = 'vendor_object'
 
 
-class GinningMappingCreateWizardView(CustomLoginRequiredMixin, AdminRequiredMixin, SessionWizardView):
-    form_list = [SelectedGinningFarmerFormSet, GinningMappingForm, Form]
-    template_name = 'farmer_admin/ginning_mapping_wizard/ginning_mapping_wizard_base.html'
-
-    def get_context_data(self, form, **kwargs):
-        context = super().get_context_data(form=form, **kwargs)
-        if self.steps.current == '2':
-            context.update({
-                'form_1_data': self.get_cleaned_data_for_step('0'),
-                'form_2_data': self.get_cleaned_data_for_step('1')
-            })
-        return context
-
-    def done(self, form_list, **kwargs):
-        all_cleaned_data = [form.cleaned_data for form in form_list]
-        cleaned_data_form_1 = all_cleaned_data[0]
-        cleaned_data_form_2 = all_cleaned_data[1]
-        with transaction.atomic():
-            ginning_mapping = GinningMapping.objects.create(
-                vendor=cleaned_data_form_2['vendor'], status=GinningMapping.IN_PROGRESS)
-            for cleaned_data in cleaned_data_form_1:
-                try:
-                    cleaned_data['quantity']
-                    ginning_mapping.selected_farmers.add(
-                        SelectedGinningFarmer.objects.create(**cleaned_data))
-                except KeyError:
-                    pass
-
-        return render(self.request, 'farmer_admin/ginning_mapping_wizard/ginning_mapping_wizard_done.html', {
-            'form_data': [form.cleaned_data for form in form_list],
-            'completed': True,
-        })
-
-
 class SeasonListView(CustomLoginRequiredMixin, AdminRequiredMixin, ListView):
     template_name = 'farmer_admin/season_list.html'
     queryset = Season.objects.filter(is_active=True)
@@ -679,115 +649,8 @@ class SeasonUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView)
     form_class = SeasonCreateForm
     success_url = reverse_lazy('farmer_admin:season_list')
     context_object_name = 'season_object'
-
-
-class DashboardVendorView(CustomLoginRequiredMixin, AdminRequiredMixin, ListView):
-    template_name = 'farmer_admin/dashboard_vendor.html'
-    queryset = GinningMapping.objects.all().prefetch_related('selected_farmers')
-    context_object_name = 'ginning_mappings'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["pending_mapping_count"] = GinningMapping.objects.filter(
-            status=GinningMapping.IN_PROGRESS).count()
-        context["completed_mapping_count"] = GinningMapping.objects.filter(
-            status=GinningMapping.COMPLETED).count()
-        return context
     
-
-class DashboardFarmerView(TemplateView):
-    template_name = 'farmer_admin/dashboard_farmer.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        average_latitude = FarmerLand.objects.filter(is_active=True).aggregate(avg=Avg('latitude'))[
-            'avg']
-        average_longitude = FarmerLand.objects.filter(is_active=True).aggregate(avg=Avg('longitude'))[
-            'avg']
-        context["average_latitude"] = average_latitude
-        context["average_longitude"] = average_longitude
-
-        # Total Farmer data
-        context["farmers_count"] = Farmer.objects.all().count() + OtherFarmer.objects.filter(is_active=True).count()
-        context["organic_crop_count"] = OrganicCropDetails.objects.filter(is_active=True).count()
-        
-        # Total Organic crop data
-        total_organic_crop_area = OrganicCropDetails.objects.filter(is_active=True).aggregate(total_area=Sum('area'))['total_area']
-        context["total_organic_crop_area"] = total_organic_crop_area
-        
-        # Piechart data
-        piechart_data = OrganicCropDetails.objects.filter(is_active=True).values('name').annotate(category=Count("name"), value=Sum('area')).order_by()
-        piechart_data = [{"value": chart['value'], "category": chart['name']} for chart in piechart_data]
-        context["piechart"] = json.dumps(piechart_data)
-
-        # Nutrition Bar graph data
-        nutrient_management_fym = NutrientManagement.objects.filter(is_active=True, type=NutrientManagement.FYM) \
-                                .aggregate(total_fertilizer_quantity=Sum('quantity_of_fertilizer'), 
-                                            total_on_farm_quantity=Sum('quantity_used'), total_off_farm_quantity=Sum('quantity_sourced'))
-        nutrient_management_vermicompost = NutrientManagement.objects.filter(is_active=True, type=NutrientManagement.VERMICOMPOST) \
-                                .aggregate(total_fertilizer_quantity=Sum('quantity_of_fertilizer'), 
-                                            total_on_farm_quantity=Sum('quantity_used'), total_off_farm_quantity=Sum('quantity_sourced'))
-        nutrient_management_compost = NutrientManagement.objects.filter(is_active=True, type=NutrientManagement.COMPOST) \
-                                .aggregate(total_fertilizer_quantity=Sum('quantity_of_fertilizer'), 
-                                            total_on_farm_quantity=Sum('quantity_used'), total_off_farm_quantity=Sum('quantity_sourced'))
-        nutrition_bar_graph_data = [{
-            "year": "On Farm",
-            "vermicompost": nutrient_management_vermicompost['total_fertilizer_quantity'],
-            "vermicompost-used": nutrient_management_vermicompost['total_on_farm_quantity'],
-            "compost": nutrient_management_compost['total_fertilizer_quantity'],
-            "compost-used": nutrient_management_compost['total_on_farm_quantity'],
-            "FYM": nutrient_management_fym['total_fertilizer_quantity'],
-            "FYM-used": nutrient_management_fym['total_on_farm_quantity'],
-        },{
-            "year": "Outsourced",
-            "vermicompost": nutrient_management_vermicompost['total_fertilizer_quantity'],
-            "vermicompost-used": nutrient_management_vermicompost['total_off_farm_quantity'],
-            "compost": nutrient_management_compost['total_fertilizer_quantity'],
-            "compost-used": nutrient_management_compost['total_off_farm_quantity'],
-            "FYM": nutrient_management_fym['total_fertilizer_quantity'],
-            "FYM-used": nutrient_management_fym['total_off_farm_quantity'],
-        }]
-
-        context["nutrition_bar_graph_data"] = json.dumps(nutrition_bar_graph_data)
-
-        # Pest and Disease Bar graph data
-        pest_management_fym = PestDiseaseManagement.objects.filter(is_active=True, source_of_input=NutrientManagement.FYM) \
-                                .aggregate(total_fertilizer_quantity=Sum('quantity_of_input'), 
-                                            total_on_farm_quantity=Sum('quantity_used'), total_off_farm_quantity=Sum('quantity_sourced'))
-        pest_management_vermicompost = PestDiseaseManagement.objects.filter(is_active=True, source_of_input=NutrientManagement.VERMICOMPOST) \
-                                .aggregate(total_fertilizer_quantity=Sum('quantity_of_input'), 
-                                            total_on_farm_quantity=Sum('quantity_used'), total_off_farm_quantity=Sum('quantity_sourced'))
-        pest_management_compost = PestDiseaseManagement.objects.filter(is_active=True, source_of_input=NutrientManagement.COMPOST) \
-                                .aggregate(total_fertilizer_quantity=Sum('quantity_of_input'), 
-                                            total_on_farm_quantity=Sum('quantity_used'), total_off_farm_quantity=Sum('quantity_sourced'))
-        pest_bar_graph_data = [{
-            "year": "On Farm",
-            "vermicompost": pest_management_vermicompost['total_fertilizer_quantity'],
-            "vermicompost-used": pest_management_vermicompost['total_on_farm_quantity'],
-            "compost": pest_management_compost['total_fertilizer_quantity'],
-            "compost-used": pest_management_compost['total_on_farm_quantity'],
-            "FYM": pest_management_fym['total_fertilizer_quantity'],
-            "FYM-used": pest_management_fym['total_on_farm_quantity'],
-        },{
-            "year": "Outsourced",
-            "vermicompost": pest_management_vermicompost['total_fertilizer_quantity'],
-            "vermicompost-used": pest_management_vermicompost['total_off_farm_quantity'],
-            "compost": pest_management_compost['total_fertilizer_quantity'],
-            "compost-used": pest_management_compost['total_off_farm_quantity'],
-            "FYM": pest_management_fym['total_fertilizer_quantity'],
-            "FYM-used": pest_management_fym['total_off_farm_quantity'],
-        }]
-
-        context["pest_bar_graph_data"] = json.dumps(pest_bar_graph_data)
-
-        return context
-
-
-import csv
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import View
-
-
+   
 class Echo:
     """An object that implements just the write method of the file-like
     interface.
@@ -890,3 +753,323 @@ class OrganicCropCsv(LoginRequiredMixin, View):
             writer.writerows(output)
 
         return response
+
+ 
+class DashboardFarmerView(TemplateView):
+    template_name = 'farmer_admin/dashboard_farmer.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        average_latitude = FarmerLand.objects.filter(is_active=True).aggregate(avg=Avg('latitude'))[
+            'avg']
+        average_longitude = FarmerLand.objects.filter(is_active=True).aggregate(avg=Avg('longitude'))[
+            'avg']
+        context["average_latitude"] = average_latitude
+        context["average_longitude"] = average_longitude
+
+        # Total Farmer data
+        context["farmers_count"] = Farmer.objects.all().count() + OtherFarmer.objects.filter(is_active=True).count()
+        context["organic_crop_count"] = OrganicCropDetails.objects.filter(is_active=True).count()
+        
+        # Total Organic crop data
+        total_organic_crop_area = OrganicCropDetails.objects.filter(is_active=True).aggregate(total_area=Sum('area'))['total_area']
+        context["total_organic_crop_area"] = total_organic_crop_area
+        
+        # Piechart data
+        piechart_data = OrganicCropDetails.objects.filter(is_active=True).values('name').annotate(category=Count("name"), value=Sum('area')).order_by()
+        piechart_data = [{"value": chart['value'], "category": chart['name']} for chart in piechart_data]
+        context["piechart"] = json.dumps(piechart_data)
+
+        # Nutrition Bar graph data
+        nutrient_management_fym = NutrientManagement.objects.filter(is_active=True, type=NutrientManagement.FYM) \
+                                .aggregate(total_fertilizer_quantity=Sum('quantity_of_fertilizer'), 
+                                            total_on_farm_quantity=Sum('quantity_used'), total_off_farm_quantity=Sum('quantity_sourced'))
+        nutrient_management_vermicompost = NutrientManagement.objects.filter(is_active=True, type=NutrientManagement.VERMICOMPOST) \
+                                .aggregate(total_fertilizer_quantity=Sum('quantity_of_fertilizer'), 
+                                            total_on_farm_quantity=Sum('quantity_used'), total_off_farm_quantity=Sum('quantity_sourced'))
+        nutrient_management_compost = NutrientManagement.objects.filter(is_active=True, type=NutrientManagement.COMPOST) \
+                                .aggregate(total_fertilizer_quantity=Sum('quantity_of_fertilizer'), 
+                                            total_on_farm_quantity=Sum('quantity_used'), total_off_farm_quantity=Sum('quantity_sourced'))
+        nutrition_bar_graph_data = [{
+            "year": "On Farm",
+            "vermicompost": nutrient_management_vermicompost['total_fertilizer_quantity'],
+            "vermicompost-used": nutrient_management_vermicompost['total_on_farm_quantity'],
+            "compost": nutrient_management_compost['total_fertilizer_quantity'],
+            "compost-used": nutrient_management_compost['total_on_farm_quantity'],
+            "FYM": nutrient_management_fym['total_fertilizer_quantity'],
+            "FYM-used": nutrient_management_fym['total_on_farm_quantity'],
+        },{
+            "year": "Outsourced",
+            "vermicompost": nutrient_management_vermicompost['total_fertilizer_quantity'],
+            "vermicompost-used": nutrient_management_vermicompost['total_off_farm_quantity'],
+            "compost": nutrient_management_compost['total_fertilizer_quantity'],
+            "compost-used": nutrient_management_compost['total_off_farm_quantity'],
+            "FYM": nutrient_management_fym['total_fertilizer_quantity'],
+            "FYM-used": nutrient_management_fym['total_off_farm_quantity'],
+        }]
+
+        context["nutrition_bar_graph_data"] = json.dumps(nutrition_bar_graph_data)
+
+        # Pest and Disease Bar graph data
+        pest_management_fym = PestDiseaseManagement.objects.filter(is_active=True, source_of_input=NutrientManagement.FYM) \
+                                .aggregate(total_fertilizer_quantity=Sum('quantity_of_input'), 
+                                            total_on_farm_quantity=Sum('quantity_used'), total_off_farm_quantity=Sum('quantity_sourced'))
+        pest_management_vermicompost = PestDiseaseManagement.objects.filter(is_active=True, source_of_input=NutrientManagement.VERMICOMPOST) \
+                                .aggregate(total_fertilizer_quantity=Sum('quantity_of_input'), 
+                                            total_on_farm_quantity=Sum('quantity_used'), total_off_farm_quantity=Sum('quantity_sourced'))
+        pest_management_compost = PestDiseaseManagement.objects.filter(is_active=True, source_of_input=NutrientManagement.COMPOST) \
+                                .aggregate(total_fertilizer_quantity=Sum('quantity_of_input'), 
+                                            total_on_farm_quantity=Sum('quantity_used'), total_off_farm_quantity=Sum('quantity_sourced'))
+        pest_bar_graph_data = [{
+            "year": "On Farm",
+            "vermicompost": pest_management_vermicompost['total_fertilizer_quantity'],
+            "vermicompost-used": pest_management_vermicompost['total_on_farm_quantity'],
+            "compost": pest_management_compost['total_fertilizer_quantity'],
+            "compost-used": pest_management_compost['total_on_farm_quantity'],
+            "FYM": pest_management_fym['total_fertilizer_quantity'],
+            "FYM-used": pest_management_fym['total_on_farm_quantity'],
+        },{
+            "year": "Outsourced",
+            "vermicompost": pest_management_vermicompost['total_fertilizer_quantity'],
+            "vermicompost-used": pest_management_vermicompost['total_off_farm_quantity'],
+            "compost": pest_management_compost['total_fertilizer_quantity'],
+            "compost-used": pest_management_compost['total_off_farm_quantity'],
+            "FYM": pest_management_fym['total_fertilizer_quantity'],
+            "FYM-used": pest_management_fym['total_off_farm_quantity'],
+        }]
+
+        context["pest_bar_graph_data"] = json.dumps(pest_bar_graph_data)
+
+        return context
+
+
+class GinningMappingCreateWizardView(CustomLoginRequiredMixin, AdminRequiredMixin, SessionWizardView):
+    form_list = [SelectFarmerFormSet, VendorMappingForm, Form]
+    template_name = 'farmer_admin/ginning_mapping_wizard/ginning_mapping_wizard_base.html'
+
+    def get_context_data(self, form, **kwargs):
+        context = super().get_context_data(form=form, **kwargs)
+        if self.steps.current == '2':
+            context.update({
+                'form_1_data': self.get_cleaned_data_for_step('0'),
+                'form_2_data': self.get_cleaned_data_for_step('1')
+            })
+        return context
+
+    def done(self, form_list, **kwargs):
+        all_cleaned_data = [form.cleaned_data for form in form_list]
+        cleaned_data_form_1 = all_cleaned_data[0]
+        cleaned_data_form_2 = all_cleaned_data[1]
+        with transaction.atomic():
+            ginning = Ginning.objects.create(
+                vendor=cleaned_data_form_2['vendor'])
+            GinningStatus.objects.create(ginning=ginning)
+            for cleaned_data in cleaned_data_form_1:
+                try:
+                    cleaned_data['quantity']
+                    ginning.selected_farmers.add(
+                        SelectedGinningFarmer.objects.create(**cleaned_data))
+                except KeyError:
+                    pass
+
+        return render(self.request, 'farmer_admin/ginning_mapping_wizard/ginning_mapping_wizard_done.html', {
+            'form_data': [form.cleaned_data for form in form_list],
+            'completed': True,
+        })
+
+class GinningListView(CustomLoginRequiredMixin, AdminRequiredMixin, ListView):
+    template_name = 'farmer_admin/ginning_list.html'
+    queryset = Ginning.objects.all().prefetch_related('selected_farmers')
+    context_object_name = 'ginnings'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["pending_mapping_count"] = Ginning.objects.filter(
+            ginning_status__status=GinningStatus.IN_PROGRESS).count()
+        context["completed_mapping_count"] = Ginning.objects.filter(
+            ginning_status__status=GinningStatus.COMPLETED).count()
+        return context
+    
+class GetGinningList(CustomLoginRequiredMixin, AdminRequiredMixin, ListView):
+    template_name = 'farmer_admin/ginning_rows.html'
+    queryset = Ginning.objects.all().prefetch_related('selected_farmers')
+    context_object_name = 'ginnings'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["pending_mapping_count"] = Ginning.objects.filter(
+            ginning_status__status=GinningStatus.IN_PROGRESS).count()
+        context["completed_mapping_count"] = Ginning.objects.filter(
+            ginning_status__status=GinningStatus.COMPLETED).count()
+        return context
+
+
+class GinningInboundRequest(CustomLoginRequiredMixin, AdminRequiredMixin, FormView):
+    form_class = InboundRequestForm
+    template_name = 'farmer_admin/inbound_form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["post_url"] = reverse(
+            'farmer_admin:ginning_inbound_request_create_view', kwargs={'pk': self.kwargs['pk']})
+        return context
+
+    def form_valid(self, form):
+        timestamp = form.cleaned_data.get('timestamp')
+        quantity = form.cleaned_data.get('quantity')
+        rate = form.cleaned_data.get('rate')
+        invoice_details = form.cleaned_data.get('invoice_details')
+
+        # Create outbound request
+        ginning = Ginning.objects.get(pk=self.kwargs['pk'])
+        GinningInbound.objects.get_or_create(ginning=ginning, defaults={
+            "timestamp": timestamp,
+            "quantity": quantity,
+            "rate": rate,
+            "invoice_details": invoice_details,
+        })
+
+        # Change status
+        ginning.ginning_status.status = GinningStatus.QC_PENDING
+        ginning.ginning_status.save()
+        ginning.save()
+
+        return HttpResponse(status=204, headers={'HX-Trigger': 'listChanged'})
+
+
+class GinningQcRequestCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, FormView):
+    form_class = QualityCheckForm
+    template_name = 'farmer_admin/qc_form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["post_url"] = reverse(
+            'farmer_admin:ginning_qc_request_create_view', kwargs={'pk': self.kwargs['pk']})
+        return context
+
+    def form_valid(self, form):
+        ginning = Ginning.objects.get(pk=self.kwargs['pk'])
+        remark = form.cleaned_data.get('remark', None)
+        # quality = form.cleaned_data.get('quality', None)
+        status = form.cleaned_data.get('status')
+
+        ginning_status, _created = GinningStatus.objects.update_or_create(ginning=ginning, defaults={
+            "status": status,
+            "remark": remark,
+            # "quality": quality
+        })
+
+        return HttpResponse(status=204, headers={'HX-Trigger': 'listChanged'})
+
+from django.db.models import Q, Avg, Count, Min, Sum, F
+from django.db.models.functions import Coalesce
+from django.db.models import ExpressionWrapper, F, FloatField as ModelFloatField
+from django.db.models import OuterRef, Subquery, Sum
+class SpinningMappingCreateWizardView(CustomLoginRequiredMixin, AdminRequiredMixin, SessionWizardView):
+    form_list = [SelectGinningFormSet, VendorMappingForm, Form]
+    template_name = 'farmer_admin/spinning_mapping_wizard/spinning_mapping_wizard_base.html'
+
+    def get_context_data(self, form, **kwargs):
+        context = super().get_context_data(form=form, **kwargs)
+        
+        if self.steps.current == '2':
+            context.update({
+                'form_1_data': self.get_cleaned_data_for_step('0'),
+                'form_2_data': self.get_cleaned_data_for_step('1')
+            })
+            
+        return context
+
+    def done(self, form_list, **kwargs):
+        all_cleaned_data = [form.cleaned_data for form in form_list]
+        cleaned_data_form_1 = all_cleaned_data[0]
+        cleaned_data_form_2 = all_cleaned_data[1]
+        with transaction.atomic():
+            spinning = Spinning.objects.create(
+                vendor=cleaned_data_form_2['vendor'])
+            SpinningStatus.objects.create(spinning=spinning)
+            for cleaned_data in cleaned_data_form_1:
+                try:
+                    cleaned_data['quantity']
+                    spinning.selected_ginnings.add(
+                        SelectedGinning.objects.create(**cleaned_data))
+                except KeyError:
+                    pass
+
+        return render(self.request, 'farmer_admin/spinning_mapping_wizard/spinning_mapping_wizard_done.html', {
+            'form_data': [form.cleaned_data for form in form_list],
+            'completed': True,
+        })
+
+
+class SpinningListView(CustomLoginRequiredMixin, AdminRequiredMixin, ListView):
+    template_name = 'farmer_admin/spinning_list.html'
+    queryset = Spinning.objects.all().prefetch_related('selected_ginnings')
+    context_object_name = 'spinnings'
+    
+class GetSpinningList(CustomLoginRequiredMixin, AdminRequiredMixin, ListView):
+    template_name = 'farmer_admin/spinning_rows.html'
+    queryset = Spinning.objects.all().prefetch_related('selected_ginnings')
+    context_object_name = 'spinnings'
+
+
+class SpinningInboundRequest(CustomLoginRequiredMixin, AdminRequiredMixin, FormView):
+    form_class = InboundRequestForm
+    template_name = 'farmer_admin/inbound_form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["post_url"] = reverse(
+            'farmer_admin:spinning_inbound_request_create_view', kwargs={'pk': self.kwargs['pk']})
+        return context
+
+    def form_valid(self, form):
+        timestamp = form.cleaned_data.get('timestamp')
+        quantity = form.cleaned_data.get('quantity')
+        rate = form.cleaned_data.get('rate')
+        invoice_details = form.cleaned_data.get('invoice_details')
+
+        # Create outbound request
+        spinning = Spinning.objects.get(pk=self.kwargs['pk'])
+        SpinningInbound.objects.get_or_create(spinning=spinning, defaults={
+            "timestamp": timestamp,
+            "quantity": quantity,
+            "rate": rate,
+            "invoice_details": invoice_details,
+        })
+
+        # Change status
+        spinning.spinning_status.status = SpinningStatus.QC_PENDING
+        spinning.spinning_status.save()
+        spinning.save()
+
+        return HttpResponse(status=204, headers={'HX-Trigger': 'listChanged'})
+
+
+class SpinningQcRequestCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, FormView):
+    form_class = QualityCheckForm
+    template_name = 'farmer_admin/qc_form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["post_url"] = reverse(
+            'farmer_admin:spinning_qc_request_create_view', kwargs={'pk': self.kwargs['pk']})
+        return context
+
+    def form_valid(self, form):
+        spinning = Spinning.objects.get(pk=self.kwargs['pk'])
+        remark = form.cleaned_data.get('remark', None)
+        # quality = form.cleaned_data.get('quality', None)
+        status = form.cleaned_data.get('status')
+
+        spinning_status, _created = SpinningStatus.objects.update_or_create(spinning=spinning, defaults={
+            "status": status,
+            "remark": remark,
+            # "quality": quality
+        })
+
+        return HttpResponse(status=204, headers={'HX-Trigger': 'listChanged'})
+
+
+
+

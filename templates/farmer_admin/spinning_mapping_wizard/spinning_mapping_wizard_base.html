@@ -1,0 +1,180 @@
+{% extends 'farmer_admin/base.html' %}
+
+{% block content %}
+<!--begin::Post-->
+<div class="content flex-row-fluid" id="kt_content">
+    <!--begin::Card-->
+    <div class="card">
+        <!--begin::Card body-->
+        <div class="card-body py-4">
+            <!--begin::Stepper-->
+            <div class="stepper stepper-pills" id="kt_stepper_example_basic">
+                <!--begin::Nav-->
+                <div class="stepper-nav d-flex justify-content-between flex-wrap mb-10">
+                    <!--begin::Step 1-->
+                    <div class="stepper-item mx-8 my-4 {% if wizard.steps.current == '0' %}current{% endif %}" data-kt-stepper-element="nav">
+                        <!--begin::Wrapper-->
+                        <div class="stepper-wrapper d-flex align-items-center">
+                            <!--begin::Icon-->
+                            <div class="stepper-icon w-40px h-40px">
+                                <i class="stepper-check fas fa-check"></i>
+                                <span class="stepper-number">1</span>
+                            </div>
+                            <!--end::Icon-->
+                
+                            <!--begin::Label-->
+                            <div class="stepper-label">
+                                <h3 class="stepper-title">
+                                    Step 1
+                                </h3>
+                
+                                <div class="stepper-desc">
+                                    Add Farmers and Quantity
+                                </div>
+                            </div>
+                            <!--end::Label-->
+                        </div>
+                        <!--end::Wrapper-->
+                
+                        <!--begin::Line-->
+                        <div class="stepper-line h-40px"></div>
+                        <!--end::Line-->
+                    </div>
+                    <!--end::Step 1-->
+                
+                    <!--begin::Step 2-->
+                    <div class="stepper-item mx-8 my-4 {% if wizard.steps.current == '1' %}current{% endif %}" data-kt-stepper-element="nav">
+                        <!--begin::Wrapper-->
+                        <div class="stepper-wrapper d-flex align-items-center">
+                            <!--begin::Icon-->
+                            <div class="stepper-icon w-40px h-40px">
+                                <i class="stepper-check fas fa-check"></i>
+                                <span class="stepper-number">2</span>
+                            </div>
+                            <!--begin::Icon-->
+                
+                            <!--begin::Label-->
+                            <div class="stepper-label">
+                                <h3 class="stepper-title">
+                                    Step 2
+                                </h3>
+                
+                                <div class="stepper-desc">
+                                    Select Vendor
+                                </div>
+                            </div>
+                            <!--end::Label-->
+                        </div>
+                        <!--end::Wrapper-->
+                
+                        <!--begin::Line-->
+                        <div class="stepper-line h-40px"></div>
+                        <!--end::Line-->
+                    </div>
+                    <!--end::Step 2-->
+                
+                    <!--begin::Step 3-->
+                    <div class="stepper-item mx-8 my-4 {% if wizard.steps.current == '2' %}current{% endif %}" data-kt-stepper-element="nav">
+                        <!--begin::Wrapper-->
+                        <div class="stepper-wrapper d-flex align-items-center">
+                            <!--begin::Icon-->
+                            <div class="stepper-icon w-40px h-40px">
+                                <i class="stepper-check fas fa-check"></i>
+                                <span class="stepper-number">3</span>
+                            </div>
+                            <!--begin::Icon-->
+                
+                            <!--begin::Label-->
+                            <div class="stepper-label">
+                                <h3 class="stepper-title">
+                                    Step 3
+                                </h3>
+                
+                                <div class="stepper-desc">
+                                    Review and Submit
+                                </div>
+                            </div>
+                            <!--end::Label-->
+                        </div>
+                        <!--end::Wrapper-->
+                
+                        <!--begin::Line-->
+                        <div class="stepper-line h-40px"></div>
+                        <!--end::Line-->
+                    </div>
+                    <!--end::Step 3-->
+                </div>
+                <!--end::Nav-->
+
+                <!--begin::Form-->
+                <form enctype="multipart/form-data" method="POST" class="form mx-auto" id="kt_stepper_example_basic_form">
+                    {% csrf_token %}
+                    {{ wizard.management_form }}
+                    <!--begin::Group-->
+                    <div class="mb-5">
+                        {% block form_content %}
+                        
+                        {% if wizard.steps.current == '0' %}
+                        {{ wizard.form.management_form }}
+                        {% include 'farmer_admin/spinning_mapping_wizard/spinning_mapping_wizard_form_1.html' with form=wizard.form form_errors=wizard.form.non_form_errors %}
+                        {% endif %}
+                        
+                        {% if wizard.steps.current == '1' %}
+                        {% include 'farmer_admin/spinning_mapping_wizard/spinning_mapping_wizard_form_2.html' with form=wizard.form form_errors=wizard.form.non_form_errors %}
+                        {% endif %}
+
+                        {% if wizard.steps.current == '2' %}
+                        {% include 'farmer_admin/spinning_mapping_wizard/spinning_mapping_wizard_review.html' with form=wizard.form form_errors=wizard.form.non_form_errors %}
+                        {% endif %}
+                        
+                        {% endblock form_content %}
+
+                    </div>
+                    <!--end::Group-->
+
+                    <!--begin::Actions-->
+                    <div class="d-flex flex-stack">
+                        <!--begin::Wrapper-->
+                        <div class="me-2">
+                            {% if wizard.steps.prev %}
+                            <button name="wizard_goto_step" formnovalidate="formnovalidate" type="submit" value="{{ wizard.steps.prev }}" class="btn btn-light btn-active-light-primary">
+                                Back
+                            </button>
+                            {% endif %}
+                        </div>
+                        <!--end::Wrapper-->
+
+                        <!--begin::Wrapper-->
+                        <div>
+                            <button type="submit" value="submit" class="btn btn-primary">
+                                Continue
+                            </button>
+                        </div>
+                        <!--end::Wrapper-->
+                    </div>
+                    <!--end::Actions-->
+                </form>
+                <!--end::Form-->
+            </div>
+            <!--end::Stepper-->
+        </div>
+        <!--end::Card body-->
+    </div>
+    <!--end::Card-->
+</div>
+<!--end::Post-->
+    
+{% endblock content %}
+
+
+{% block js %}
+{{block.super}}
+<script type="text/javascript">
+    {% if wizard.form.management_form.errors %}
+        let fallbackUrl = '{% url "farmer_admin:traceability_spinning_mapping_create" %}'
+        window.location.replace(`${fallbackUrl}`)
+    {% endif %}
+</script>
+{% endblock js %}
+
+

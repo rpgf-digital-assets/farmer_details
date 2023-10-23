@@ -93,35 +93,137 @@ class SelectedGinningFarmer(BaseModel):
         "Farmer Name"), max_length=200, null=True, blank=True)
     farmer = models.ForeignKey(
         Farmer, related_name="ginning_farmer", on_delete=models.PROTECT, null=True, blank=True)
-    quantity = models.IntegerField(verbose_name=_("Quantity"), )
+    quantity = models.FloatField(verbose_name=_("Quantity"), )
 
 
-class GinningMapping(BaseModel):
+class Ginning(BaseModel):
     vendor = models.ForeignKey(Vendor, verbose_name=_(
         "Vendor"), on_delete=models.CASCADE)
     selected_farmers = models.ManyToManyField(SelectedGinningFarmer, verbose_name=_(
         "Selected farmers"), related_name="ginning_mapping")
 
+    timestamp = models.DateTimeField(auto_now_add=True)
+    total_quantity = models.FloatField(default=0.0)
+    
+    def save(self, *args, **kwargs):
+        self.total_quantity = 0
+        for selected_farmer in self.selected_farmers.all():
+            self.total_quantity += selected_farmer.quantity
+        super(Ginning, self).save(*args, **kwargs)
+        
+    
+    # @property
+    # def total_quantity(self):
+    #     quantity = 0
+    #     for selected_farmer in self.selected_farmers.all():
+    #         quantity += selected_farmer.quantity
+
+    #     return quantity
+    
+    
+class GinningStatus(BaseModel):
+    ginning = models.OneToOneField(Ginning, related_name="ginning_status", on_delete=models.PROTECT)
+
     UNDEFINED = 'Undefined'
     IN_PROGRESS = 'In Progress'
+    QC_PENDING = 'QC Pending'
+    QC_APPROVED = 'QC Approved'
+    QC_REJECTED = 'QC Rejected'
     COMPLETED = 'Completed'
 
     STATUS_CHOICES = [
         (UNDEFINED, UNDEFINED),
         (IN_PROGRESS, IN_PROGRESS),
+        (QC_PENDING, QC_PENDING),
+        (QC_APPROVED, QC_APPROVED),
+        (QC_REJECTED, QC_REJECTED),
         (COMPLETED, COMPLETED),
     ]
+    
     status = models.CharField(
-        _("Status"), max_length=100, choices=STATUS_CHOICES, default=UNDEFINED)
-    created_on = models.DateTimeField(auto_now_add=True)
-    modified = models.DateTimeField(auto_now=True)
-    returned_quantity = models.IntegerField(
-        _("Returned quantity"), null=True, blank=True)
+        _("Status"), max_length=100, choices=STATUS_CHOICES, default=IN_PROGRESS)
+    remark = models.CharField(
+        _("Status"), max_length=1000, null=True, blank=True)
+    # quality = models.ForeignKey(
+    #     Quality, related_name="ginning_status", on_delete=models.PROTECT, null=True, blank=True)
+    # rejected_count = models.PositiveBigIntegerField(
+    #     _("Number of times it got rejected"), default=0)
+
+
+class GinningInbound(BaseModel):
+    ginning = models.OneToOneField(Ginning, verbose_name=_(
+        "Ginning"), related_name='ginning_inbound', on_delete=models.PROTECT)
+    timestamp = models.DateTimeField(_("Timestamp"))
+    quantity = models.FloatField(_("Inbound Quantity"), validators = [MinValueValidator(0.0)])
+    rate = models.FloatField(_("Inbound Cost as per Invoice"), validators = [MinValueValidator(0.0)])
+    invoice_details = models.CharField(_("Invoice Details"), max_length=500)
+
+    def __str__(self):
+        return f"{self.ginning} | {self.quantity}"
+
+
+
+class SelectedGinning(BaseModel):
+    ginning = models.ForeignKey(Ginning, verbose_name=_(
+        "Ginning"), related_name="selected_ginnings", on_delete=models.PROTECT)
+    quantity = models.FloatField(verbose_name=_("Quantity"), )
+
+    
+class Spinning(BaseModel):
+    selected_ginnings = models.ManyToManyField(SelectedGinning, verbose_name=_(
+        "Selected Ginnings"), related_name="spinnings")
+    vendor = models.ForeignKey(Vendor, verbose_name=_(
+        "Vendor"), on_delete=models.CASCADE)
+
+    timestamp = models.DateTimeField(auto_now_add=True)
 
     @property
     def total_quantity(self):
         quantity = 0
-        for selected_farmer in self.selected_farmers.all():
+        for selected_farmer in self.selected_ginnings.all():
             quantity += selected_farmer.quantity
 
         return quantity
+    
+
+class SpinningStatus(BaseModel):
+    spinning = models.OneToOneField(Spinning, related_name="spinning_status", on_delete=models.PROTECT)
+
+    UNDEFINED = 'Undefined'
+    IN_PROGRESS = 'In Progress'
+    QC_PENDING = 'QC Pending'
+    QC_APPROVED = 'QC Approved'
+    QC_REJECTED = 'QC Rejected'
+    COMPLETED = 'Completed'
+
+    STATUS_CHOICES = [
+        (UNDEFINED, UNDEFINED),
+        (IN_PROGRESS, IN_PROGRESS),
+        (QC_PENDING, QC_PENDING),
+        (QC_APPROVED, QC_APPROVED),
+        (QC_REJECTED, QC_REJECTED),
+        (COMPLETED, COMPLETED),
+    ]
+    
+    status = models.CharField(
+        _("Status"), max_length=100, choices=STATUS_CHOICES, default=IN_PROGRESS)
+    remark = models.CharField(
+        _("Status"), max_length=1000, null=True, blank=True)
+    # quality = models.ForeignKey(
+    #     Quality, related_name="ginning_status", on_delete=models.PROTECT, null=True, blank=True)
+    # rejected_count = models.PositiveBigIntegerField(
+    #     _("Number of times it got rejected"), default=0)
+
+
+class SpinningInbound(BaseModel):
+    spinning = models.OneToOneField(Spinning, verbose_name=_(
+        "Spinning"), related_name='spinning_inbound', on_delete=models.PROTECT)
+    timestamp = models.DateTimeField(_("Timestamp"))
+    quantity = models.FloatField(_("Inbound Quantity"), validators = [MinValueValidator(0.0)])
+    rate = models.FloatField(_("Inbound Cost as per Invoice"), validators = [MinValueValidator(0.0)])
+    invoice_details = models.CharField(_("Invoice Details"), max_length=500)
+
+    def __str__(self):
+        return f"{self.spinning} | {self.quantity}"
+
+    

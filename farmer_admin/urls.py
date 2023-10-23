@@ -49,8 +49,6 @@ urlpatterns = [
     path('vendor/<uuid:pk>/update/', views.VendorUpdateView.as_view(), name="vendor_update"),
     
     
-    path('traceability/ginning_mapping/create/', views.GinningMappingCreateWizardView.as_view(), name="traceability_ginning_mapping_create"),
-    
     
     path('season/list/', views.SeasonListView.as_view(), name="season_list"),
     path('season/create/', views.SeasonCreateView.as_view(), name="season_create"),
@@ -64,5 +62,17 @@ urlpatterns = [
     path('organic_crop/csv/', views.OrganicCropCsv.as_view(), name="organic_crop_download_csv"),
     path('vendor/download/', views.VendorCSV.as_view(), name="vendor_download_csv"),
     
-    path('dashboard/vendor/', views.DashboardVendorView.as_view(), name="dashboard_vendor"),
+    path('traceability/ginning_mapping/create/', views.GinningMappingCreateWizardView.as_view(), name="traceability_ginning_mapping_create"),
+    path('traceability/get_ginnings/', views.GetGinningList.as_view(), name="get_ginnings"),
+    path('traceability/ginning/list/', views.GinningListView.as_view(), name="ginning_list_view"),
+    path('traceability/ginning/<uuid:pk>/qc_request/', views.GinningQcRequestCreateView.as_view(), name="ginning_qc_request_create_view"),
+    path('traceability/ginning/<uuid:pk>/create/inbound_request/', views.GinningInboundRequest.as_view(), name="ginning_inbound_request_create_view"),
+    
+    path('traceability/spinning_mapping/create/', views.SpinningMappingCreateWizardView.as_view(), name="traceability_spinning_mapping_create"),
+    path('traceability/get_spinnings/', views.GetSpinningList.as_view(), name="get_spinnings"),
+    path('traceability/spinning/list/', views.SpinningListView.as_view(), name="spinning_list_view"),
+    path('traceability/spinning/<uuid:pk>/qc_request/', views.SpinningQcRequestCreateView.as_view(), name="spinning_qc_request_create_view"),
+    path('traceability/spinning/<uuid:pk>/create/inbound_request/', views.SpinningInboundRequest.as_view(), name="spinning_inbound_request_create_view"),
+    
+    
 ]

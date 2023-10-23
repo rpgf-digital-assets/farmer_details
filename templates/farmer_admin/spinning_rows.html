@@ -1,0 +1,100 @@
+{% load base_extras %}
+{% load static %}
+
+
+{% for spinning in spinnings %}
+<tr>
+    <!--Vendor-->
+    <td class="min-w-10.9375rem">
+        <div class="position-relative ps-6 pe-3 py-2">
+            <div class="position-absolute start-0 top-0 w-4px h-100 rounded-2 bg-info"></div>
+            <div class="d-flex align-items-center">
+                <!--begin:: Avatar -->
+                <div class="symbol symbol-circle symbol-50px overflow-hidden me-3">
+                    <a>
+                        <div class="symbol-label">
+                            <img src="{{spinning.vendor.profile_image.url}}" alt="profile image" class="w-100" />
+                        </div>
+                    </a>
+                </div>
+                <!--end::Avatar-->
+                <!--begin::User details-->
+                <div class="d-flex flex-column">
+                    <a href="#" class="mb-1 text-dark text-hover-primary fw-bold">{{spinning.vendor}}</a>
+                </div>
+            </div>
+        </div>
+    </td>
+    <!--Quantity-->
+    <td>
+        <div class="fs-7 text-muted fw-bold">{{spinning.total_quantity}}Kg</div>
+    </td>
+    <!--Status-->
+    <td>
+        {% if spinning.spinning_status.status == spinning.spinning_status.IN_PROGRESS %}
+        <span class="badge badge-light-primary">
+            {{spinning.spinning_status.status}}
+        <span>
+        {% elif spinning.spinning_status.status == spinning.spinning_status.QC_PENDING %}
+        <span class="badge badge-light-warning">
+            {{spinning.spinning_status.status}}
+        <span>
+        {% elif spinning.spinning_status.status == spinning.spinning_status.QC_REJECTED %}
+        <span class="badge badge-light-danger">
+            {{spinning.spinning_status.status}}
+        <span>
+        {% elif spinning.spinning_status.status == spinning.spinning_status.QC_APPROVED %}
+        <span class="badge badge-light-success">
+            {{spinning.spinning_status.status}}
+        <span>
+        {% endif %}
+    </td>
+    <!--Farmers-->
+    <td class="min-w-7.8125rem">
+        <!--begin::Team members-->
+        <div class="symbol-group symbol-hover mb-1">
+            {% for selected_farmer in spinning.selected_ginnings.all %}
+            <!--begin::Member-->
+            <div class="symbol symbol-circle symbol-1.5625rem">
+                <a  class="symbol symbol-circle symbol-1.5625rem" {% if selected_farmer.farmer %} href="{% url 'farmer_admin:farmer_overview' selected_farmer.farmer.pk %}" {% endif %} target="_blank">
+                    <img {% if selected_farmer.farmer %}src="{{selected_farmer.farmer.profile_image.url}}" {% else %} src="{% static 'assets/media/avatars/blank-profile-picture.png' %}" {% endif %} alt="" />
+                </a>
+            </div>
+            <!--end::Member-->
+            {% endfor %}
+            {% if spinning.selected_ginnings.count > 5 %}
+            <!--begin::More members-->
+            <div class="symbol symbol-circle symbol-1.5625rem">
+                <div class="symbol-label bg-dark">
+                    <span class="fs-8 text-inverse-dark">+{{spinning.selected_ginnings.all.count}}</span>
+                </div>
+            </div>
+            <!--end::More members-->
+            {% endif %}
+        </div>
+        <!--end::Team members-->
+        <div class="fs-7 fw-bold text-muted">Farmers</div>
+    </td>
+    <!--Created on-->
+    <td class="min-w-9.375rem">
+        <div class="mb-2 fw-bold">{{spinning.timestamp}}</div>
+        <div class="fs-7 fw-bold text-muted">Date Created</div>
+    </td>
+    <!--Progress-->
+    <td class="d-none">{{spinning.status}}</td>
+    <!--Action-->
+    <td class="text-end">
+
+        {% if spinning.spinning_status.status == spinning.spinning_status.IN_PROGRESS %}
+        <button hx-get="{% url 'farmer_admin:spinning_inbound_request_create_view' spinning.id %}"  class="btn btn-primary btn-sm btn-light" hx-target="#outbound_request_container">
+            Add Inbound 
+        </button>
+        {% elif spinning.spinning_status.status == spinning.spinning_status.QC_PENDING %}
+        <button hx-get="{% url 'farmer_admin:spinning_qc_request_create_view' spinning.id %}"  class="btn btn-primary btn-sm btn-light" hx-target="#outbound_request_container">
+            Add QC
+        </button>
+        {% endif %}
+            
+    </td>
+</tr>
+{% endfor %}

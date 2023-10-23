@@ -1,0 +1,108 @@
+
+<div class="flex-column current" id="form-container" data-kt-stepper-element="content">
+    {% for each_form in form %}
+    <div class="farmer_add_form row d-flex justify-content-evenly" id="form_{{forloop.counter0}}">
+        <div class="col-xl-3">
+            <label class="col-form-label">{{each_form.ginning.label}}</label>
+            <div class="">
+                {{ each_form.ginning }}
+            </div>
+            <div class="text-danger" style="text-align:start">
+                {{ each_form.ginning.errors }}
+            </div>
+        </div>
+        <div class="col-xl-3 add-button-after">
+            <label class="col-form-label">{{each_form.quantity.label}}</label>
+            <div class="">
+                {{ each_form.quantity }}
+            </div>
+            <div class="text-danger" style="text-align:start">
+                {{ each_form.quantity.errors }}
+            </div>
+        </div>
+
+        {% if forloop.counter == 1 %}
+        <div class="col-xl-1 d-flex justify-content-center align-items-center delete-button">
+        </div>
+        {% else %}
+        <div class="col-xl-1 d-flex justify-content-center align-items-center delete-button">
+            <button class="btn btn-primary" onClick="deleteForm('form_{{forloop.counter0}}')" type="button">
+                <i class="bi bi-trash fs-2"></i>
+            </button>
+        </div>
+        {% endif %}
+    </div>
+
+    {% comment %} Each form error {% endcomment %}
+    <div class="row">
+        <ul id="errorlist_ul" class="errorlist">
+            {% for error in each_form.non_field_errors %}
+            <li class="text-danger mt-3" style="text-align:start">
+                {{error}}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endfor %}
+
+    {% comment %} Formset error {% endcomment %}
+    <div class="row">
+        <ul id="errorlist_ul" class="errorlist">
+            {% for error in form_errors %}
+            <li class="text-danger mt-3" style="text-align:start">
+                {{error}}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+
+    <div class="row d-flex justify-content-center" id="add-new-button-container">
+        <div class="col-xl-3 d-flex justify-content-center">
+            <button id="add-form" onclick="addForm(event)" class="btn btn-primary" type="button">Add Another</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    
+    function addForm(e){
+        e.preventDefault()
+
+        let farmer_add_form = document.querySelectorAll(".farmer_add_form")
+        let container = document.querySelector("#form-container")
+        let addButtonContainer = document.querySelector("#add-new-button-container")
+        let totalForms = document.querySelector("#id_0-TOTAL_FORMS")
+        let formNum = farmer_add_form.length - 1
+
+        let newForm = farmer_add_form[0].cloneNode(true)
+        let formRegex = RegExp(`0-(\\d){1}-`,'g')
+
+        formNum++
+        newForm.innerHTML = newForm.innerHTML.replace(formRegex, `0-${formNum}-`)
+        if (formNum >= 1){
+            var html = `
+            <button class="btn btn-primary" onClick="deleteForm('form_${formNum}')" type="button">
+                <i class="bi bi-trash fs-2"></i>
+            </button>
+            `
+            console.log('newForm.querySelector', newForm.querySelector('.add-button-after'))
+            newForm.querySelector('.delete-button').innerHTML = html 
+        }
+        newForm.id = `form_${formNum}`
+        console.log('formNum', formNum, newForm)
+        container.insertBefore(newForm, addButtonContainer)
+        totalForms.setAttribute('value', `${formNum+1}`)
+    }
+
+    function deleteForm(id){
+        let farmer_add_form = document.querySelectorAll(".farmer_add_form")
+        let totalForms = document.querySelector("#id_0-TOTAL_FORMS")
+        let formNum = farmer_add_form.length - 1
+
+        let form = document.getElementById(id)
+        form.parentNode.removeChild(form)
+        totalForms.setAttribute('value', `${formNum}`)
+    }
+</script>
+
