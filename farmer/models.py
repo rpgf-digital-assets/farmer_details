@@ -263,7 +263,10 @@ class OrganicCropDetails(BaseModel):
         return f"{self.name}"
     
     def save(self, *args, **kwargs):
-        self.expected_productivity = self.expected_yield / self.area
+        self.expected_productivity = self.expected_yield
+        if self.area > 0:
+            self.expected_productivity = self.expected_yield / self.area
+        
         super(OrganicCropDetails, self).save(*args, **kwargs)
 
     
