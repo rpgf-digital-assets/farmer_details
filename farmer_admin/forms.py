@@ -577,7 +577,7 @@ class CustomGinningModelChoiceField(ModelChoiceField):
 
 
 class SelectGinningForm(ModelForm):
-    ginning = CustomGinningModelChoiceField(queryset=Ginning.objects.annotate(
+    ginning = CustomGinningModelChoiceField(required=True, queryset=Ginning.objects.annotate(
         sum_quantity=Coalesce(Sum('selected_ginnings__quantity'), 0.0),
         remaining_quantity=F('total_quantity') - Coalesce(Sum('selected_ginnings__quantity'), 0.0)).filter(
         ginning_status__status=GinningStatus.QC_APPROVED, total_quantity__gt=F('sum_quantity')),
@@ -586,7 +586,7 @@ class SelectGinningForm(ModelForm):
         }
     ))
 
-    quantity = PositiveIntegerField(widget=NumberInput(attrs={
+    quantity = PositiveIntegerField(required=True, widget=NumberInput(attrs={
         'class': 'form-control'
     }))
 
@@ -594,42 +594,35 @@ class SelectGinningForm(ModelForm):
         model = SelectedGinning
         exclude = ['id']
 
-    def clean(self):
-        cleaned_data = super().clean()
-        validation_errors = []
-
-        ginning = cleaned_data.get('ginning')
-
-        if validation_errors:
-            raise ValidationError(validation_errors)
-
 
 class SelectGinningFormSet(BaseFormSet):
+    
     def clean(self):
         """Checks that no two selected ginning farmer are same."""
         if any(self.errors):
             # Don't bother validating the formset unless each form is valid on its own
             return
-        distinct_inbound_quantity_mapping = {}
+        distinct_ginning_quantity_mapping = {}
         for form in self.forms:
             if self.can_delete and self._should_delete_form(form):
                 continue
-            # inbound = form.cleaned_data.get("inbound")
-            # quantity = form.cleaned_data.get("quantity")
-            # if distinct_inbound_quantity_mapping[inbound]:
-            # distinct_inbound_quantity_mapping[inbound] += quantity
-            # else:
-            #     distinct_inbound_quantity_mapping[inbound] = quantity
-
-            # if (inbound, quantity) in selected_inbound_list:
-            #     raise ValidationError(
-            #         "Selected farmers in a set must be distinct.")
-            # selected_inbound_list.append((inbound, quantity))
-            # if not farmer and not farmer_name and not quantity:
-            #     raise ValidationError("Cannot submit an empty form")
-
-        print("🐍 File: farmer_admin/forms.py | Line: 68 | clean ~ distinct_inbound_quantity_mapping",
-              distinct_inbound_quantity_mapping)
+            ginning = form.cleaned_data.get("ginning")
+            quantity = form.cleaned_data.get("quantity")
+            if ginning:
+                try:
+                    distinct_ginning_quantity_mapping[str(ginning.pk)] += quantity
+                except KeyError:
+                    distinct_ginning_quantity_mapping[str(ginning.pk)] = quantity
+        validation_errors = []
+        for ginning_pk in distinct_ginning_quantity_mapping.keys():
+            ginning = Ginning.objects.annotate(
+                remaining_quantity=F('total_quantity') - Coalesce(Sum('selected_ginnings__quantity'), 0.0)).filter(
+                pk=ginning_pk, ginning_status__status=GinningStatus.QC_APPROVED).first()
+            if round(ginning.remaining_quantity, 2) < distinct_ginning_quantity_mapping[ginning_pk]:
+                validation_errors.append(ValidationError(f"Total quantity entered is greater than the \
+                                                          total quantity available for the ginning \"{ginning}\""))
+        if validation_errors:
+            raise ValidationError(validation_errors)
 
 
 SelectGinningFormSet = formset_factory(

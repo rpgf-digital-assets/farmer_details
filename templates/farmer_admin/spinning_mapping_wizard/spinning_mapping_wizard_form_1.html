@@ -1,7 +1,7 @@
 
 <div class="flex-column current" id="form-container" data-kt-stepper-element="content">
     {% for each_form in form %}
-    <div class="farmer_add_form row d-flex justify-content-evenly" id="form_{{forloop.counter0}}">
+    <div class="farmer_add_form row d-flex justify-content-between" id="form_{{forloop.counter0}}">
         <div class="col-xl-3">
             <label class="col-form-label">{{each_form.ginning.label}}</label>
             <div class="">
@@ -22,10 +22,10 @@
         </div>
 
         {% if forloop.counter == 1 %}
-        <div class="col-xl-1 d-flex justify-content-center align-items-center delete-button">
+        <div class="col-xl-1 d-flex justify-content-center align-items-end delete-button">
         </div>
         {% else %}
-        <div class="col-xl-1 d-flex justify-content-center align-items-center delete-button">
+        <div class="col-xl-1 d-flex justify-content-center align-items-end delete-button">
             <button class="btn btn-primary" onClick="deleteForm('form_{{forloop.counter0}}')" type="button">
                 <i class="bi bi-trash fs-2"></i>
             </button>
@@ -34,6 +34,8 @@
     </div>
 
     {% comment %} Each form error {% endcomment %}
+    
+    {% if each_form.non_field_errors %}
     <div class="row">
         <ul id="errorlist_ul" class="errorlist">
             {% for error in each_form.non_field_errors %}
@@ -43,9 +45,18 @@
             {% endfor %}
         </ul>
     </div>
+    {% endif %}
+    
     {% endfor %}
-
     {% comment %} Formset error {% endcomment %}
+
+    <div class="row d-flex justify-content-center my-10 " id="add-new-button-container">
+        <div class="col-xl-3 d-flex justify-content-center">
+            <button id="add-form" onclick="addForm(event)" class="btn btn-primary" type="button">Add Another</button>
+        </div>
+    </div>
+
+    {% if form_errors %}
     <div class="row">
         <ul id="errorlist_ul" class="errorlist">
             {% for error in form_errors %}
@@ -55,13 +66,8 @@
             {% endfor %}
         </ul>
     </div>
+    {% endif %}
 
-
-    <div class="row d-flex justify-content-center" id="add-new-button-container">
-        <div class="col-xl-3 d-flex justify-content-center">
-            <button id="add-form" onclick="addForm(event)" class="btn btn-primary" type="button">Add Another</button>
-        </div>
-    </div>
 </div>
 
 <script>

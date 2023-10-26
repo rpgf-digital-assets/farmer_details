@@ -103,14 +103,16 @@ class Ginning(BaseModel):
         "Selected farmers"), related_name="ginning_mapping")
 
     timestamp = models.DateTimeField(auto_now_add=True)
-    total_quantity = models.FloatField(default=0.0, validators = [MinValueValidator(0.0)])
+    total_quantity = models.FloatField(validators = [MinValueValidator(0.0)])
     
     def save(self, *args, **kwargs):
         self.total_quantity = 0
         for selected_farmer in self.selected_farmers.all():
             self.total_quantity += selected_farmer.quantity
         super(Ginning, self).save(*args, **kwargs)
-        
+    
+    def __str__(self):
+        return f"{self.vendor} | {self.timestamp.date()}"
     
     # @property
     # def total_quantity(self):
