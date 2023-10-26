@@ -93,7 +93,7 @@ class SelectedGinningFarmer(BaseModel):
         "Farmer Name"), max_length=200, null=True, blank=True)
     farmer = models.ForeignKey(
         Farmer, related_name="ginning_farmer", on_delete=models.PROTECT, null=True, blank=True)
-    quantity = models.FloatField(verbose_name=_("Quantity"), )
+    quantity = models.FloatField(verbose_name=_("Quantity"), validators = [MinValueValidator(0.0)])
 
 
 class Ginning(BaseModel):
@@ -103,7 +103,7 @@ class Ginning(BaseModel):
         "Selected farmers"), related_name="ginning_mapping")
 
     timestamp = models.DateTimeField(auto_now_add=True)
-    total_quantity = models.FloatField(default=0.0)
+    total_quantity = models.FloatField(default=0.0, validators = [MinValueValidator(0.0)])
     
     def save(self, *args, **kwargs):
         self.total_quantity = 0
@@ -166,7 +166,7 @@ class GinningInbound(BaseModel):
 class SelectedGinning(BaseModel):
     ginning = models.ForeignKey(Ginning, verbose_name=_(
         "Ginning"), related_name="selected_ginnings", on_delete=models.PROTECT)
-    quantity = models.FloatField(verbose_name=_("Quantity"), )
+    quantity = models.FloatField(verbose_name=_("Quantity"), validators = [MinValueValidator(0.0)])
 
     
 class Spinning(BaseModel):
