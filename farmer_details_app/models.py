@@ -76,7 +76,7 @@ class Vendor(BaseModel):
     address = models.CharField(verbose_name=_("Address"), max_length=200)
     city = models.CharField(verbose_name=_("City"), max_length=200)
     state = models.CharField(verbose_name=_("State"), max_length=200)
-    pincode = models.IntegerField(verbose_name=_("Pincode"))
+    pincode = models.PositiveBigIntegerField(verbose_name=_("Pincode"))
 
     objects = VendorManager()
 
