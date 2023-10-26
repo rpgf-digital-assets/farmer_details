@@ -29,17 +29,18 @@ from django.forms import (
     FileField,
     formset_factory
 )
+from django.db.models import Sum, F
+from django.db.models.functions import Coalesce
 
 from farmer.models import ContaminationControl, CostOfCultivation, Farmer, FarmerEducation, FarmerLand, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
 from farmer_details_app.models import Ginning, GinningStatus, SelectedGinning, SelectedGinningFarmer, SpinningStatus, Vendor
 from users.models import User
 from users.validators import validate_name, validate_phonenumber, validate_positive_number
 
-from django.db import transaction
-
 
 class PositiveIntegerField(IntegerField):
     default_validators = [validate_positive_number]
+
 
 class BaseContaminationFormSet(BaseFormSet):
     def clean(self):
@@ -129,8 +130,8 @@ class FarmerCreationForm(BaseCreationForm):
     phone = CharField(label='Phone Number', validators=[validate_phonenumber],
                       widget=TextInput(attrs={
                             'placeholder': 'Phone Number',
-                            'autocomplete':"off",
-                            "data-intl-tel-input-id":"0"
+                            'autocomplete': "off",
+                            "data-intl-tel-input-id": "0"
                       }))
 
     class Meta:
@@ -140,10 +141,10 @@ class FarmerCreationForm(BaseCreationForm):
     field_order = ['first_name', 'last_name', 'gender', 'birth_date', 'aadhar_number', 'phone', 'registration_number', 'date_of_joining_of_program',
                    'village', 'taluka', 'district', 'state', 'profile_image']
 
-
     def clean(self):
         cleaned_data = super().clean()
-        print("🐍 File: farmer_admin/forms.py | Line: 178 | clean ~ cleaned_data",cleaned_data)
+        print(
+            "🐍 File: farmer_admin/forms.py | Line: 178 | clean ~ cleaned_data", cleaned_data)
         validation_errors = []
         first_name = cleaned_data.get('first_name')
         last_name = cleaned_data.get('last_name')
@@ -151,7 +152,7 @@ class FarmerCreationForm(BaseCreationForm):
         birth_date = cleaned_data.get('birth_date')
         aadhar_number = cleaned_data.get('aadhar_number')
         phone = cleaned_data.get('phone')
-        print("🐍 File: farmer_admin/forms.py | Line: 178 | clean ~ phone",phone)
+        print("🐍 File: farmer_admin/forms.py | Line: 178 | clean ~ phone", phone)
         registration_number = cleaned_data.get('registration_number')
         date_of_joining_of_program = cleaned_data.get(
             'date_of_joining_of_program')
@@ -190,7 +191,6 @@ class OtherFarmerCreationForm(BaseCreationForm):
     class Meta:
         model = OtherFarmer
         fields = '__all__'
-
 
 
 class FarmerSocialCreationFrom(BaseCreationForm):
@@ -453,7 +453,8 @@ class HarvestAndIncomeDetailForm(BaseCreationForm):
         type = cleaned_data.get('type')
         if type == HarvestAndIncomeDetails.MULTIPLE:
             if not cleaned_data.get('second_harvest', None) and not cleaned_data.get('third_harvest', None):
-                self.add_error('second_harvest', ValidationError("Second harvest is required if type is multiple"))
+                self.add_error('second_harvest', ValidationError(
+                    "Second harvest is required if type is multiple"))
 
 
 HarvestAndIncomeDetailFormSet = formset_factory(
@@ -493,10 +494,6 @@ ContaminationControlFormSet = formset_factory(
 
 ######################### Organic Crop Forms::END ################################
 
-class VendorCreateForm(BaseCreationForm):
-    class Meta:
-        model = Vendor
-        exclude = ['id']
 
 ######################### Ginning Forms::BEGIN ################################
 
@@ -561,20 +558,19 @@ class SelectFarmerFormSet(BaseFormSet):
             # if not farmer and not farmer_name and not quantity:
             #     raise ValidationError("Cannot submit an empty form")
 
-        print("🐍 File: farmer_admin/forms.py | Line: 68 | clean ~ distinct_inbound_quantity_mapping",distinct_inbound_quantity_mapping)
+        print("🐍 File: farmer_admin/forms.py | Line: 68 | clean ~ distinct_inbound_quantity_mapping",
+              distinct_inbound_quantity_mapping)
 
-        
+
 SelectFarmerFormSet = formset_factory(
     SelectFarmerForm, extra=0, formset=SelectFarmerFormSet, min_num=1)
 
 
 ######################### Ginning Forms::END ################################
 
-from django.db.models import Q, Avg, Count, Min, Sum, F
-from django.db.models.functions import Coalesce
-from django.db.models import ExpressionWrapper, F, FloatField as ModelFloatField
+
 ######################### Spinning Forms::BEGIN ################################
-class CustomGinningModelChoiceField(ModelChoiceField): 
+class CustomGinningModelChoiceField(ModelChoiceField):
 
     def label_from_instance(self, obj):
         return f'{obj.vendor} ({round(obj.remaining_quantity, 2)} Kg)'
@@ -582,14 +578,14 @@ class CustomGinningModelChoiceField(ModelChoiceField):
 
 class SelectGinningForm(ModelForm):
     ginning = CustomGinningModelChoiceField(queryset=Ginning.objects.annotate(
-                sum_quantity=Coalesce(Sum('selected_ginnings__quantity'), 0.0), 
-                remaining_quantity=F('total_quantity') - Coalesce(Sum('selected_ginnings__quantity'), 0.0)).filter(
-                ginning_status__status=GinningStatus.QC_APPROVED, total_quantity__gt=F('sum_quantity')), 
+        sum_quantity=Coalesce(Sum('selected_ginnings__quantity'), 0.0),
+        remaining_quantity=F('total_quantity') - Coalesce(Sum('selected_ginnings__quantity'), 0.0)).filter(
+        ginning_status__status=GinningStatus.QC_APPROVED, total_quantity__gt=F('sum_quantity')),
         widget=Select(attrs={
             'class': 'form-control'
         }
     ))
-    
+
     quantity = PositiveIntegerField(widget=NumberInput(attrs={
         'class': 'form-control'
     }))
@@ -603,7 +599,7 @@ class SelectGinningForm(ModelForm):
         validation_errors = []
 
         ginning = cleaned_data.get('ginning')
-        
+
         if validation_errors:
             raise ValidationError(validation_errors)
 
@@ -632,9 +628,10 @@ class SelectGinningFormSet(BaseFormSet):
             # if not farmer and not farmer_name and not quantity:
             #     raise ValidationError("Cannot submit an empty form")
 
-        print("🐍 File: farmer_admin/forms.py | Line: 68 | clean ~ distinct_inbound_quantity_mapping",distinct_inbound_quantity_mapping)
+        print("🐍 File: farmer_admin/forms.py | Line: 68 | clean ~ distinct_inbound_quantity_mapping",
+              distinct_inbound_quantity_mapping)
 
-        
+
 SelectGinningFormSet = formset_factory(
     SelectGinningForm, extra=0, formset=SelectGinningFormSet, min_num=1)
 
@@ -657,14 +654,14 @@ class InboundRequestForm(Form):
 
 
 class QualityCheckForm(Form):
-    status = ChoiceField(label="Quality Check Status", 
-                        choices=[(GinningStatus.QC_APPROVED, "Approved"), 
-                                (GinningStatus.QC_REJECTED, 'Rejected'),],
-                        widget=Select(
-                            attrs={
-                                'class': 'form-control'
-                            }
-                        ))
+    status = ChoiceField(label="Quality Check Status",
+                         choices=[(GinningStatus.QC_APPROVED, "Approved"),
+                                  (GinningStatus.QC_REJECTED, 'Rejected'),],
+                         widget=Select(
+                             attrs={
+                                 'class': 'form-control'
+                             }
+                         ))
     remark = CharField(required=False, label="Remarks", widget=TextInput(attrs={
         'class': 'form-control',
     }))
@@ -673,6 +670,13 @@ class QualityCheckForm(Form):
     #         'class': 'form-control'
     #     }
     # ))
+
+
+class VendorCreateForm(BaseCreationForm):
+    class Meta:
+        model = Vendor
+        exclude = ['id']
+
 
 class VendorMappingForm(Form):
 
