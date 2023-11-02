@@ -200,3 +200,5 @@ custom_logs
 
 *.docx
 *.xlsx
+*.pem
+*.tar

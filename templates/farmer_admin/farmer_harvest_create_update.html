@@ -19,6 +19,125 @@ Farmer Harvest Details {% if farmer_seed_object %} Edit {% else %} Create {% end
         maxYear: parseInt(moment().format("YYYY"),12)
     });
     
+    const total_harvest_fields = ['id_first_harvest', 'id_second_harvest', 'id_third_harvest']
+
+    total_harvest_fields.forEach((field) => {
+        $('#' + field).on('change', () => {
+            update_total_harvest()
+        })
+    })
+
+    const update_total_harvest = () => {
+        sum = 0
+        total_harvest_fields.forEach((field) => {
+            sum = sum + parseInt($('#' + field).val() || 0)
+        })
+        $('#id_total_crop_harvested').val(sum).trigger('change')
+    }
+
+
+
+    // FPO Fields
+
+    const fpo_fields = ['id_price_paid_fpo', 'id_premium_paid_fpo']
+
+    $('#id_price_paid_fpo').on('change', () => {
+        update_total_income_fpo()
+        update_total_fpo()
+    })
+    $('#id_premium_paid_fpo').on('change', () => {
+        update_total_fpo()
+    })
+
+    const update_total_fpo = () => {
+        sum = 0
+        fpo_fields.forEach((field) => {
+            sum = sum + parseInt($('#' + field).val() || 0)
+        })
+        $('#id_total_price_received_fpo').val(sum)
+    }
+    
+    const income_fpo_fields = ['id_quantity_sold_fpo', 'id_price_paid_fpo']
+
+    $('#id_quantity_sold_fpo').on('change', () => {
+        update_total_income_fpo()
+        update_unsold()
+    })
+
+    const update_total_income_fpo = () => {
+        sum = 1
+        income_fpo_fields.forEach((field) => {
+            sum = sum * parseInt($('#' + field).val() || 0)
+        })
+        $('#id_total_organic_sale_fpo').val(sum)
+    }
+    
+    
+    // Others fields
+
+    const other_fields = ['id_price_paid_outside', 'id_premium_paid_outside']
+
+    $('#id_price_paid_outside').on('change', () => {
+        update_total_others()
+        update_total_income_others()
+    })
+    $('#id_premium_paid_outside').on('change', () => {
+        update_total_others()
+    })
+
+    const update_total_others = () => {
+        sum = 0
+        other_fields.forEach((field) => {
+            sum = sum + parseInt($('#' + field).val() || 0)
+        })
+        $('#id_total_price_received_outside').val(sum).trigger('change')
+    }
+
+    const income_other_fields = ['id_quantity_sold_outside', 'id_price_paid_outside']
+
+    $('#id_quantity_sold_outside').on('change', () => {
+        update_total_income_others()
+        update_unsold()
+    })
+
+    const update_total_income_others = () => {
+        sum = 1
+        income_other_fields.forEach((field) => {
+            sum = sum * parseInt($('#' + field).val() || 0)
+        })
+        $('#id_total_organic_sale_outside').val(sum).trigger('change')
+    }
+    
+    // Gross Income field
+
+    gross_income_fields = ['id_total_organic_sale_outside', 'id_total_organic_sale_fpo']
+
+    gross_income_fields.forEach((field) => {
+        $('#' + field).on('change', () => {
+            update_gross_income()
+        })
+    })
+
+    const update_gross_income = () => {
+        sum = 0
+        gross_income_fields.forEach((field) => {
+            sum = sum + parseInt($('#' + field).val() || 0)
+        })
+        $('#id_gross_income').val(sum)
+    }
+
+    unsold_fields = ['id_total_crop_harvested', 'id_quantity_sold_fpo', 'id_quantity_sold_outside']
+
+    $('#id_total_crop_harvested').on('change', () => {
+        update_unsold()
+    })
+
+    const update_unsold = () => {
+        const unsold = parseInt($('#id_total_crop_harvested').val()) - $('#id_quantity_sold_fpo').val() - $('#id_quantity_sold_outside').val()
+        console.log(unsold)
+        $('#id_unsold_quantity').val(unsold)
+    }
+
 
 </script>
 {% endblock js %}

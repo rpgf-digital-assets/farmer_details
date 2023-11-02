@@ -392,6 +392,7 @@ class HarvestAndIncomeDetails(BaseModel):
     second_harvest_date = models.DateField(verbose_name=_('Second harvest date'), null=True, blank=True)
     third_harvest = models.PositiveIntegerField(verbose_name=_('Third harvest'), null=True, blank=True)
     third_harvest_date = models.DateField(verbose_name=_('Third harvest date'), null=True, blank=True)
+    total_crop_harvested = models.PositiveIntegerField(verbose_name=_('Total crop harvested'), null=True, blank=True)
     actual_crop_production = models.PositiveIntegerField(_('Actual organic crop productivity (kg/ha)'))
     
     quantity_sold_fpo = models.PositiveIntegerField(_('Quantity Sold through FPO (Kg)'))
@@ -412,12 +413,12 @@ class HarvestAndIncomeDetails(BaseModel):
     payment_mode = models.CharField(verbose_name=_('Mode of payment'), max_length=500)
     payment_reference_number = models.PositiveIntegerField(verbose_name=_('Payment Reference number '))
     unsold_quantity = models.PositiveIntegerField(_('Quantity of organic harvest unsold/Balance (kg)'))
-
-    @property
-    def total_crop_harvested(self):
-        if self.first_harvest and self.second_harvest and self.third_harvest:
-            return self.first_harvest + self.second_harvest + self.third_harvest
-        return self.first_harvest
+    
+    # @property
+    # def total_crop_harvested(self):
+    #     if self.first_harvest and self.second_harvest and self.third_harvest:
+    #         return self.first_harvest + self.second_harvest + self.third_harvest
+    #     return self.first_harvest
     
     
 class CostOfCultivation(BaseModel):
@@ -461,8 +462,6 @@ class ContaminationControl(BaseModel):
     preventive_measure_details = models.CharField(verbose_name=_('Details of Preventive measure taken'), max_length=500)
     control_measures_details = models.CharField(verbose_name=_('Details of control measures taken'), max_length=500)
     remark = models.CharField(verbose_name=_('Remark'), max_length=500)
-    
-    
     
     
 class FarmerOrganicCropPdf(BaseModel):

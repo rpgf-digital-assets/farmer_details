@@ -449,13 +449,24 @@ class HarvestAndIncomeDetailForm(BaseCreationForm):
         exclude = ['organic_crop']
 
     def clean(self):
+        validation_errors = []
         cleaned_data = super().clean()
         type = cleaned_data.get('type')
+        total_crop_harvested = cleaned_data.get('total_crop_harvested')
+        quantity_sold_fpo = cleaned_data.get('quantity_sold_fpo')
+        quantity_sold_outside = cleaned_data.get('quantity_sold_outside')
+        unsold_quantity = cleaned_data.get('unsold_quantity')
         if type == HarvestAndIncomeDetails.MULTIPLE:
             if not cleaned_data.get('second_harvest', None) and not cleaned_data.get('third_harvest', None):
                 self.add_error('second_harvest', ValidationError(
                     "Second harvest is required if type is multiple"))
+                
+        if total_crop_harvested != (quantity_sold_fpo + quantity_sold_outside + unsold_quantity):
+            validation_errors.append(ValidationError(
+                    "Total crop harvested should be sum of all the quantities."))
 
+        if validation_errors:
+            raise ValidationError(validation_errors)
 
 HarvestAndIncomeDetailFormSet = formset_factory(
     HarvestAndIncomeDetailForm, formset=BaseFarmerOrganicCropFormSet, extra=0, min_num=1)

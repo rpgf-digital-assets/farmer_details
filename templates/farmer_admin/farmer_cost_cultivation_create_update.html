@@ -33,7 +33,7 @@ Farmer Cost of Cultivation Details {% if farmer_seed_object %} Edit {% else %} C
     const update_input_cost = () => {
         sum = 0
         input_cost_fields.forEach((field) => {
-            sum = sum + parseInt($('#' + field).val())
+            sum = sum + parseInt($('#' + field).val() || 0)
         })
         $('#id_input_cost').val(sum)
     }
@@ -47,7 +47,7 @@ Farmer Cost of Cultivation Details {% if farmer_seed_object %} Edit {% else %} C
     const update_labour_cost = () => {
         sum = 0
         labour_cost_fields.forEach((field) => {
-            sum = sum + parseInt($('#' + field).val())
+            sum = sum + parseInt($('#' + field).val() || 0)
         })
         $('#id_total_labour_hiring_cost').val(sum)
     }
@@ -61,7 +61,7 @@ Farmer Cost of Cultivation Details {% if farmer_seed_object %} Edit {% else %} C
     const update_total_cost = () => {
         sum = 0
         total_cost_fields.forEach((field) => {
-            sum = sum + parseInt($('#' + field).val())
+            sum = sum + parseInt($('#' + field).val() || 0)
         })
         $('#id_total_cost').val(sum)
     }
