@@ -4,14 +4,14 @@ from django.core.files import File
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, RetrieveAPIView, DestroyAPIView
-from api.farmer_admin.serializers import FarmerDetailsSerializer, FarmerLandCoordinatesSerializer, FarmerOrganicCropDetailsSerializer, FarmerOrganicCropSerializer
+from api.farmer_admin.serializers import CostsSerializer, FarmerDetailsSerializer, FarmerLandCoordinatesSerializer, FarmerOrganicCropDetailsSerializer, FarmerOrganicCropSerializer
 from django.db.models import ProtectedError
 from django.db.models import Count
 from django.db import connection
 from django.db import transaction
 from django.db.models import Sum, Avg
 from api.permissions import IsAdminOrSuperUser
-from farmer.models import ContaminationControl, CostOfCultivation, Farmer, FarmerLand, FarmerOrganicCropPdf, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
+from farmer.models import ContaminationControl, CostOfCultivation, Costs, Farmer, FarmerLand, FarmerOrganicCropPdf, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
 from farmer_admin.utils import generate_certificate
 from farmer_details_app.models import Vendor
 from users.models import User
@@ -64,8 +64,34 @@ class DeleteVendorAPIView(DeleteBaseAPIView):
     
 class DeleteSeasonAPIView(DeleteBaseAPIView):
     model = Season
+
+class DeleteCostsAPIView(DeleteBaseAPIView):
+    model = Costs
     
     
+class GetCostsAPIView(APIView):
+    
+    def post(self, request):
+        response = {
+            'status': '',
+        }
+        try:
+            data = request.data
+            organic_crop_id = data['organic_crop']
+            input_source = data['input_source']
+            organic_crop = OrganicCropDetails.objects.get(id=organic_crop_id, is_active=True)
+            costs = Costs.objects.filter(type=input_source, is_active=True).first()
+            nutrient = NutrientManagement.objects.filter(organic_crop=organic_crop, is_active=True).first()
+            response['costs'] = CostsSerializer(costs).data
+            response['no_of_workdays_required'] = nutrient.no_of_workdays_required if nutrient else 1
+            response['status'] = 'success'   
+        except Exception as e:
+            response['error'] = str(e)
+            response['status'] = 'failure'
+        return Response(response)
+        
+        
+        
 class DeleteOrganicCropAPIView(APIView):
     def post(self, request):
         response = {

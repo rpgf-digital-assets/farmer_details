@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from api.utils import DynamicFieldsCategorySerializer
 
-from farmer.models import Farmer, FarmerLand, HarvestAndIncomeDetails, OrganicCropDetails, Season
+from farmer.models import Costs, Farmer, FarmerLand, HarvestAndIncomeDetails, OrganicCropDetails, Season
 from users.models import User
 
 
@@ -60,4 +60,8 @@ class FarmerDetailsSerializer(DynamicFieldsCategorySerializer):
     
 
 
+class CostsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Costs
+        fields = '__all__'
         

@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
 
 class CustomLoginRequiredMixin(LoginRequiredMixin):
-    """
+    """ 
      If the user is not logged in they are redirected to Index page
     """
     """Verify that the current user is authenticated."""

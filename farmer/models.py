@@ -422,8 +422,8 @@ class HarvestAndIncomeDetails(BaseModel):
     
 class CostOfCultivation(BaseModel):
     organic_crop = models.ForeignKey(OrganicCropDetails, related_name='cost_of_cultivation', on_delete=models.PROTECT)
-    area = models.FloatField(verbose_name=_('Crop Area (Ha)'))
-    input_source = models.CharField(verbose_name=_('Source of Input'), max_length=500)
+    # area = models.FloatField(verbose_name=_('Crop Area (Ha)'))
+    input_source = models.CharField(verbose_name=_('Source of Input'), max_length=500, choices=NutrientManagement.TYPE_CHOICES)
     manure_preparation_cost = models.PositiveIntegerField(verbose_name=_('Cost of Manure Preparation'))
     biofertilizer_preparation_cost = models.PositiveIntegerField(verbose_name=_('Cost of Biofertilizer Preparation'))
     biopesticide_preparation_cost = models.PositiveIntegerField(verbose_name=_('Cost of Bio pesticide Preparation'))
@@ -468,3 +468,22 @@ class ContaminationControl(BaseModel):
 class FarmerOrganicCropPdf(BaseModel):
     farmer = models.ForeignKey(Farmer, related_name='organic_crop_pdf', on_delete=models.PROTECT)
     pdf = models.FileField(upload_to='farmer/organic_crop_pdf', verbose_name=_("Organic Crop Pdf"))
+    
+    
+class Costs(BaseModel):
+    type = models.CharField(_("Type of fertilizer used"), max_length=100, choices=NutrientManagement.TYPE_CHOICES)
+    manure_preparation_cost = models.PositiveIntegerField(verbose_name=_('Cost of Manure Preparation'))
+    biofertilizer_preparation_cost = models.PositiveIntegerField(verbose_name=_('Cost of Biofertilizer Preparation'))
+    biopesticide_preparation_cost = models.PositiveIntegerField(verbose_name=_('Cost of Bio pesticide Preparation'))
+    seed_purchase_cost = models.PositiveIntegerField(verbose_name=_('Seed Purchase Costs'))
+    irrigation_cost = models.PositiveIntegerField(verbose_name=_('Irrigation Costs'))
+    land_preparation_labour_cost = models.PositiveIntegerField(verbose_name=_('Labour Cost for land preparation'))
+    sowing_labour_cost = models.PositiveIntegerField(verbose_name=_('Labour Cost for Sowing'))
+    weed_management_labour_cost = models.PositiveIntegerField(verbose_name=_('Labour Cost for Weed management'))
+    manure_application_labour_cost = models.PositiveIntegerField(verbose_name=_('Labour Cost for Manure Application'))
+    biofertilizer_application_labour_cost = models.PositiveIntegerField(verbose_name=_('Labour Cost for Biofertilizer Application'))
+    biopesticide_application_labour_cost = models.PositiveIntegerField(verbose_name=_('Labour Cost for Bio pesticide Application'))
+    harvest_labour_cost = models.PositiveIntegerField(verbose_name=_('Labour Cost for Harvest'))
+    
+    
+    

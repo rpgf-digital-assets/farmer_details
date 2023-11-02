@@ -54,6 +54,10 @@ urlpatterns = [
     path('season/create/', views.SeasonCreateView.as_view(), name="season_create"),
     path('season/<uuid:pk>/update/', views.SeasonUpdateView.as_view(), name="season_update"),
     
+
+    path('costs/list/', views.CostsListView.as_view(), name="costs_list"),
+    path('costs/create/', views.CostsCreateView.as_view(), name="costs_create"),
+    path('costs/<uuid:pk>/update/', views.CostsUpdateView.as_view(), name="costs_update"),
     
     
     path('dashboard/farmer/', views.DashboardFarmerView.as_view(), name="dashboard_farmer_view"),

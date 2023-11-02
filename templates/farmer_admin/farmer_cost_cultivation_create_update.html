@@ -9,7 +9,130 @@ Farmer Cost of Cultivation Details {% if farmer_seed_object %} Edit {% else %} C
 {% block js %}
 {{block.super}}
 <script>
+    // TODO: Add change listener to source of input fields
+    // TODO: Fetch costs master data using source of input value
+    // TODO: Set the master data
+    // TODO: Set total fields
+    // Done
+
+    const input_cost_fields = ['id_manure_preparation_cost', 'id_biofertilizer_preparation_cost', 'id_biopesticide_preparation_cost',
+    'id_seed_purchase_cost', 'id_irrigation_cost']
+
+    const labour_cost_fields = ['id_land_preparation_labour_cost', 'id_sowing_labour_cost', 'id_weed_management_labour_cost', 
+    'id_manure_application_labour_cost', 'id_biofertilizer_application_labour_cost', 'id_biopesticide_application_labour_cost', 
+    'id_harvest_labour_cost']
+
+    const total_cost_fields = ['id_total_labour_hiring_cost', 'id_input_cost']
+
+    input_cost_fields.forEach((field) => {
+        $('#' + field).on('change', () => {
+            update_input_cost()
+        })
+    })
+
+    const update_input_cost = () => {
+        sum = 0
+        input_cost_fields.forEach((field) => {
+            sum = sum + parseInt($('#' + field).val())
+        })
+        $('#id_input_cost').val(sum)
+    }
+
+    labour_cost_fields.forEach((field) => {
+        $('#' + field).on('change', () => {
+            update_labour_cost()
+        })
+    })
     
+    const update_labour_cost = () => {
+        sum = 0
+        labour_cost_fields.forEach((field) => {
+            sum = sum + parseInt($('#' + field).val())
+        })
+        $('#id_total_labour_hiring_cost').val(sum)
+    }
+
+    total_cost_fields.forEach((field) => {
+        $('#' + field).on('change', () => {
+            update_total_cost()
+        })
+    })
+    
+    const update_total_cost = () => {
+        sum = 0
+        total_cost_fields.forEach((field) => {
+            sum = sum + parseInt($('#' + field).val())
+        })
+        $('#id_total_cost').val(sum)
+    }
+
+    
+    var organic_crop
+    {% if farmer_cost_object %}
+        organic_crop = '{{farmer_cost_object.organic_crop.pk}}'
+    {% else %}
+    let url_split = window.location.href.split('/')
+        let organic_crop_index = 6
+        for (let i = 0; i < url_split.length; i++){
+            if (url_split[i] === 'organic_crop'){
+                organic_crop_index = i + 1
+            }
+        }    
+        organic_crop = url_split[organic_crop_index]
+    {% endif %}
+
+        
+
+    const input_source = $('#id_input_source')
+
+    input_source.on('change', () => {
+        changed_value = input_source.val()
+        let url = "{% url 'api:api_farmer_admin:get_costs' %}"
+        fetch(url, {
+            method: "POST",
+            body: JSON.stringify({
+                input_source: changed_value,
+                organic_crop: organic_crop
+            }),
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken"),
+                "Content-type": "application/json; charset=UTF-8",
+            },
+            credentials: "include"
+        })
+        .then((response) => {
+            if (response.ok != true) {
+                toastr.error(response.statusText || 'Session Expired! Please login again.');
+                checkResponse(response)
+            }
+            else {
+                return response.json()
+            }
+        })
+        .then((response) => {
+            if (response.status === 'success' ){
+                const costs = response.costs
+                const number_of_days = response.no_of_workdays_required
+                
+                //if (costs.type !== null){}
+                // Costs exist
+                
+                // Update fields with cost information
+                for (const property in costs) {
+                    $('#id_' + property).val(costs[property] * number_of_days)
+                }
+                update_input_cost()
+                update_labour_cost()
+                update_total_cost()
+            }
+            if(response.status === 'failure'){
+                // Show error message
+                toastr.error(response.error)
+            }
+        })
+    })
+
+
 
 </script>
 {% endblock js %}

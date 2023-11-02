@@ -30,8 +30,8 @@ from django.views.generic import (
     DetailView
 )
 
-from farmer.models import ContaminationControl, CostOfCultivation, Farmer, FarmerLand, FarmerOrganicCropPdf, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
-from farmer_admin.forms import ContaminationControlForm, ContaminationControlFormSet, CostOfCultivationForm, CostOfCultivationFormSet, FarmerCreationForm, FarmerLandDetailsCreationFrom, FarmerNutritionManagementForm, FarmerNutritionManagementFormSet, FarmerOrganicCropDetailForm, FarmerPestDiseaseManagementForm, FarmerPestDiseaseManagementFormSet, FarmerSeedDetailsForm, FarmerSeedDetailsFormSet, FarmerSocialCreationFrom, InboundRequestForm, QualityCheckForm, SelectGinningFormSet, VendorMappingForm, HarvestAndIncomeDetailForm, HarvestAndIncomeDetailFormSet, OtherFarmerCreationForm, SeasonCreateForm, SelectFarmerFormSet, VendorCreateForm, WeedManagementForm, WeedManagementFormSet
+from farmer.models import ContaminationControl, CostOfCultivation, Costs, Farmer, FarmerLand, FarmerOrganicCropPdf, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
+from farmer_admin.forms import ContaminationControlForm, ContaminationControlFormSet, CostOfCultivationForm, CostOfCultivationFormSet, CostsCreateForm, FarmerCreationForm, FarmerLandDetailsCreationFrom, FarmerNutritionManagementForm, FarmerNutritionManagementFormSet, FarmerOrganicCropDetailForm, FarmerPestDiseaseManagementForm, FarmerPestDiseaseManagementFormSet, FarmerSeedDetailsForm, FarmerSeedDetailsFormSet, FarmerSocialCreationFrom, InboundRequestForm, QualityCheckForm, SelectGinningFormSet, VendorMappingForm, HarvestAndIncomeDetailForm, HarvestAndIncomeDetailFormSet, OtherFarmerCreationForm, SeasonCreateForm, SelectFarmerFormSet, VendorCreateForm, WeedManagementForm, WeedManagementFormSet
 from farmer_admin.mixins import AdminRequiredMixin
 from farmer_admin.utils import generate_certificate, get_lookup_fields, get_model_field_names, qs_to_dataset
 from farmer_details_app.mixins import CustomLoginRequiredMixin
@@ -649,7 +649,43 @@ class SeasonUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView)
     form_class = SeasonCreateForm
     success_url = reverse_lazy('farmer_admin:season_list')
     context_object_name = 'season_object'
+
+
+class CostsListView(CustomLoginRequiredMixin, AdminRequiredMixin, ListView):
+    template_name = 'farmer_admin/costs_list.html'
+    queryset = Costs.objects.filter(is_active=True)
+    context_object_name = 'costs'
     
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        field_verbose_dict = {}
+        for field in Costs._meta.get_fields():
+            if field.name in ['id', 'is_active']:
+                continue
+            if hasattr(field, 'verbose_name'):
+                field_verbose_dict[field.name] = (
+                    field.verbose_name, field.get_internal_type())
+        context["field_verbose_dict"] = field_verbose_dict
+        context['create_url'] = 'farmer_admin:costs_create'
+        context['edit_url'] = 'farmer_admin:costs_update'
+        context['delete_url'] = reverse('api:api_farmer_admin:costs_delete_api_view')
+        return context
+
+class CostsCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, CreateView):
+    form_class = CostsCreateForm
+    template_name = 'farmer_admin/costs_create_edit.html'
+    success_url = reverse_lazy('farmer_admin:costs_list')
+    
+
+
+class CostsUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, UpdateView):
+    template_name = 'farmer_admin/costs_create_edit.html'
+    queryset = Costs.objects.filter(is_active=True)
+    form_class = CostsCreateForm
+    success_url = reverse_lazy('farmer_admin:costs_list')
+    context_object_name = 'costs_object'
+    
+       
    
 class Echo:
     """An object that implements just the write method of the file-like

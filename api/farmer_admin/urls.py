@@ -14,6 +14,8 @@ urlpatterns = [
     path('delete/vendor/', views.DeleteVendorAPIView.as_view(), name='vendor_delete_api_view'),
     
     path('season/delete/', views.DeleteSeasonAPIView.as_view(), name='season_delete_api_view'),
+    path('costs/delete/', views.DeleteCostsAPIView.as_view(), name='costs_delete_api_view'),
+    path('get_costs/', views.GetCostsAPIView.as_view(), name='get_costs'),
     
     path('delete/organic_crop/', views.DeleteOrganicCropAPIView.as_view(), name='delete_organic_crop_api_view'),
 

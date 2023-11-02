@@ -2,6 +2,8 @@ import json
 from django import template
 from django.db.models import ForeignKey
 from django.urls import reverse
+from django.conf import settings
+
 register = template.Library()
 
 @register.simple_tag
@@ -57,3 +59,19 @@ def add_items_to_dict(dict_1, dict_2):
     result = {**dict_1, **res}
     print("🐍 File: templatetags/base_extras.py | Line: 55 | add_items_to_dict ~ result",result, type(result))
     return result
+
+@register.simple_tag
+def get_field_value(instance, field_name, file_field=False):
+    if file_field:
+        return f"{settings.MEDIA_URL}{getattr(instance, field_name)}"
+    return getattr(instance, field_name)
+
+
+@register.simple_tag
+def get_edit_url(edit_url, pk):
+    edit_url = reverse(edit_url, kwargs={'pk': pk})
+    return reverse(edit_url, kwargs={'pk': pk})
+
+@register.simple_tag
+def get_url(url):
+    return reverse(url)

@@ -32,7 +32,7 @@ from django.forms import (
 from django.db.models import Sum, F
 from django.db.models.functions import Coalesce
 
-from farmer.models import ContaminationControl, CostOfCultivation, Farmer, FarmerEducation, FarmerLand, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
+from farmer.models import ContaminationControl, CostOfCultivation, Costs, Farmer, FarmerEducation, FarmerLand, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
 from farmer_details_app.models import Ginning, GinningStatus, SelectedGinning, SelectedGinningFarmer, SpinningStatus, Vendor
 from users.models import User
 from users.validators import validate_name, validate_phonenumber, validate_positive_number
@@ -683,4 +683,8 @@ class VendorMappingForm(Form):
 class SeasonCreateForm(BaseCreationForm):
     class Meta:
         model = Season
+        fields = '__all__'
+class CostsCreateForm(BaseCreationForm):
+    class Meta:
+        model = Costs
         fields = '__all__'
