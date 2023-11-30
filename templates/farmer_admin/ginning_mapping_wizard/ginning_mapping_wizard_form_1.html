@@ -1,7 +1,7 @@
 
 <div class="flex-column current" id="form-container" data-kt-stepper-element="content">
     {% for each_form in form %}
-    <div class="farmer_add_form row d-flex justify-content-between" id="form_{{forloop.counter0}}">
+    <div class="farmer_add_form row d-flex justify-content-center" id="form_{{forloop.counter0}}">
         <div class="col-xl-3">
             <label class="col-form-label">{{each_form.farmer.label}}</label>
             <div class="">
@@ -14,7 +14,7 @@
         <div class="col-xl-1 separator separator-dashed separator-content border-primary my-15">
             <i class="bi bi-arrow-left-right fs-2"></i>
         </div>
-        <div class="col-xl-3">
+        <div class="col-xl-3">  
             <label class="col-form-label">{{each_form.farmer_name.label}}</label>
             <div class="">
                 {{ each_form.farmer_name }}
@@ -23,13 +23,31 @@
                 {{ each_form.farmer_name.errors }}
             </div>
         </div>
-        <div class="col-xl-3 add-button-after">
+        <div class="col-xl-3">
             <label class="col-form-label">{{each_form.quantity.label}}</label>
             <div class="">
                 {{ each_form.quantity }}
             </div>
             <div class="text-danger" style="text-align:start">
                 {{ each_form.quantity.errors }}
+            </div>
+        </div>
+        <div class="col-xl-3">
+            <label class="col-form-label">{{each_form.slip_no.label}}</label>
+            <div class="">
+                {{ each_form.slip_no }}
+            </div>
+            <div class="text-danger" style="text-align:start">
+                {{ each_form.slip_no.errors }}
+            </div>
+        </div>
+        <div class="col-xl-3 add-button-after">
+            <label class="col-form-label">{{each_form.inward_lot_no.label}}</label>
+            <div class="">
+                {{ each_form.inward_lot_no }}
+            </div>
+            <div class="text-danger" style="text-align:start">
+                {{ each_form.inward_lot_no.errors }}
             </div>
         </div>
 
