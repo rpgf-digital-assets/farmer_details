@@ -31,11 +31,11 @@ from django.views.generic import (
 )
 
 from farmer.models import ContaminationControl, CostOfCultivation, Costs, Farmer, FarmerLand, FarmerOrganicCropPdf, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
-from farmer_admin.forms import ContaminationControlForm, ContaminationControlFormSet, CostOfCultivationForm, CostOfCultivationFormSet, CostsCreateForm, FarmerCreationForm, FarmerLandDetailsCreationFrom, FarmerNutritionManagementForm, FarmerNutritionManagementFormSet, FarmerOrganicCropDetailForm, FarmerPestDiseaseManagementForm, FarmerPestDiseaseManagementFormSet, FarmerSeedDetailsForm, FarmerSeedDetailsFormSet, FarmerSocialCreationFrom, InboundRequestForm, QualityCheckForm, SelectGinningFormSet, VendorMappingForm, HarvestAndIncomeDetailForm, HarvestAndIncomeDetailFormSet, OtherFarmerCreationForm, SeasonCreateForm, SelectFarmerFormSet, VendorCreateForm, WeedManagementForm, WeedManagementFormSet
+from farmer_admin.forms import ContaminationControlForm, ContaminationControlFormSet, CostOfCultivationForm, CostOfCultivationFormSet, CostsCreateForm, FarmerCreationForm, FarmerLandDetailsCreationFrom, FarmerNutritionManagementForm, FarmerNutritionManagementFormSet, FarmerOrganicCropDetailForm, FarmerPestDiseaseManagementForm, FarmerPestDiseaseManagementFormSet, FarmerSeedDetailsForm, FarmerSeedDetailsFormSet, FarmerSocialCreationFrom, GinningInProcessForm, GinningOutboundForm, GinningQualityCheckForm, SelectGinningFormSet, SpinningInProcessForm, SpinningOutboundForm, SpinningQualityCheckForm, VendorMappingForm, HarvestAndIncomeDetailForm, HarvestAndIncomeDetailFormSet, OtherFarmerCreationForm, SeasonCreateForm, SelectFarmerFormSet, VendorCreateForm, WeedManagementForm, WeedManagementFormSet
 from farmer_admin.mixins import AdminRequiredMixin
 from farmer_admin.utils import generate_certificate, get_lookup_fields, get_model_field_names, qs_to_dataset
 from farmer_details_app.mixins import CustomLoginRequiredMixin
-from farmer_details_app.models import Ginning, GinningInbound, GinningStatus, SelectedGinning, SelectedGinningFarmer, Spinning, SpinningInbound, SpinningStatus, Vendor
+from farmer_details_app.models import Ginning, GinningInProcess, GinningOutbound, GinningStatus, SelectedGinning, SelectedGinningFarmer, Spinning, SpinningInProcess, SpinningOutbound, SpinningStatus, Vendor
 from users.models import User
 from django.core.files.storage import FileSystemStorage
 
@@ -940,29 +940,36 @@ class GetGinningList(CustomLoginRequiredMixin, AdminRequiredMixin, ListView):
         return context
 
 
-class GinningInboundRequest(CustomLoginRequiredMixin, AdminRequiredMixin, FormView):
-    form_class = InboundRequestForm
+class GinningOutboundRequest(CustomLoginRequiredMixin, AdminRequiredMixin, FormView):
+    form_class = GinningOutboundForm
     template_name = 'farmer_admin/inbound_form.html'
-
+    
+    def get_form_kwargs(self):
+        kw = super(GinningOutboundRequest, self).get_form_kwargs()
+        kw['kwargs'] = self.kwargs # the trick!
+        return kw
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["post_url"] = reverse(
-            'farmer_admin:ginning_inbound_request_create_view', kwargs={'pk': self.kwargs['pk']})
+            'farmer_admin:ginning_outbound_request_create_view', kwargs={'pk': self.kwargs['pk']})
         return context
 
     def form_valid(self, form):
         timestamp = form.cleaned_data.get('timestamp')
+        invoice_no = form.cleaned_data.get('invoice_no')
+        product_name = form.cleaned_data.get('product_name')
+        outward_lot_no = form.cleaned_data.get('outward_lot_no')
         quantity = form.cleaned_data.get('quantity')
-        rate = form.cleaned_data.get('rate')
-        invoice_details = form.cleaned_data.get('invoice_details')
 
         # Create outbound request
         ginning = Ginning.objects.get(pk=self.kwargs['pk'])
-        GinningInbound.objects.get_or_create(ginning=ginning, defaults={
+        GinningOutbound.objects.update_or_create(ginning=ginning, defaults={
             "timestamp": timestamp,
+            "invoice_no": invoice_no,
+            "product_name": product_name,
+            "outward_lot_no": outward_lot_no,
             "quantity": quantity,
-            "rate": rate,
-            "invoice_details": invoice_details,
         })
 
         # Change status
@@ -973,8 +980,45 @@ class GinningInboundRequest(CustomLoginRequiredMixin, AdminRequiredMixin, FormVi
         return HttpResponse(status=204, headers={'HX-Trigger': 'listChanged'})
 
 
+class GinningInProcessRequest(CustomLoginRequiredMixin, AdminRequiredMixin, FormView):
+    form_class = GinningInProcessForm
+    template_name = 'farmer_admin/inprogress_form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["post_url"] = reverse(
+            'farmer_admin:ginning_inprocess_request_create_view', kwargs={'pk': self.kwargs['pk']})
+        return context
+
+    def form_valid(self, form):
+        name = form.cleaned_data.get('name')
+        heap_no = form.cleaned_data.get('heap_no')
+        consumed_qty = form.cleaned_data.get('consumed_qty')
+        lint_qty = form.cleaned_data.get('lint_qty')
+
+        recovery = (lint_qty / consumed_qty) * 100
+        
+        # Create outbound request
+        ginning = Ginning.objects.get(pk=self.kwargs['pk'])
+        GinningInProcess.objects.update_or_create(ginning=ginning, defaults={
+            "name": name,
+            "heap_no": heap_no,
+            "consumed_qty": consumed_qty,
+            "lint_qty": lint_qty,
+            "recovery": recovery,
+        })
+
+        # Change status
+        ginning.ginning_status.status = GinningStatus.IN_PROGRESS
+        ginning.ginning_status.save()
+        ginning.save()
+
+        return HttpResponse(status=204, headers={'HX-Trigger': 'listChanged'})
+
+
+
 class GinningQcRequestCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, FormView):
-    form_class = QualityCheckForm
+    form_class = GinningQualityCheckForm
     template_name = 'farmer_admin/qc_form.html'
 
     def get_context_data(self, **kwargs):
@@ -985,22 +1029,25 @@ class GinningQcRequestCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, F
 
     def form_valid(self, form):
         ginning = Ginning.objects.get(pk=self.kwargs['pk'])
-        remark = form.cleaned_data.get('remark', None)
-        # quality = form.cleaned_data.get('quality', None)
         status = form.cleaned_data.get('status')
+        length = form.cleaned_data.get('length')
+        mic = form.cleaned_data.get('mic')
+        strength = form.cleaned_data.get('strength')
+        trash = form.cleaned_data.get('trash')
+        rd_plus = form.cleaned_data.get('rd_plus')
 
-        ginning_status, _created = GinningStatus.objects.update_or_create(ginning=ginning, defaults={
+        GinningStatus.objects.update_or_create(ginning=ginning, defaults={
             "status": status,
-            "remark": remark,
-            # "quality": quality
+            "length": length,
+            "mic": mic,
+            "strength": strength,
+            "trash": trash,
+            "rd_plus": rd_plus,
         })
 
         return HttpResponse(status=204, headers={'HX-Trigger': 'listChanged'})
 
-from django.db.models import Q, Avg, Count, Min, Sum, F
-from django.db.models.functions import Coalesce
-from django.db.models import ExpressionWrapper, F, FloatField as ModelFloatField
-from django.db.models import OuterRef, Subquery, Sum
+
 class SpinningMappingCreateWizardView(CustomLoginRequiredMixin, AdminRequiredMixin, SessionWizardView):
     form_list = [SelectGinningFormSet, VendorMappingForm, Form]
     template_name = 'farmer_admin/spinning_mapping_wizard/spinning_mapping_wizard_base.html'
@@ -1043,35 +1090,76 @@ class SpinningListView(CustomLoginRequiredMixin, AdminRequiredMixin, ListView):
     queryset = Spinning.objects.all().prefetch_related('selected_ginnings')
     context_object_name = 'spinnings'
     
+    
 class GetSpinningList(CustomLoginRequiredMixin, AdminRequiredMixin, ListView):
     template_name = 'farmer_admin/spinning_rows.html'
     queryset = Spinning.objects.all().prefetch_related('selected_ginnings')
     context_object_name = 'spinnings'
 
 
-class SpinningInboundRequest(CustomLoginRequiredMixin, AdminRequiredMixin, FormView):
-    form_class = InboundRequestForm
+class SpinningInProcessRequest(CustomLoginRequiredMixin, AdminRequiredMixin, FormView):
+    form_class = SpinningInProcessForm
     template_name = 'farmer_admin/inbound_form.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["post_url"] = reverse(
-            'farmer_admin:spinning_inbound_request_create_view', kwargs={'pk': self.kwargs['pk']})
+            'farmer_admin:spinning_inprocess_request_create_view', kwargs={'pk': self.kwargs['pk']})
+        return context
+
+    def form_valid(self, form):
+        name = form.cleaned_data.get('name')
+        raw_material_qty = form.cleaned_data.get('raw_material_qty')
+        output_yarn_qty = form.cleaned_data.get('output_yarn_qty')
+        
+        recovery = (output_yarn_qty / raw_material_qty) * 100
+
+        # Create outbound request
+        spinning = Spinning.objects.get(pk=self.kwargs['pk'])
+        SpinningInProcess.objects.update_or_create(spinning=spinning, defaults={
+            "name": name,
+            "raw_material_qty": raw_material_qty,
+            "output_yarn_qty": output_yarn_qty,
+            "recovery": recovery,
+        })
+
+        # Change status
+        spinning.spinning_status.status = SpinningStatus.QC_PENDING
+        spinning.spinning_status.save()
+        spinning.save()
+
+        return HttpResponse(status=204, headers={'HX-Trigger': 'listChanged'})
+
+class SpinningOutboundRequest(CustomLoginRequiredMixin, AdminRequiredMixin, FormView):
+    form_class = SpinningOutboundForm
+    template_name = 'farmer_admin/inbound_form.html'
+    
+    def get_form_kwargs(self):
+        kw = super(SpinningOutboundRequest, self).get_form_kwargs()
+        kw['kwargs'] = self.kwargs # the trick!
+        return kw
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["post_url"] = reverse(
+            'farmer_admin:spinning_outbound_request_create_view', kwargs={'pk': self.kwargs['pk']})
         return context
 
     def form_valid(self, form):
         timestamp = form.cleaned_data.get('timestamp')
         quantity = form.cleaned_data.get('quantity')
-        rate = form.cleaned_data.get('rate')
-        invoice_details = form.cleaned_data.get('invoice_details')
+        invoice_no = form.cleaned_data.get('invoice_no')
+        lot_no = form.cleaned_data.get('lot_no')
+        product_name = form.cleaned_data.get('product_name')
 
         # Create outbound request
         spinning = Spinning.objects.get(pk=self.kwargs['pk'])
-        SpinningInbound.objects.get_or_create(spinning=spinning, defaults={
+        SpinningOutbound.objects.update_or_create(spinning=spinning, defaults={
             "timestamp": timestamp,
             "quantity": quantity,
-            "rate": rate,
-            "invoice_details": invoice_details,
+            "product_name": product_name,
+            "lot_no": lot_no,
+            "invoice_no": invoice_no
         })
 
         # Change status
@@ -1083,7 +1171,7 @@ class SpinningInboundRequest(CustomLoginRequiredMixin, AdminRequiredMixin, FormV
 
 
 class SpinningQcRequestCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, FormView):
-    form_class = QualityCheckForm
+    form_class = SpinningQualityCheckForm
     template_name = 'farmer_admin/qc_form.html'
 
     def get_context_data(self, **kwargs):
@@ -1094,14 +1182,18 @@ class SpinningQcRequestCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, 
 
     def form_valid(self, form):
         spinning = Spinning.objects.get(pk=self.kwargs['pk'])
-        remark = form.cleaned_data.get('remark', None)
-        # quality = form.cleaned_data.get('quality', None)
         status = form.cleaned_data.get('status')
+        actual_count = form.cleaned_data.get('actual_count')
+        csp = form.cleaned_data.get('csp')
+        rkm = form.cleaned_data.get('rkm')
+        ipi = form.cleaned_data.get('ipi')
 
-        spinning_status, _created = SpinningStatus.objects.update_or_create(spinning=spinning, defaults={
+        SpinningStatus.objects.update_or_create(spinning=spinning, defaults={
             "status": status,
-            "remark": remark,
-            # "quality": quality
+            "actual_count": actual_count,
+            "csp": csp,
+            "rkm": rkm,
+            "ipi": ipi
         })
 
         return HttpResponse(status=204, headers={'HX-Trigger': 'listChanged'})

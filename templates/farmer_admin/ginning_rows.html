@@ -29,10 +29,17 @@
     <td>
         <div class="fs-7 text-muted fw-bold">{{ginning.total_quantity}}Kg</div>
     </td>
+    <td>
+        <div class="fs-7 text-muted fw-bold">{{ginning.ginning_outbound.quantity|default:"0"}}Kg</div>
+    </td>
     <!--Status-->
     <td>
-        {% if ginning.ginning_status.status == ginning.ginning_status.IN_PROGRESS %}
+        {% if ginning.ginning_status.status == ginning.ginning_status.INBOUND %}
         <span class="badge badge-light-primary">
+            {{ginning.ginning_status.status}}
+        <span>
+        {% elif ginning.ginning_status.status == ginning.ginning_status.IN_PROGRESS %}
+        <span class="badge badge-light-warning">
             {{ginning.ginning_status.status}}
         <span>
         {% elif ginning.ginning_status.status == ginning.ginning_status.QC_PENDING %}
@@ -85,8 +92,12 @@
     <!--Action-->
     <td class="text-end">
 
-        {% if ginning.ginning_status.status == ginning.ginning_status.IN_PROGRESS %}
-        <button hx-get="{% url 'farmer_admin:ginning_inbound_request_create_view' ginning.id %}"  class="btn btn-primary btn-sm btn-light" hx-target="#outbound_request_container">
+        {% if ginning.ginning_status.status == ginning.ginning_status.INBOUND %}
+        <button hx-get="{% url 'farmer_admin:ginning_inprocess_request_create_view' ginning.id %}"  class="btn btn-primary btn-sm btn-light" hx-target="#outbound_request_container">
+            Add Process 
+        </button>
+        {% elif ginning.ginning_status.status == ginning.ginning_status.IN_PROGRESS %}
+        <button hx-get="{% url 'farmer_admin:ginning_outbound_request_create_view' ginning.id %}"  class="btn btn-primary btn-sm btn-light" hx-target="#outbound_request_container">
             Add Inbound 
         </button>
         {% elif ginning.ginning_status.status == ginning.ginning_status.QC_PENDING %}

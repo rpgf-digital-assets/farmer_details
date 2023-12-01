@@ -31,7 +31,11 @@
     </td>
     <!--Status-->
     <td>
-        {% if spinning.spinning_status.status == spinning.spinning_status.IN_PROGRESS %}
+        {% if spinning.spinning_status.status == spinning.spinning_status.INBOUND %}
+        <span class="badge badge-light-primary">
+            {{spinning.spinning_status.status}}
+        <span>
+        {% elif spinning.spinning_status.status == spinning.spinning_status.IN_PROGRESS %}
         <span class="badge badge-light-primary">
             {{spinning.spinning_status.status}}
         <span>
@@ -85,9 +89,13 @@
     <!--Action-->
     <td class="text-end">
 
-        {% if spinning.spinning_status.status == spinning.spinning_status.IN_PROGRESS %}
-        <button hx-get="{% url 'farmer_admin:spinning_inbound_request_create_view' spinning.id %}"  class="btn btn-primary btn-sm btn-light" hx-target="#outbound_request_container">
-            Add Inbound 
+        {% if spinning.spinning_status.status == spinning.spinning_status.INBOUND %}
+        <button hx-get="{% url 'farmer_admin:spinning_inprocess_request_create_view' spinning.id %}"  class="btn btn-primary btn-sm btn-light" hx-target="#outbound_request_container">
+            Add Process
+        </button>
+        {% elif spinning.spinning_status.status == spinning.spinning_status.IN_PROGRESS %}
+        <button hx-get="{% url 'farmer_admin:spinning_outbound_request_create_view' spinning.id %}"  class="btn btn-primary btn-sm btn-light" hx-target="#outbound_request_container">
+            Add Outbound
         </button>
         {% elif spinning.spinning_status.status == spinning.spinning_status.QC_PENDING %}
         <button hx-get="{% url 'farmer_admin:spinning_qc_request_create_view' spinning.id %}"  class="btn btn-primary btn-sm btn-light" hx-target="#outbound_request_container">

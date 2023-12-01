@@ -33,7 +33,7 @@ from django.db.models import Sum, F
 from django.db.models.functions import Coalesce
 
 from farmer.models import ContaminationControl, CostOfCultivation, Costs, Farmer, FarmerEducation, FarmerLand, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
-from farmer_details_app.models import Ginning, GinningStatus, SelectedGinning, SelectedGinningFarmer, SpinningStatus, Vendor
+from farmer_details_app.models import Ginning, GinningInProcess, GinningOutbound, GinningStatus, SelectedGinning, SelectedGinningFarmer, Spinning, SpinningInProcess, SpinningOutbound, SpinningStatus, Vendor
 from users.models import User
 from users.validators import validate_name, validate_phonenumber, validate_positive_number
 
@@ -85,6 +85,7 @@ class BaseCreationForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
+        self.kwargs = kwargs.pop('kwargs', None)
         super().__init__(*args, **kwargs)
         for visible in self.visible_fields():
             # print("🐍 File: farmer_admin/forms.py | Line: 52 | __init__ ~ visible.field.widget.input_type",visible.field.widget.input_type)
@@ -522,6 +523,16 @@ class SelectFarmerForm(ModelForm):
     quantity = PositiveIntegerField(widget=NumberInput(attrs={
         'class': 'form-control'
     }))
+    slip_no = CharField(required=True, widget=TextInput(
+        attrs={
+            'class': 'form-control'
+        }
+    ))
+    inward_lot_no = CharField(required=True, widget=TextInput(
+        attrs={
+            'class': 'form-control'
+        }
+    ))
 
     class Meta:
         model = SelectedGinningFarmer
@@ -569,8 +580,6 @@ class SelectFarmerFormSet(BaseFormSet):
             # if not farmer and not farmer_name and not quantity:
             #     raise ValidationError("Cannot submit an empty form")
 
-        print("🐍 File: farmer_admin/forms.py | Line: 68 | clean ~ distinct_inbound_quantity_mapping",
-              distinct_inbound_quantity_mapping)
 
 
 SelectFarmerFormSet = formset_factory(
@@ -600,7 +609,25 @@ class SelectGinningForm(ModelForm):
     quantity = PositiveIntegerField(required=True, widget=NumberInput(attrs={
         'class': 'form-control'
     }))
-
+    
+    invoice_no = CharField(required=True, widget=TextInput(
+        attrs={
+            'class': 'form-control'
+        }
+    ))
+    
+    lot_no = CharField(required=True, widget=TextInput(
+        attrs={
+            'class': 'form-control'
+        }
+    ))
+    
+    lint_cotton_tc_no = CharField(required=True, widget=TextInput(
+        attrs={
+            'class': 'form-control'
+        }
+    ))
+    
     class Meta:
         model = SelectedGinning
         exclude = ['id']
@@ -640,24 +667,75 @@ SelectGinningFormSet = formset_factory(
     SelectGinningForm, extra=0, formset=SelectGinningFormSet, min_num=1)
 
 
-######################### Spinning Forms::END ################################
-
-class InboundRequestForm(Form):
+class SpinningInProcessForm(BaseCreationForm):
     timestamp = DateTimeField(required=True, label="Outbound Timestamp", widget=DateTimeInput(attrs={
         'class': 'form-control datetimepicker-input-time',
     }))
-    quantity = FloatField(required=True, label="Inbound Quantity", widget=NumberInput(attrs={
-        'class': 'form-control',
+    class Meta:
+        model = SpinningInProcess
+        fields = ['name', 'raw_material_qty', 'output_yarn_qty']
+    
+
+class SpinningOutboundForm(BaseCreationForm): 
+    timestamp = DateTimeField(required=True, label="Outbound Timestamp", widget=DateTimeInput(attrs={
+        'class': 'form-control datetimepicker-input-time',
     }))
-    rate = FloatField(required=True, label="Inbound Cost as per Invoice", widget=NumberInput(attrs={
-        'class': 'form-control',
-    }))
-    invoice_details = CharField(required=True, label="Invoice Details", widget=TextInput(attrs={
-        'class': 'form-control',
-    }))
+    class Meta:
+        model = SpinningOutbound
+        fields = ['invoice_no', 'timestamp',
+                  'product_name', 'lot_no', 'quantity']
+    def clean(self):
+        quantity = self.cleaned_data['quantity']
+        spinning = Spinning.objects.get(pk=self.kwargs['pk'])
+        if spinning:
+            if quantity > spinning.total_quantity:
+                self.add_error('quantity', ValidationError("Quantity cannot be greater than total ginning quantity"))
+         
 
 
-class QualityCheckForm(Form):
+class SpinningQualityCheckForm(BaseCreationForm):
+    status = ChoiceField(label="Quality Check Status",
+            choices=[(SpinningStatus.QC_APPROVED, "Approved"),
+                    (SpinningStatus.QC_REJECTED, 'Rejected'),],
+            widget=Select(
+                attrs={
+                    'class': 'form-control'
+                }
+            ))
+    class Meta:
+        model = SpinningStatus
+        fields = ['actual_count', 'csp', 'rkm', 'ipi', 'status']
+
+######################### Spinning Forms::END ################################
+
+class GinningInProcessForm(BaseCreationForm):
+    timestamp = DateTimeField(required=True, label="Outbound Timestamp", widget=DateTimeInput(attrs={
+        'class': 'form-control datetimepicker-input-time',
+    }))
+    class Meta:
+        model = GinningInProcess
+        fields = ['name', 'timestamp', 'heap_no', 'consumed_qty', 'lint_qty']
+    
+    
+class GinningOutboundForm(BaseCreationForm):
+        
+    timestamp = DateTimeField(required=True, label="Outbound Timestamp", widget=DateTimeInput(attrs={
+        'class': 'form-control datetimepicker-input-time',
+    }))
+    class Meta:
+        model = GinningOutbound
+        fields = ['timestamp', 'invoice_no', 'product_name', 'outward_lot_no', 'quantity']
+        
+    def clean(self):
+        quantity = self.cleaned_data['quantity']
+        ginning = Ginning.objects.get(pk=self.kwargs['pk'])
+        if ginning:
+            if quantity > ginning.total_quantity:
+                self.add_error('quantity', ValidationError("Quantity cannot be greater than total ginning quantity"))
+         
+        
+        
+class GinningQualityCheckForm(BaseCreationForm):
     status = ChoiceField(label="Quality Check Status",
                          choices=[(GinningStatus.QC_APPROVED, "Approved"),
                                   (GinningStatus.QC_REJECTED, 'Rejected'),],
@@ -666,14 +744,10 @@ class QualityCheckForm(Form):
                                  'class': 'form-control'
                              }
                          ))
-    remark = CharField(required=False, label="Remarks", widget=TextInput(attrs={
-        'class': 'form-control',
-    }))
-    # quality = ModelChoiceField(required=True, queryset=Quality.objects.filter(is_active=True), widget=Select(
-    #     attrs={
-    #         'class': 'form-control'
-    #     }
-    # ))
+    class Meta:
+        model = GinningStatus
+        exclude = ['ginning']
+        
 
 
 class VendorCreateForm(BaseCreationForm):

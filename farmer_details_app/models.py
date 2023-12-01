@@ -94,6 +94,8 @@ class SelectedGinningFarmer(BaseModel):
     farmer = models.ForeignKey(
         Farmer, related_name="ginning_farmer", on_delete=models.PROTECT, null=True, blank=True)
     quantity = models.FloatField(verbose_name=_("Quantity"), validators = [MinValueValidator(0.0)])
+    slip_no = models.CharField(_("Slip No."), max_length=255, default="0")
+    inward_lot_no = models.CharField(_("Inward Lot No."), max_length=255, default="0")
 
 
 class Ginning(BaseModel):
@@ -101,8 +103,8 @@ class Ginning(BaseModel):
         "Vendor"), on_delete=models.CASCADE)
     selected_farmers = models.ManyToManyField(SelectedGinningFarmer, verbose_name=_(
         "Selected farmers"), related_name="ginning_mapping")
-
-    timestamp = models.DateTimeField(auto_now_add=True)
+    
+    timestamp = models.DateTimeField(_("Date"), default=timezone.now)
     total_quantity = models.FloatField(validators = [MinValueValidator(0.0)])
     
     def save(self, *args, **kwargs):
@@ -113,20 +115,13 @@ class Ginning(BaseModel):
     
     def __str__(self):
         return f"{self.vendor} | {self.timestamp.date()}"
-    
-    # @property
-    # def total_quantity(self):
-    #     quantity = 0
-    #     for selected_farmer in self.selected_farmers.all():
-    #         quantity += selected_farmer.quantity
 
-    #     return quantity
-    
     
 class GinningStatus(BaseModel):
     ginning = models.OneToOneField(Ginning, related_name="ginning_status", on_delete=models.PROTECT)
 
     UNDEFINED = 'Undefined'
+    INBOUND = 'Inbound'
     IN_PROGRESS = 'In Progress'
     QC_PENDING = 'QC Pending'
     QC_APPROVED = 'QC Approved'
@@ -135,41 +130,67 @@ class GinningStatus(BaseModel):
 
     STATUS_CHOICES = [
         (UNDEFINED, UNDEFINED),
+        (INBOUND, INBOUND),
         (IN_PROGRESS, IN_PROGRESS),
         (QC_PENDING, QC_PENDING),
         (QC_APPROVED, QC_APPROVED),
         (QC_REJECTED, QC_REJECTED),
         (COMPLETED, COMPLETED),
     ]
-    
+
     status = models.CharField(
-        _("Status"), max_length=100, choices=STATUS_CHOICES, default=IN_PROGRESS)
-    remark = models.CharField(
-        _("Status"), max_length=1000, null=True, blank=True)
-    # quality = models.ForeignKey(
-    #     Quality, related_name="ginning_status", on_delete=models.PROTECT, null=True, blank=True)
-    # rejected_count = models.PositiveBigIntegerField(
-    #     _("Number of times it got rejected"), default=0)
+        _("Status"), max_length=100, choices=STATUS_CHOICES, default=INBOUND)
+    length = models.CharField(
+        _("Length"), max_length=255, default="0")
+    mic = models.CharField(
+        _("Mic"), max_length=255, default="0")
+    strength = models.CharField(
+        _("strength"), max_length=255, default="0")
+    trash = models.CharField(
+        _("Trash"), max_length=255, default="0")
+    rd_plus = models.CharField(
+        _("Rd+"), max_length=255, default="0")
 
 
-class GinningInbound(BaseModel):
+class GinningInProcess(BaseModel):
     ginning = models.OneToOneField(Ginning, verbose_name=_(
-        "Ginning"), related_name='ginning_inbound', on_delete=models.PROTECT)
+        "Ginning"), related_name='ginning_inprocess', on_delete=models.PROTECT)
+    timestamp = models.DateTimeField(_("Timestamp"), default=timezone.now)
+    name = models.CharField(_("Ginning Name"), max_length=500)
+    heap_no = models.CharField(_("Heap No."), max_length=500)
+    consumed_qty = models.FloatField(_("Consumed raw cotton Quantity (Kgs)"), validators = [MinValueValidator(0.0)])
+    lint_qty = models.FloatField(_("Lint Quantity (Kgs)"), validators = [MinValueValidator(0.0)])
+    recovery = models.FloatField(_("Recovery %"), validators = [MinValueValidator(0.0), MaxValueValidator(100.0)])
+    
+    def save(self, *args, **kwargs):
+        self.recovery = (self.lint_qty / self.consumed_qty) * 100
+        super(GinningInProcess, self).save(*args, **kwargs)
+        
+    def __str__(self):
+        return f"{self.ginning} | {self.name}"
+
+
+class GinningOutbound(BaseModel):
+    ginning = models.OneToOneField(Ginning, verbose_name=_(
+        "Ginning"), related_name='ginning_outbound', on_delete=models.PROTECT)
     timestamp = models.DateTimeField(_("Timestamp"))
-    quantity = models.FloatField(_("Inbound Quantity"), validators = [MinValueValidator(0.0)])
-    rate = models.FloatField(_("Inbound Cost as per Invoice"), validators = [MinValueValidator(0.0)])
-    invoice_details = models.CharField(_("Invoice Details"), max_length=500)
+    invoice_no = models.CharField(_("Invoice No."), max_length=500)
+    product_name = models.CharField(_("Product Name"), max_length=500)
+    outward_lot_no = models.CharField(_("Outward Lot No"), max_length=500)
+    quantity = models.FloatField(_("Quantity (Kgs)"), validators = [MinValueValidator(0.0)])
 
     def __str__(self):
         return f"{self.ginning} | {self.quantity}"
-
 
 
 class SelectedGinning(BaseModel):
     ginning = models.ForeignKey(Ginning, verbose_name=_(
         "Ginning"), related_name="selected_ginnings", on_delete=models.PROTECT)
     quantity = models.FloatField(verbose_name=_("Quantity"), validators = [MinValueValidator(0.0)])
-
+    invoice_no = models.CharField(_("Invoice No."), max_length=500, default="0")
+    lot_no = models.CharField(_("Lot No"), max_length=500, default="0")
+    lint_cotton_tc_no = models.CharField(_("Lint Cotton TC No."), max_length=500, default="0")
+    
     
 class Spinning(BaseModel):
     selected_ginnings = models.ManyToManyField(SelectedGinning, verbose_name=_(
@@ -177,7 +198,7 @@ class Spinning(BaseModel):
     vendor = models.ForeignKey(Vendor, verbose_name=_(
         "Vendor"), on_delete=models.CASCADE)
 
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(_("Date"), default=timezone.now)
 
     @property
     def total_quantity(self):
@@ -192,6 +213,7 @@ class SpinningStatus(BaseModel):
     spinning = models.OneToOneField(Spinning, related_name="spinning_status", on_delete=models.PROTECT)
 
     UNDEFINED = 'Undefined'
+    INBOUND = 'Inbound'
     IN_PROGRESS = 'In Progress'
     QC_PENDING = 'QC Pending'
     QC_APPROVED = 'QC Approved'
@@ -200,6 +222,8 @@ class SpinningStatus(BaseModel):
 
     STATUS_CHOICES = [
         (UNDEFINED, UNDEFINED),
+        (INBOUND, INBOUND),
+        (IN_PROGRESS, IN_PROGRESS),
         (IN_PROGRESS, IN_PROGRESS),
         (QC_PENDING, QC_PENDING),
         (QC_APPROVED, QC_APPROVED),
@@ -208,24 +232,39 @@ class SpinningStatus(BaseModel):
     ]
     
     status = models.CharField(
-        _("Status"), max_length=100, choices=STATUS_CHOICES, default=IN_PROGRESS)
-    remark = models.CharField(
-        _("Status"), max_length=1000, null=True, blank=True)
-    # quality = models.ForeignKey(
-    #     Quality, related_name="ginning_status", on_delete=models.PROTECT, null=True, blank=True)
-    # rejected_count = models.PositiveBigIntegerField(
-    #     _("Number of times it got rejected"), default=0)
+        _("Status"), max_length=100, choices=STATUS_CHOICES, default=INBOUND)
+    actual_count = models.CharField(_("Actual Count"), max_length=500, default="0")
+    csp = models.CharField(_("CSP"), max_length=500, default="0")
+    rkm = models.CharField(_("RKM"), max_length=500, default="0")
+    ipi = models.CharField(_("IPI"), max_length=500, default="0")
 
 
-class SpinningInbound(BaseModel):
+class SpinningInProcess(BaseModel):
+    spinning = models.OneToOneField(Spinning, verbose_name=_(
+        "Spinning"), related_name='spinning_inprocess', on_delete=models.PROTECT)
+    timestamp = models.DateTimeField(_("Timestamp"), default=timezone.now)
+    name = models.CharField(_("Spinning Name"), max_length=500)
+    raw_material_qty = models.FloatField(_("Raw material Quantity (Kgs)"), validators = [MinValueValidator(0.0)])
+    output_yarn_qty = models.FloatField(_("Output Yarn Quantity (Kgs)"), validators = [MinValueValidator(0.0)])
+    recovery = models.FloatField(_("Recovery %"), validators = [MinValueValidator(0.0), MaxValueValidator(100.0)])
+    
+    def save(self, *args, **kwargs):
+        self.recovery = (self.output_yarn_qty / self.raw_material_qty) * 100
+        super(SpinningInProcess, self).save(*args, **kwargs)
+        
+    def __str__(self):
+        return f"{self.spinning} | {self.name}"
+
+
+class SpinningOutbound(BaseModel):
     spinning = models.OneToOneField(Spinning, verbose_name=_(
         "Spinning"), related_name='spinning_inbound', on_delete=models.PROTECT)
-    timestamp = models.DateTimeField(_("Timestamp"))
-    quantity = models.FloatField(_("Inbound Quantity"), validators = [MinValueValidator(0.0)])
-    rate = models.FloatField(_("Inbound Cost as per Invoice"), validators = [MinValueValidator(0.0)])
-    invoice_details = models.CharField(_("Invoice Details"), max_length=500)
-
+    timestamp = models.DateTimeField(_("Date"))
+    invoice_no = models.CharField(_("Invoice No."), max_length=500, default="0")
+    product_name = models.CharField(_("Product Name"), max_length=500, default="0")
+    lot_no = models.CharField(_("Lot No"), max_length=500, default="0")
+    quantity = models.FloatField(_("Quantity (Kgs)"), validators = [MinValueValidator(0.0)])
+    
     def __str__(self):
         return f"{self.spinning} | {self.quantity}"
 
-    

@@ -11,6 +11,35 @@
                 {{ each_form.ginning.errors }}
             </div>
         </div>
+        
+        <div class="col-xl-3 add-button-after">
+            <label class="col-form-label">{{each_form.invoice_no.label}}</label>
+            <div class="">
+                {{ each_form.invoice_no }}
+            </div>
+            <div class="text-danger" style="text-align:start">
+                {{ each_form.invoice_no.errors }}
+            </div>
+        </div>
+        <div class="col-xl-3 add-button-after">
+            <label class="col-form-label">{{each_form.lot_no.label}}</label>
+            <div class="">
+                {{ each_form.lot_no }}
+            </div>
+            <div class="text-danger" style="text-align:start">
+                {{ each_form.lot_no.errors }}
+            </div>
+        </div>
+        <div class="col-xl-3 add-button-after">
+            <label class="col-form-label">{{each_form.lint_cotton_tc_no.label}}</label>
+            <div class="">
+                {{ each_form.lint_cotton_tc_no }}
+            </div>
+            <div class="text-danger" style="text-align:start">
+                {{ each_form.lint_cotton_tc_no.errors }}
+            </div>
+        </div>
+
         <div class="col-xl-3 add-button-after">
             <label class="col-form-label">{{each_form.quantity.label}}</label>
             <div class="">

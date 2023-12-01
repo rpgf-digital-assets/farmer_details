@@ -70,13 +70,15 @@ urlpatterns = [
     path('traceability/get_ginnings/', views.GetGinningList.as_view(), name="get_ginnings"),
     path('traceability/ginning/list/', views.GinningListView.as_view(), name="ginning_list_view"),
     path('traceability/ginning/<uuid:pk>/qc_request/', views.GinningQcRequestCreateView.as_view(), name="ginning_qc_request_create_view"),
-    path('traceability/ginning/<uuid:pk>/create/inbound_request/', views.GinningInboundRequest.as_view(), name="ginning_inbound_request_create_view"),
+    path('traceability/ginning/<uuid:pk>/create/outbound_request/', views.GinningOutboundRequest.as_view(), name="ginning_outbound_request_create_view"),
+    path('traceability/ginning/<uuid:pk>/create/inprocess_request/', views.GinningInProcessRequest.as_view(), name="ginning_inprocess_request_create_view"),
     
     path('traceability/spinning_mapping/create/', views.SpinningMappingCreateWizardView.as_view(), name="traceability_spinning_mapping_create"),
     path('traceability/get_spinnings/', views.GetSpinningList.as_view(), name="get_spinnings"),
     path('traceability/spinning/list/', views.SpinningListView.as_view(), name="spinning_list_view"),
     path('traceability/spinning/<uuid:pk>/qc_request/', views.SpinningQcRequestCreateView.as_view(), name="spinning_qc_request_create_view"),
-    path('traceability/spinning/<uuid:pk>/create/inbound_request/', views.SpinningInboundRequest.as_view(), name="spinning_inbound_request_create_view"),
+    path('traceability/spinning/<uuid:pk>/create/outbound_request/', views.SpinningOutboundRequest.as_view(), name="spinning_outbound_request_create_view"),
+    path('traceability/spinning/<uuid:pk>/create/inprocess_request/', views.SpinningInProcessRequest.as_view(), name="spinning_inprocess_request_create_view"),
     
     
 ]
