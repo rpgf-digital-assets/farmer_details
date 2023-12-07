@@ -50,6 +50,16 @@
             </div>
         </div>
 
+        <div class="col-xl-3 add-button-after">
+            <label class="col-form-label">{{each_form.price.label}}</label>
+            <div class="">
+                {{ each_form.price }}
+            </div>
+            <div class="text-danger" style="text-align:start">
+                {{ each_form.price.errors }}
+            </div>
+        </div>
+        {{each_form.errors}}
         {% if forloop.counter == 1 %}
         <div class="col-xl-1 d-flex justify-content-center align-items-end delete-button">
         </div>

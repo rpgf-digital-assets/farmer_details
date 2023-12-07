@@ -36,7 +36,7 @@ elif environment == 'PROD':
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'theartisanre.com', 'www.theartisanre.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.0.138', 'theartisanre.com', 'www.theartisanre.com']
 
 
 # Application definition
@@ -48,7 +48,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
+    'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework_api_key',
     'formtools',
     'users',
     'farmer',
@@ -59,6 +62,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -234,5 +238,10 @@ SIMPLE_JWT = {
 }
 
 
-CSRF_TRUSTED_ORIGINS = ['https://theartisanre.com', 'https://www.theartisanre.com']
+CSRF_TRUSTED_ORIGINS = ['https://theartisanre.com', 'https://www.theartisanre.com', 'http://192.168.0.138:8000', "https://inventoryartisanre.in"]
 
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://192.168.0.138:8000",
+    "https://inventoryartisanre.in"
+]

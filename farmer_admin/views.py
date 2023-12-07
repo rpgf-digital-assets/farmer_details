@@ -19,6 +19,7 @@ from django.db.models import Sum
 from django.db.models import Count
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import (
     View,
@@ -875,6 +876,8 @@ class DashboardFarmerView(TemplateView):
         }]
 
         context["pest_bar_graph_data"] = json.dumps(pest_bar_graph_data)
+        
+        context['year_range'] = [i for i in range(timezone.now().year, timezone.now().year - 10, -1)]
 
         return context
 
@@ -905,6 +908,7 @@ class GinningMappingCreateWizardView(CustomLoginRequiredMixin, AdminRequiredMixi
                     cleaned_data['quantity']
                     ginning.selected_farmers.add(
                         SelectedGinningFarmer.objects.create(**cleaned_data))
+                    ginning.save()
                 except KeyError:
                     pass
 
@@ -912,6 +916,7 @@ class GinningMappingCreateWizardView(CustomLoginRequiredMixin, AdminRequiredMixi
             'form_data': [form.cleaned_data for form in form_list],
             'completed': True,
         })
+
 
 class GinningListView(CustomLoginRequiredMixin, AdminRequiredMixin, ListView):
     template_name = 'farmer_admin/ginning_list.html'
@@ -1014,7 +1019,6 @@ class GinningInProcessRequest(CustomLoginRequiredMixin, AdminRequiredMixin, Form
         ginning.save()
 
         return HttpResponse(status=204, headers={'HX-Trigger': 'listChanged'})
-
 
 
 class GinningQcRequestCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, FormView):
@@ -1124,7 +1128,7 @@ class SpinningInProcessRequest(CustomLoginRequiredMixin, AdminRequiredMixin, For
         })
 
         # Change status
-        spinning.spinning_status.status = SpinningStatus.QC_PENDING
+        spinning.spinning_status.status = SpinningStatus.IN_PROGRESS
         spinning.spinning_status.save()
         spinning.save()
 

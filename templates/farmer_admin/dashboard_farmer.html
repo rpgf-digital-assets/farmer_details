@@ -54,12 +54,21 @@ crossorigin=""/>
                     <!--end::Card title-->
                     <!--begin::Card toolbar-->
                     <div class="card-toolbar">
-                        <div class="my-1">
+                        <div class="my-1 d-flex">
                             <!--begin::Select-->
                             <select class="form-select fw-semibold w-125px select2 crop_select" id="crop_detail_select"
                                 tabindex="-1" aria-hidden="true">
                             </select>
                             <!--end::Select-->
+                            <!--begin::Select-->
+                            <select class="form-select fw-semibold w-125px select2" id="year_select"
+                                tabindex="-1" aria-hidden="true">
+                                {% for year in year_range %}
+                                    <option value="{{year}}">{{year}}</option>
+                                {% endfor %}
+                            </select>
+                            <!--end::Select-->
+                            
                         </div>
                     </div>
                     <!--end::Card toolbar-->
@@ -475,10 +484,10 @@ crossorigin=""></script>
 
                     },
                     legend: {
-                        show: false
+                        show: true
                     },
                     dataLabels: {
-                        enabled: false
+                        enabled: true
                     },
                     fill: {
                         type: 'solid',
@@ -491,7 +500,7 @@ crossorigin=""></script>
                         colors: [baseColor]
                     },
                     xaxis: {
-                        categories: response.data.months,
+                        categories: response.data.years,
                         axisBorder: {
                             show: false,
                         },
@@ -587,7 +596,7 @@ crossorigin=""></script>
             // Create root element
             // https://www.amcharts.com/docs/v5/getting-started/#Root_element
             var root = am5.Root.new("kt_amcharts_3");
-
+            root._logo.dispose();
             // Set themes
             // https://www.amcharts.com/docs/v5/concepts/themes/
             root.setThemes([
@@ -653,7 +662,7 @@ crossorigin=""></script>
 
         am5.ready(function () {
             var root = am5.Root.new("nutrition_bar_graph");
-
+            root._logo.dispose();
             // Set themes
             // https://www.amcharts.com/docs/v5/concepts/themes/
             root.setThemes([
@@ -764,13 +773,11 @@ crossorigin=""></script>
             chart.appear(1000, 100);
 
         })
-
         
-
 
         am5.ready(function () {
             var root = am5.Root.new("pest_bar_graph");
-
+            root._logo.dispose();
             // Set themes
             // https://www.amcharts.com/docs/v5/concepts/themes/
             root.setThemes([
@@ -893,15 +900,16 @@ crossorigin=""></script>
         ],
     })
 
-    $('#crop_detail_select').on('change', function(e) {
+    const updateCropDetails = () => {
         var selected_crop = $('#crop_detail_select').val()
         crop_datatable.clear()
-
+        var year = $('#year_select').val()
         let crop_details_url = "{% url 'api:api_farmer_admin:get_crop_details_from_name_api_view' %}"
         fetch(crop_details_url, {
             method: "POST",
             body: JSON.stringify({
-                crop_name: selected_crop
+                crop_name: selected_crop,
+                year: year
             }),
             headers: {
                 "X-CSRFToken": getCookie("csrftoken"),
@@ -921,17 +929,25 @@ crossorigin=""></script>
         })
         .then((response) => {
             crop_datatable.row.add(['Name of crop cultivated', selected_crop]).draw()
-            crop_datatable.row.add(['Area under that crop cultivation (Ha)', response.data.organic_crop.total_area]).draw()
-            crop_datatable.row.add(['Estimated yield (Kg)', response.data.organic_crop.total_expected_yield]).draw()
-            crop_datatable.row.add(['Estimated Productivity (Kg/Ha)', response.data.organic_crop.total_expected_productivity]).draw()
-            crop_datatable.row.add(['Actual harvested quantity (Kg)', (response.data.harvest_details.total_first_harvest + response.data.harvest_details.total_second_harvest + response.data.harvest_details.total_third_harvest) || "None"]).draw()
-            crop_datatable.row.add(['Actual Productivity (Kg/Ha)', response.data.harvest_details.total_actual_crop_production || "None"]).draw()
-            crop_datatable.row.add(['Quantity Sold as organic (Kg)', response.data.harvest_details.total_quantity_sold_fpo + response.data.harvest_details.total_quantity_sold_outside || "None"]).draw()
-            crop_datatable.row.add(['Total premium amount paid to farmers (Rs.)', response.data.harvest_details.total_premium_paid_fpo + response.data.harvest_details.total_premium_paid_outside || "None"]).draw()
-            crop_datatable.row.add(['Farmer Net income (Rs) (Total income-total cost)', response.data.cost.total_cost || "None"]).draw()
+            crop_datatable.row.add(['Area under that crop cultivation (Ha)', response.data.organic_crop.total_area || "0"]).draw()
+            crop_datatable.row.add(['Estimated yield (Kg)', (response.data.organic_crop.total_expected_yield || "0")]).draw()
+            crop_datatable.row.add(['Estimated Productivity (Kg/Ha)', (response.data.organic_crop.total_expected_productivity || "0")]).draw()
+            crop_datatable.row.add(['Actual harvested quantity (Kg)', (response.data.harvest_details.total_first_harvest + response.data.harvest_details.total_second_harvest + response.data.harvest_details.total_third_harvest) || "0"]).draw()
+            crop_datatable.row.add(['Actual Productivity (Kg/Ha)', response.data.harvest_details.total_actual_crop_production || "0"]).draw()
+            crop_datatable.row.add(['Quantity Sold as organic (Kg)', response.data.harvest_details.total_quantity_sold_fpo + response.data.harvest_details.total_quantity_sold_outside || "0"]).draw()
+            crop_datatable.row.add(['Total premium amount paid to farmers (Rs.)', response.data.harvest_details.total_premium_paid_fpo + response.data.harvest_details.total_premium_paid_outside || "0"]).draw()
+            crop_datatable.row.add(['Farmer Net income (Rs) (Total income-total cost)', response.data.cost.total_cost || "0"]).draw()
         })
+    }
+
+    $('#crop_detail_select').on('change', function(e) {
+        updateCropDetails()
     });
 
+    $('#year_select').on('change', function(e) {
+        updateCropDetails()
+    });
+    
     $('#crop_cost_select').on('change', function(e) {
         var selected_crop = $('#crop_cost_select').val()
 

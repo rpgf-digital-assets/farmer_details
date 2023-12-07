@@ -9,13 +9,16 @@ from django.db.models import ProtectedError
 from django.db.models import Count
 from django.db import connection
 from django.db import transaction
-from django.db.models import Sum, Avg
+from django.db.models import Sum, Avg, F
 from api.permissions import IsAdminOrSuperUser
 from farmer.models import ContaminationControl, CostOfCultivation, Costs, Farmer, FarmerLand, FarmerOrganicCropPdf, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
 from farmer_admin.utils import generate_certificate
-from farmer_details_app.models import Vendor
+from farmer_details_app.models import Ginning, GinningStatus, SelectedGinningFarmer, Spinning, SpinningStatus, Vendor
 from users.models import User
 from utils.cursor_fetch import dictfetchall
+from django.db.models.functions.comparison import Coalesce
+from rest_framework_api_key.permissions import HasAPIKey
+
 class DeleteBaseAPIView(DestroyAPIView):
     permission_classes = [IsAdminOrSuperUser]
     model = None
@@ -225,14 +228,14 @@ class GetCropDetailsFromNameAPIView(APIView):
             'message': ''
         }
         crop_name = request.data.get('crop_name')
-
-        organic_crops = OrganicCropDetails.objects.filter(is_active=True, name=crop_name)\
+        year = request.data.get('year')
+        organic_crops = OrganicCropDetails.objects.filter(is_active=True, name=crop_name, year=year)\
         .values('area', 'expected_yield', 'expected_productivity')\
         .aggregate(total_area=Sum('area'),
                     total_expected_yield=Sum('expected_yield'),
                     total_expected_productivity=Sum('expected_productivity'))
 
-        organic_crop_ids = OrganicCropDetails.objects.filter(is_active=True, name=crop_name).values_list('id', flat=True)
+        organic_crop_ids = OrganicCropDetails.objects.filter(is_active=True, name=crop_name, year=year).values_list('id', flat=True)
         total_crop_harvested = HarvestAndIncomeDetails.objects.filter(is_active=True, organic_crop__in=organic_crop_ids)\
         .values('first_harvest', 'second_harvest', 'third_harvest', 
                 'actual_crop_production', 'quantity_sold_fpo', 'premium_paid_fpo', 
@@ -275,23 +278,24 @@ class GetarmerLineGraphData(APIView):
         try:
             with connection.cursor() as cursor:
                 cursor.execute("""
-                    SELECT strftime('%m', fdhf.history_date) AS month, count(fdhf.user_id) AS count from farmer_historicalfarmer as fdhf
+                    SELECT strftime('%Y', fdhf.history_date) AS year, count(fdhf.user_id) AS count from farmer_historicalfarmer as fdhf
                     WHERE fdhf.history_type = '+'
-                    GROUP BY month
+                    GROUP BY year
                 """)
                 rows = dictfetchall(cursor)
                 response['status'] = 'success'
-                months_list = [row["month"] for row in rows]
+                years_list = [row["year"] for row in rows]
+                print("🐍 File: farmer_admin/views.py | Line: 288 | get ~ years_list",years_list)
                 counts_list = [row["count"] for row in rows]
                 response['data'] = {
-                    "months": months_list,
+                    "years": years_list,
                     "counts": counts_list
                 }
                 print("🐍 File: farmer_admin/views.py | Line: 711 | get_context_data ~ row", rows)
 
         except Exception as e:
             response['status'] = 'failure'
-            response['message'] = 'Exception Occured'
+            response['message'] = 'Exception Occurred'
 
         return Response(response)
     
@@ -331,3 +335,63 @@ class GetCropBarGraphDetails(APIView):
             "average_costs": list(average_costs.values()),
         }
         return Response(response)
+    
+    
+
+class CottonDataAPIView(APIView):
+    permission_classes = [HasAPIKey]
+    authentication_classes = []
+    def get(self, request):
+        response = {
+            'status': 'success',
+            'message': ''
+        }
+        try:
+            data = {}
+            
+            # Raw cotton data
+            total_ginning_added = SelectedGinningFarmer.objects.filter(is_active=True).annotate(total_price=F('quantity')*F('price')).aggregate(total_quantity=Sum('quantity'), total_value=Sum('total_price'))
+            value_for_one = total_ginning_added['total_value'] / total_ginning_added['total_quantity']
+            ginning = Ginning.objects.filter(ginning_status__status=GinningStatus.QC_APPROVED) \
+                .aggregate(total_available_quantity=total_ginning_added['total_quantity'] - Sum('ginning_outbound__quantity'), 
+                        total_available_value=F('total_available_quantity')*value_for_one)
+            data['raw_cotton'] = {
+                "available": {
+                    "quantity": ginning['total_available_quantity'],
+                    "value": ginning['total_available_value'],
+                }
+            }
+            
+            # Lint cotton data
+            # Available lint = ginned_outbound - sent for spinning
+            spinned_cotton = Spinning.objects.filter(is_active=True, spinning_status__status=SpinningStatus.QC_APPROVED)\
+                .aggregate(total_quantity=Sum('spinning_outbound__quantity'))
+            ginning_outbound = Ginning.objects.filter(ginning_status__status=GinningStatus.QC_APPROVED) \
+                .aggregate(total_ginned_quantity=Sum('ginning_outbound__quantity') - Coalesce(spinned_cotton['total_quantity'], 0.0), 
+                        total_ginned_value=F('total_ginned_quantity')*value_for_one)
+            
+            data['lint_cotton'] = {
+                "available": {
+                    "quantity": ginning_outbound['total_ginned_quantity'],
+                    "value": ginning_outbound['total_ginned_value']
+                }
+            }
+            
+            # Yarn data
+            # Available Yarn = sent for spinning - spinning_outbound
+            data['yarn'] = {
+                "available": {
+                    "quantity": spinned_cotton['total_quantity'],
+                    "value": spinned_cotton['total_quantity'] * value_for_one
+                }
+            }
+
+            response['data'] = data
+            
+        except Exception as e:
+            response['status'] = 'failure'
+            response['message'] = str(e)
+            
+        return Response(response)
+        
+        

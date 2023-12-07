@@ -94,6 +94,7 @@ class SelectedGinningFarmer(BaseModel):
     farmer = models.ForeignKey(
         Farmer, related_name="ginning_farmer", on_delete=models.PROTECT, null=True, blank=True)
     quantity = models.FloatField(verbose_name=_("Quantity"), validators = [MinValueValidator(0.0)])
+    price = models.FloatField(verbose_name=_("Price per Kg"), validators = [MinValueValidator(0.0)], default=0.0)
     slip_no = models.CharField(_("Slip No."), max_length=255, default="0")
     inward_lot_no = models.CharField(_("Inward Lot No."), max_length=255, default="0")
 
@@ -177,16 +178,17 @@ class GinningOutbound(BaseModel):
     invoice_no = models.CharField(_("Invoice No."), max_length=500)
     product_name = models.CharField(_("Product Name"), max_length=500)
     outward_lot_no = models.CharField(_("Outward Lot No"), max_length=500)
-    quantity = models.FloatField(_("Quantity (Kgs)"), validators = [MinValueValidator(0.0)])
 
     def __str__(self):
         return f"{self.ginning} | {self.quantity}"
+    quantity = models.FloatField(_("Quantity (Kgs)"), validators = [MinValueValidator(0.0)])
 
 
 class SelectedGinning(BaseModel):
     ginning = models.ForeignKey(Ginning, verbose_name=_(
         "Ginning"), related_name="selected_ginnings", on_delete=models.PROTECT)
     quantity = models.FloatField(verbose_name=_("Quantity"), validators = [MinValueValidator(0.0)])
+    price = models.FloatField(verbose_name=_("Price Per Kg"), validators = [MinValueValidator(0.0)], default=0.0)
     invoice_no = models.CharField(_("Invoice No."), max_length=500, default="0")
     lot_no = models.CharField(_("Lot No"), max_length=500, default="0")
     lint_cotton_tc_no = models.CharField(_("Lint Cotton TC No."), max_length=500, default="0")
@@ -224,7 +226,6 @@ class SpinningStatus(BaseModel):
         (UNDEFINED, UNDEFINED),
         (INBOUND, INBOUND),
         (IN_PROGRESS, IN_PROGRESS),
-        (IN_PROGRESS, IN_PROGRESS),
         (QC_PENDING, QC_PENDING),
         (QC_APPROVED, QC_APPROVED),
         (QC_REJECTED, QC_REJECTED),
@@ -258,7 +259,7 @@ class SpinningInProcess(BaseModel):
 
 class SpinningOutbound(BaseModel):
     spinning = models.OneToOneField(Spinning, verbose_name=_(
-        "Spinning"), related_name='spinning_inbound', on_delete=models.PROTECT)
+        "Spinning"), related_name='spinning_outbound', on_delete=models.PROTECT)
     timestamp = models.DateTimeField(_("Date"))
     invoice_no = models.CharField(_("Invoice No."), max_length=500, default="0")
     product_name = models.CharField(_("Product Name"), max_length=500, default="0")

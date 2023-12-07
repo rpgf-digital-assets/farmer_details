@@ -33,6 +33,15 @@
             </div>
         </div>
         <div class="col-xl-3">
+            <label class="col-form-label">{{each_form.price.label}}</label>
+            <div class="">
+                {{ each_form.price }}
+            </div>
+            <div class="text-danger" style="text-align:start">
+                {{ each_form.price.errors }}
+            </div>
+        </div>
+        <div class="col-xl-3">
             <label class="col-form-label">{{each_form.slip_no.label}}</label>
             <div class="">
                 {{ each_form.slip_no }}

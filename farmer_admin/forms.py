@@ -508,9 +508,19 @@ ContaminationControlFormSet = formset_factory(
 
 
 ######################### Ginning Forms::BEGIN ################################
+class CustomFarmerModelChoiceField(ModelChoiceField):
+
+    def label_from_instance(self, obj):
+        if obj.organic_crop:
+            cotton_crop = obj.organic_crop.filter(name__iexact="cotton").first()
+            if cotton_crop:
+                if cotton_crop.harvest_income:
+                    total_area = cotton_crop.harvest_income.aggregate(total_area=Sum('quantity_sold_fpo'))['total_area']
+                    return f'{obj.user} ({total_area} Kg)'
+        return f'{obj.user}'
 
 class SelectFarmerForm(ModelForm):
-    farmer = ModelChoiceField(required=False, queryset=Farmer.objects.all(), widget=Select(
+    farmer = CustomFarmerModelChoiceField(required=False, queryset=Farmer.objects.all(), widget=Select(
         attrs={
             'class': 'form-control'
         }
@@ -523,6 +533,11 @@ class SelectFarmerForm(ModelForm):
     quantity = PositiveIntegerField(widget=NumberInput(attrs={
         'class': 'form-control'
     }))
+    
+    price = PositiveIntegerField(widget=NumberInput(attrs={
+        'class': 'form-control'
+    }))
+    
     slip_no = CharField(required=True, widget=TextInput(
         attrs={
             'class': 'form-control'
@@ -607,6 +622,10 @@ class SelectGinningForm(ModelForm):
     ))
 
     quantity = PositiveIntegerField(required=True, widget=NumberInput(attrs={
+        'class': 'form-control'
+    }))
+    
+    price = PositiveIntegerField(widget=NumberInput(attrs={
         'class': 'form-control'
     }))
     
