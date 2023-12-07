@@ -357,8 +357,8 @@ class CottonDataAPIView(APIView):
                         total_available_value=F('total_available_quantity')*value_for_one)
             data['raw_cotton'] = {
                 "available": {
-                    "quantity": ginning['total_available_quantity'],
-                    "value": ginning['total_available_value'],
+                    "quantity": ginning['total_available_quantity'] or 0,
+                    "value": ginning['total_available_value'] or 0,
                 }
             }
             
@@ -372,8 +372,8 @@ class CottonDataAPIView(APIView):
             
             data['lint_cotton'] = {
                 "available": {
-                    "quantity": ginning_outbound['total_ginned_quantity'],
-                    "value": ginning_outbound['total_ginned_value']
+                    "quantity": ginning_outbound['total_ginned_quantity'] or 0,
+                    "value": ginning_outbound['total_ginned_value'] or 0
                 }
             }
             
@@ -381,8 +381,8 @@ class CottonDataAPIView(APIView):
             # Available Yarn = sent for spinning - spinning_outbound
             data['yarn'] = {
                 "available": {
-                    "quantity": spinned_cotton['total_quantity'],
-                    "value": spinned_cotton['total_quantity'] * value_for_one
+                    "quantity": spinned_cotton['total_quantity'] or 0,
+                    "value": (spinned_cotton['total_quantity'] * value_for_one) or 0
                 }
             }
 
