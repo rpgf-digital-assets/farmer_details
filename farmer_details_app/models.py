@@ -210,6 +210,9 @@ class Spinning(BaseModel):
 
         return quantity
     
+    def __str__(self):
+        return "-".join([selected_ginning.lot_no for selected_ginning in self.selected_ginnings.all()]) + f" ({self.total_quantity})"
+    
 
 class SpinningStatus(BaseModel):
     spinning = models.OneToOneField(Spinning, related_name="spinning_status", on_delete=models.PROTECT)
