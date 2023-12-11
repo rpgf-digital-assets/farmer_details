@@ -4,7 +4,7 @@ from django.core.files import File
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, RetrieveAPIView, DestroyAPIView
-from api.farmer_admin.serializers import CostsSerializer, FarmerDetailsSerializer, FarmerLandCoordinatesSerializer, FarmerOrganicCropDetailsSerializer, FarmerOrganicCropSerializer
+from api.farmer_admin.serializers import CostsSerializer, FarmerDetailsSerializer, FarmerLandCoordinatesSerializer, FarmerOrganicCropDetailsSerializer, FarmerOrganicCropSerializer, GinningSerializer, SpinningSerializer
 from django.db.models import ProtectedError
 from django.db.models import Count
 from django.db import connection
@@ -395,3 +395,57 @@ class CottonDataAPIView(APIView):
         return Response(response)
         
         
+class YarnAvailableAPIView(APIView):
+    permission_classes = [HasAPIKey]
+    authentication_classes = []
+    
+    def get(self, request):
+        response = {
+            'status': 'success',
+            'message': ''
+        }
+        try:
+            
+            spinnings = Spinning.objects.annotate(sum_quantity=Sum('selected_ginnings__quantity')).filter(is_active=True, spinning_status__status=SpinningStatus.QC_APPROVED)
+            spinnings_json = SpinningSerializer(spinnings, many=True).data
+
+            data = {
+                'spinnings': spinnings_json
+            }
+            
+            response['data'] = data
+            
+        except Exception as e:
+            response['status'] = 'failure'
+            response['message'] = str(e)
+            
+        return Response(response)
+    
+    
+class YarnTraceabilityAPIView(APIView):
+    permission_classes = []
+    authentication_classes = []
+    
+    def get(self, request, **kwargs):
+        response = {
+            'status': 'success',
+            'message': ''
+        }
+        try:
+            spinning = Spinning.objects.annotate(sum_quantity=Sum('selected_ginnings__quantity')).get(id=self.kwargs['pk'])
+            ginnings = Ginning.objects.filter(selected_ginnings__in=spinning.selected_ginnings.all())
+            farmers = Farmer.objects.filter(ginning_farmer__ginning_mapping__in=ginnings)
+            
+            data = {
+                'spinning': SpinningSerializer(spinning, context={'request':request}).data,
+                'ginning': GinningSerializer(ginnings, many=True, context={'request':request}).data,
+                'farmers': FarmerDetailsSerializer(farmers, many=True, context={'request':request}).data
+            }
+            
+            response['data'] = data
+            
+        except Exception as e:
+            response['status'] = 'failure'
+            response['message'] = str(e)
+            
+        return Response(response)

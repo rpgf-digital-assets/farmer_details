@@ -25,5 +25,7 @@ urlpatterns = [
     path('dashboard/crop_cost_bar_graph/', views.GetCropBarGraphDetails.as_view(), name="get_crop_bar_graph_details_api_view"),
     
     path('cotton/data/', views.CottonDataAPIView.as_view(), name="cotton_data_api_view"),
+    path('yarn/available/', views.YarnAvailableAPIView.as_view(), name="available_yarn"),
+    path('yarn/<uuid:pk>/traceability/', views.YarnTraceabilityAPIView.as_view(), name="yarn_traceability"),
     
 ]
