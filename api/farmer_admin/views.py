@@ -407,7 +407,7 @@ class YarnAvailableAPIView(APIView):
         try:
             
             spinnings = Spinning.objects.annotate(sum_quantity=Sum('selected_ginnings__quantity')).filter(is_active=True, spinning_status__status=SpinningStatus.QC_APPROVED)
-            spinnings_json = SpinningSerializer(spinnings, many=True).data
+            spinnings_json = SpinningSerializer(spinnings, many=True, context={"request": request}).data
 
             data = {
                 'spinnings': spinnings_json
