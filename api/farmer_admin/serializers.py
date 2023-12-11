@@ -89,7 +89,7 @@ class SpinningSerializer(serializers.ModelSerializer):
         
     class Meta:
         model = Spinning
-        fields = ['vendor', 'sum_quantity', 'lot_combined', 'timestamp']
+        fields = ['id', 'vendor', 'sum_quantity', 'lot_combined', 'timestamp']
         
 
 class SelectedGinningFarmerSerializer(serializers.ModelSerializer):

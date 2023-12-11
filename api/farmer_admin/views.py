@@ -351,7 +351,7 @@ class CottonDataAPIView(APIView):
             
             # Raw cotton data
             total_ginning_added = SelectedGinningFarmer.objects.filter(is_active=True).annotate(total_price=F('quantity')*F('price')).aggregate(total_quantity=Sum('quantity'), total_value=Sum('total_price'))
-            value_for_one = total_ginning_added['total_value'] / total_ginning_added['total_quantity']
+            value_for_one = round(total_ginning_added['total_value'] / total_ginning_added['total_quantity'], 2)
             ginning = Ginning.objects.filter(ginning_status__status=GinningStatus.QC_APPROVED) \
                 .aggregate(total_available_quantity=total_ginning_added['total_quantity'] - Sum('ginning_outbound__quantity'), 
                         total_available_value=F('total_available_quantity')*value_for_one)
