@@ -39,6 +39,12 @@ elif environment == 'PROD':
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.0.138', 'theartisanre.com', 'www.theartisanre.com']
 
 
+# Session timeout settings
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_COOKIE_AGE = 3600 # Inactivity timeout
+
 # Application definition
 
 INSTALLED_APPS = [
