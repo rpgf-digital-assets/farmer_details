@@ -1,0 +1,137 @@
+{% extends 'farmer_admin/base.html' %}
+{% load static %}
+
+
+{% block title %}
+Upload Data
+{% endblock title %}
+
+{% block breadcrumb_items %}
+<!--begin::Item-->
+<li class="breadcrumb-item text-white opacity-75">
+    <a href="#" class="text-white text-hover-primary">Upload Data</a>
+</li>
+<!--end::Item-->
+<!--begin::Item-->
+<li class="breadcrumb-item">
+    <span class="bullet bg-white opacity-75 w-5px h-2px"></span>
+</li>
+<!--end::Item-->
+<!--begin::Item-->
+<li class="breadcrumb-item text-white opacity-75">List</li>
+<!--end::Item-->
+{% endblock breadcrumb_items %}
+
+{% block content %}
+<!--begin::Post-->
+<div class="content flex-row-fluid" id="kt_content">
+    <!--begin::Card-->
+    <div class="card">
+        <!--begin::Card header-->
+        <form class="form" method="POST" action="{% url 'farmer_admin:upload_csv_request' %}" enctype="multipart/form-data">
+        <div class="card-header border-0 pt-6">
+            <!--begin::Card title-->
+            <div class="card-title">
+                {% csrf_token %}
+                <!--begin::Search-->
+                <div class="d-flex align-items-center position-relative my-1">
+                    <i class="ki-duotone ki-file fs-3 position-absolute ms-5">
+                        <span class="path1"></span>
+                        <span class="path2"></span>
+                    </i>
+                    {{form.upload_document}}
+                    {% comment %} <input type="file" id="id_upload_document" class="form-control form-control-solid ps-13" placeholder="Upload CSV" /> {% endcomment %}
+                </div>
+                <div class="text-danger" style="text-align:start; font-size: 15px;">
+                    {{ form.upload_document.errors }}
+                </div>
+                <!--end::Search-->
+            </div>
+            <!--begin::Card title-->
+            <!--begin::Card toolbar-->
+            <div class="card-toolbar">
+                <!--begin::Toolbar-->
+                <button type="submit" class="btn btn-primary">Upload CSV</button>
+                <div class="row">
+                    <ul id="errorlist_ul" class="errorlist">
+                        {% for error in form.non_field_errors %}
+                        <li class="text-danger mt-3" style="text-align:start">
+                            {{error}}
+                        </li>
+                        {% endfor %}
+                    </ul>
+
+                </div>
+                <!--end::Toolbar-->
+            </div>
+            <!--end::Card toolbar-->
+        </div>
+        </form>
+
+        <!--end::Card header-->
+        <!--begin::Card body-->
+        <div class="card-body py-4">
+            <!--begin::Table-->
+            <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_table_users">
+                <thead>
+                    <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0">
+                        <th class="">Tiimstamp</th>
+                        <th class="">Document Name</th>
+                        <th class="">Uploaded Document</th>
+                        <th class="">Error Document</th>
+                        <th class="">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-600 fw-semibold">
+                    {% for document in bulk_upload_documents %}
+                    <tr>
+                        <td>{{document.timestamp}}</td>
+                        <td>{{document.filename}}</td>
+                        <td>
+                            <a href="{{document.upload_document.url}}" target="_blank">
+                            {{document.filename}}
+                            </a>
+                        </td>
+                        <td>
+                            {% if document.error_document %}
+                            <a href="{{document.error_document.url}}" target="_blank">
+                            Error document
+                            </a>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if document.status == document.IN_PROGRESS %}
+                                <span class="badge badge-primary">{{document.status}}</span>
+                            {% elif document.status == document.ERROR %}
+                                <span class="badge badge-danger">{{document.status}}</span>
+                            {% elif document.status == document.COMPLETED %}
+                                <span class="badge badge-success">{{document.status}}</span>
+                            {% elif document.status == document.CANCELLED %}
+                                <span class="badge badge-info">{{document.status}}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <!--end::Table-->
+        </div>
+        <!--end::Card body-->
+    </div>
+    <!--end::Card-->
+</div>
+<!--end::Post-->
+{% endblock content %}
+
+{% block js %}
+
+{{block.super}}
+
+<script type="text/javascript">
+
+
+
+</script>
+
+
+{% endblock js %}

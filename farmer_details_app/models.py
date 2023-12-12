@@ -1,7 +1,10 @@
+import csv
+import os
 import uuid
 import phonenumbers
 from django.db import models
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, FileExtensionValidator
+from django.core.exceptions import ValidationError
 
 from simple_history.models import HistoricalRecords
 from django.utils.translation import gettext_lazy as _
@@ -272,3 +275,36 @@ class SpinningOutbound(BaseModel):
     def __str__(self):
         return f"{self.spinning} | {self.quantity}"
 
+
+
+def upload_document_validator(document):
+    # check file valid csv format
+    try:
+        dialect = csv.Sniffer().sniff(document.read(1024).decode('UTF-8'))
+        document.seek(0, 0)
+    except csv.Error:
+        raise ValidationError(u'Not a valid (UTF-8) CSV file')
+    return True
+
+class BulkUpload(BaseModel):
+    IN_PROGRESS = 'In Progress'
+    ERROR = 'Error'
+    COMPLETED = 'Completed'
+    CANCELLED = 'Cancelled'
+    
+    STATUS_CHOICES = (
+        (IN_PROGRESS, IN_PROGRESS),
+        (ERROR, ERROR),
+        (COMPLETED, COMPLETED),
+        (CANCELLED, CANCELLED),
+    )
+    upload_document = models.FileField(upload_to='bulk_upload/upload_document', validators=[FileExtensionValidator(['csv']), upload_document_validator])
+    error_document = models.FileField(
+        upload_to='bulk_upload/error_document', null=True, blank=True)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=IN_PROGRESS)
+    timestamp = models.DateTimeField(default=timezone.now)
+    
+    def filename(self):
+        return os.path.basename(self.upload_document.name)
+    
+    

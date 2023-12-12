@@ -80,5 +80,6 @@ urlpatterns = [
     path('traceability/spinning/<uuid:pk>/create/outbound_request/', views.SpinningOutboundRequest.as_view(), name="spinning_outbound_request_create_view"),
     path('traceability/spinning/<uuid:pk>/create/inprocess_request/', views.SpinningInProcessRequest.as_view(), name="spinning_inprocess_request_create_view"),
     
+    path('upload/csv/', views.UploadCsvRequest.as_view(), name="upload_csv_request"),
     
 ]

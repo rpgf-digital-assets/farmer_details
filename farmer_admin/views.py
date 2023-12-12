@@ -32,11 +32,11 @@ from django.views.generic import (
 )
 
 from farmer.models import ContaminationControl, CostOfCultivation, Costs, Farmer, FarmerLand, FarmerOrganicCropPdf, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
-from farmer_admin.forms import ContaminationControlForm, ContaminationControlFormSet, CostOfCultivationForm, CostOfCultivationFormSet, CostsCreateForm, FarmerCreationForm, FarmerLandDetailsCreationFrom, FarmerNutritionManagementForm, FarmerNutritionManagementFormSet, FarmerOrganicCropDetailForm, FarmerPestDiseaseManagementForm, FarmerPestDiseaseManagementFormSet, FarmerSeedDetailsForm, FarmerSeedDetailsFormSet, FarmerSocialCreationFrom, GinningInProcessForm, GinningOutboundForm, GinningQualityCheckForm, SelectGinningFormSet, SpinningInProcessForm, SpinningOutboundForm, SpinningQualityCheckForm, VendorMappingForm, HarvestAndIncomeDetailForm, HarvestAndIncomeDetailFormSet, OtherFarmerCreationForm, SeasonCreateForm, SelectFarmerFormSet, VendorCreateForm, WeedManagementForm, WeedManagementFormSet
+from farmer_admin.forms import BulkUploadForm, ContaminationControlForm, ContaminationControlFormSet, CostOfCultivationForm, CostOfCultivationFormSet, CostsCreateForm, FarmerCreationForm, FarmerLandDetailsCreationFrom, FarmerNutritionManagementForm, FarmerNutritionManagementFormSet, FarmerOrganicCropDetailForm, FarmerPestDiseaseManagementForm, FarmerPestDiseaseManagementFormSet, FarmerSeedDetailsForm, FarmerSeedDetailsFormSet, FarmerSocialCreationFrom, GinningInProcessForm, GinningOutboundForm, GinningQualityCheckForm, SelectGinningFormSet, SpinningInProcessForm, SpinningOutboundForm, SpinningQualityCheckForm, VendorMappingForm, HarvestAndIncomeDetailForm, HarvestAndIncomeDetailFormSet, OtherFarmerCreationForm, SeasonCreateForm, SelectFarmerFormSet, VendorCreateForm, WeedManagementForm, WeedManagementFormSet
 from farmer_admin.mixins import AdminRequiredMixin
 from farmer_admin.utils import generate_certificate, get_lookup_fields, get_model_field_names, qs_to_dataset
 from farmer_details_app.mixins import CustomLoginRequiredMixin
-from farmer_details_app.models import Ginning, GinningInProcess, GinningOutbound, GinningStatus, SelectedGinning, SelectedGinningFarmer, Spinning, SpinningInProcess, SpinningOutbound, SpinningStatus, Vendor
+from farmer_details_app.models import BulkUpload, Ginning, GinningInProcess, GinningOutbound, GinningStatus, SelectedGinning, SelectedGinningFarmer, Spinning, SpinningInProcess, SpinningOutbound, SpinningStatus, Vendor
 from users.models import User
 from django.core.files.storage import FileSystemStorage
 
@@ -1204,4 +1204,20 @@ class SpinningQcRequestCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, 
 
 
 
-
+class UploadCsvRequest(CustomLoginRequiredMixin, AdminRequiredMixin, FormView, ListView):
+    form_class = BulkUploadForm
+    model = BulkUpload
+    template_name = 'farmer_admin/upload_csv.html'
+    context_object_name = 'bulk_upload_documents'
+    success_url = reverse_lazy('farmer_admin:upload_csv_request')
+    queryset = BulkUpload.objects.filter(is_active=True)
+    
+    # def get_queryset(self):
+    #     return 
+    # def get_success_url(self):
+    #     return reverse('farmer_admin:upload_csv_request')
+        
+    
+    def form_valid(self, form):
+        form.save()
+        return super(UploadCsvRequest, self).form_valid(form)
