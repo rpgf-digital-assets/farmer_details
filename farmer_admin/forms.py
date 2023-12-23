@@ -33,7 +33,7 @@ from django.db.models import Sum, F
 from django.db.models.functions import Coalesce
 
 from farmer.models import ContaminationControl, CostOfCultivation, Costs, Farmer, FarmerEducation, FarmerLand, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
-from farmer_details_app.models import BulkUpload, Ginning, GinningInProcess, GinningOutbound, GinningStatus, SelectedGinning, SelectedGinningFarmer, Spinning, SpinningInProcess, SpinningOutbound, SpinningStatus, Vendor
+from farmer_details_app.models import ApplicationConfiguration, BulkUpload, Ginning, GinningInProcess, GinningOutbound, GinningStatus, SelectedGinning, SelectedGinningFarmer, Spinning, SpinningInProcess, SpinningOutbound, SpinningStatus, Vendor
 from users.models import User
 from users.validators import validate_name, validate_phonenumber, validate_positive_number
 
@@ -801,3 +801,9 @@ class BulkUploadForm(BaseCreationForm):
     class Meta:
         model = BulkUpload
         fields = ['upload_document']
+        
+
+class BulkUploadEmailListForm(BaseCreationForm):
+    class Meta:
+        model = ApplicationConfiguration
+        fields = ['value']
