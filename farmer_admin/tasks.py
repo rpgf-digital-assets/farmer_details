@@ -28,7 +28,6 @@ error_path = settings.BULK_UPLOAD_ERROR_PATH
 
 configuration = sib_api_v3_sdk.Configuration()
 configuration.api_key['api-key'] = settings.BREVO_API_KEY
-api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
 sender = {
     "name": "Farmer Portal",
     "email": settings.BREVO_SENDER_EMAIL
@@ -48,8 +47,10 @@ def get_recipients():
     
     return to
 
+
 def send_failure_email(bulk_upload):
     subject = 'Farmer Bulk Upload Failure'
+    api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
     
     to = get_recipients()
     
@@ -75,6 +76,7 @@ def send_failure_email(bulk_upload):
 
 def send_success_email(bulk_upload):
     subject = 'Farmer Bulk Upload Success'
+    api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
     
     to = get_recipients()
     
