@@ -122,7 +122,12 @@ def validate_row(row, header_name):
 @shared_task
 def validate_bulk_upload(bulk_upload_pk):
     bulk_upload = BulkUpload.objects.get(pk=bulk_upload_pk)
-    url = bulk_upload.upload_document.path
+    
+    if settings.FARMER_ENVIRONMENT == 'DEV':
+        url = bulk_upload.upload_document.path
+    elif settings.FARMER_ENVIRONMENT == 'PROD':
+        url = bulk_upload.upload_document.url
+        
     excel_data = pd.read_excel(url).fillna('')
     
     is_valid = True
