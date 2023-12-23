@@ -204,3 +204,6 @@ custom_logs
 *.tar
 *.csv
 *.pdf
+
+# Keep template files in static
+!static_files/assets/media/misc/farmer_template.xlsx
