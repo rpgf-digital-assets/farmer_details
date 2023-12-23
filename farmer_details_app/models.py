@@ -289,6 +289,7 @@ def upload_document_validator(document):
 class BulkUpload(BaseModel):
     IN_PROGRESS = 'In Progress'
     ERROR = 'Error'
+    SUCCESS = 'Success'
     COMPLETED = 'Completed'
     CANCELLED = 'Cancelled'
     
@@ -296,9 +297,10 @@ class BulkUpload(BaseModel):
         (IN_PROGRESS, IN_PROGRESS),
         (ERROR, ERROR),
         (COMPLETED, COMPLETED),
+        (SUCCESS, SUCCESS),
         (CANCELLED, CANCELLED),
     )
-    upload_document = models.FileField(upload_to='bulk_upload/upload_document', validators=[FileExtensionValidator(['csv']), upload_document_validator])
+    upload_document = models.FileField(upload_to='bulk_upload/upload_document', validators=[FileExtensionValidator(['xlsx'])])
     error_document = models.FileField(
         upload_to='bulk_upload/error_document', null=True, blank=True)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=IN_PROGRESS)
@@ -307,4 +309,7 @@ class BulkUpload(BaseModel):
     def filename(self):
         return os.path.basename(self.upload_document.name)
     
-    
+
+class ApplicationConfiguration(BaseModel):
+    name = models.CharField(_("Name"), max_length=255, unique=True)
+    value = models.CharField(_("Value"), max_length=1000)

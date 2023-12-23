@@ -32,11 +32,12 @@ from django.views.generic import (
 )
 
 from farmer.models import ContaminationControl, CostOfCultivation, Costs, Farmer, FarmerLand, FarmerOrganicCropPdf, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
-from farmer_admin.forms import BulkUploadForm, ContaminationControlForm, ContaminationControlFormSet, CostOfCultivationForm, CostOfCultivationFormSet, CostsCreateForm, FarmerCreationForm, FarmerLandDetailsCreationFrom, FarmerNutritionManagementForm, FarmerNutritionManagementFormSet, FarmerOrganicCropDetailForm, FarmerPestDiseaseManagementForm, FarmerPestDiseaseManagementFormSet, FarmerSeedDetailsForm, FarmerSeedDetailsFormSet, FarmerSocialCreationFrom, GinningInProcessForm, GinningOutboundForm, GinningQualityCheckForm, SelectGinningFormSet, SpinningInProcessForm, SpinningOutboundForm, SpinningQualityCheckForm, VendorMappingForm, HarvestAndIncomeDetailForm, HarvestAndIncomeDetailFormSet, OtherFarmerCreationForm, SeasonCreateForm, SelectFarmerFormSet, VendorCreateForm, WeedManagementForm, WeedManagementFormSet
+from farmer_admin.forms import BulkUploadEmailListForm, BulkUploadForm, ContaminationControlForm, ContaminationControlFormSet, CostOfCultivationForm, CostOfCultivationFormSet, CostsCreateForm, FarmerCreationForm, FarmerLandDetailsCreationFrom, FarmerNutritionManagementForm, FarmerNutritionManagementFormSet, FarmerOrganicCropDetailForm, FarmerPestDiseaseManagementForm, FarmerPestDiseaseManagementFormSet, FarmerSeedDetailsForm, FarmerSeedDetailsFormSet, FarmerSocialCreationFrom, GinningInProcessForm, GinningOutboundForm, GinningQualityCheckForm, SelectGinningFormSet, SpinningInProcessForm, SpinningOutboundForm, SpinningQualityCheckForm, VendorMappingForm, HarvestAndIncomeDetailForm, HarvestAndIncomeDetailFormSet, OtherFarmerCreationForm, SeasonCreateForm, SelectFarmerFormSet, VendorCreateForm, WeedManagementForm, WeedManagementFormSet
 from farmer_admin.mixins import AdminRequiredMixin
+from farmer_admin.tasks import validate_bulk_upload
 from farmer_admin.utils import generate_certificate, get_lookup_fields, get_model_field_names, qs_to_dataset
 from farmer_details_app.mixins import CustomLoginRequiredMixin
-from farmer_details_app.models import BulkUpload, Ginning, GinningInProcess, GinningOutbound, GinningStatus, SelectedGinning, SelectedGinningFarmer, Spinning, SpinningInProcess, SpinningOutbound, SpinningStatus, Vendor
+from farmer_details_app.models import ApplicationConfiguration, BulkUpload, Ginning, GinningInProcess, GinningOutbound, GinningStatus, SelectedGinning, SelectedGinningFarmer, Spinning, SpinningInProcess, SpinningOutbound, SpinningStatus, Vendor
 from users.models import User
 from django.core.files.storage import FileSystemStorage
 
@@ -254,10 +255,9 @@ class FarmerOrganicCropDetailCreateView(CustomLoginRequiredMixin, AdminRequiredM
         farmer_land = FarmerLand.objects.get(farmer=farmer)
         organic_crops = OrganicCropDetails.objects.filter(is_active=True, farmer=farmer)
         total_organic_crop_area = sum([item.area for item in organic_crops])
-        print("🐍 File: farmer_admin/views.py | Line: 249 | form_valid ~ total_organic_crop_area",total_organic_crop_area)
         if int(farmer_land.total_organic_land) < int(total_organic_crop_area + cleaned_data['area']):
             form.add_error('area', ValidationError("Farmer land area is less than the organic crop area"))
-            return super().form_invalid(form)
+            return super().form_invalid(form)   
         return super().form_valid(form)
 
 class FarmerOrganicCropDetailSessionWizardView(CustomLoginRequiredMixin, AdminRequiredMixin, SessionWizardView):
@@ -272,20 +272,6 @@ class FarmerOrganicCropDetailSessionWizardView(CustomLoginRequiredMixin, AdminRe
                  CostOfCultivationFormSet,
                  ContaminationControlFormSet,
                  Form]
-    
-    # def post(self, *args, **kwargs):
-    #     if self.request.POST.get('skip_step'):
-    #         print("🐍 File: farmer_admin/views.py | Line: 246 | post ~ skip_step")
-    #         # Set a flag in the session to indicate that the current step should be skipped.
-    #         self.storage.extra_data['skip_step'] = True
-    #         # Move to the next step and redirect.
-    #         next_step = self.get_next_step()
-    #         self.storage.current_step = next_step
-    #         print("🐍 File: farmer_admin/views.py | Line: 250 | post ~ self.steps.current",self.steps.current)
-    #         print("🐍 File: farmer_admin/views.py | Line: 250 | post ~  self.storage.current_step", self.storage.current_step)
-    #         return self.render_goto_step(next_step)
-
-    #     return super().post(*args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
         farmer = Farmer.objects.get(user__id=self.kwargs['pk'])
@@ -1203,21 +1189,42 @@ class SpinningQcRequestCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, 
         return HttpResponse(status=204, headers={'HX-Trigger': 'listChanged'})
 
 
-
-class UploadCsvRequest(CustomLoginRequiredMixin, AdminRequiredMixin, FormView, ListView):
+class BulkUploadList(CustomLoginRequiredMixin, AdminRequiredMixin, FormView, ListView):
     form_class = BulkUploadForm
     model = BulkUpload
     template_name = 'farmer_admin/upload_csv.html'
     context_object_name = 'bulk_upload_documents'
-    success_url = reverse_lazy('farmer_admin:upload_csv_request')
-    queryset = BulkUpload.objects.filter(is_active=True)
-    
-    # def get_queryset(self):
-    #     return 
-    # def get_success_url(self):
-    #     return reverse('farmer_admin:upload_csv_request')
-        
+    success_url = reverse_lazy('farmer_admin:bulk_upload_list')
+    queryset = BulkUpload.objects.filter(is_active=True).order_by('-timestamp')
     
     def form_valid(self, form):
-        form.save()
-        return super(UploadCsvRequest, self).form_valid(form)
+        object = form.save()
+        validate_bulk_upload.delay(object.pk)
+        return super(BulkUploadList, self).form_valid(form)
+
+
+class BulkUploadEditEmailList(CustomLoginRequiredMixin, AdminRequiredMixin, FormView):
+    form_class = BulkUploadEmailListForm
+    template_name = 'farmer_admin/bulk_upload_email_edit_form.html'
+    application_config_name = 'BulkUploadEmailList'
+    
+    def get_initial(self):
+        initial = super().get_initial()
+        instance = ApplicationConfiguration.objects.filter(name=self.application_config_name).first()
+        if instance:
+            initial['value'] = instance.value
+        return initial
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["post_url"] = reverse(
+            'farmer_admin:bulk_upload_edit_email_list')
+        return context
+
+    def form_valid(self, form):
+        value = form.cleaned_data.get('value')
+
+        # Create application configuration
+        ApplicationConfiguration.objects.update_or_create(name=self.application_config_name, defaults={'value': value})
+
+        return HttpResponse(status=204, headers={'HX-Trigger': 'listChanged'})

@@ -28,7 +28,7 @@ Upload Data
     <!--begin::Card-->
     <div class="card">
         <!--begin::Card header-->
-        <form class="form" method="POST" action="{% url 'farmer_admin:upload_csv_request' %}" enctype="multipart/form-data">
+        <form class="form" method="POST" action="{% url 'farmer_admin:bulk_upload_list' %}" enctype="multipart/form-data">
         <div class="card-header border-0 pt-6">
             <!--begin::Card title-->
             <div class="card-title">
@@ -40,10 +40,14 @@ Upload Data
                         <span class="path2"></span>
                     </i>
                     {{form.upload_document}}
-                    {% comment %} <input type="file" id="id_upload_document" class="form-control form-control-solid ps-13" placeholder="Upload CSV" /> {% endcomment %}
                 </div>
                 <div class="text-danger" style="text-align:start; font-size: 15px;">
                     {{ form.upload_document.errors }}
+                </div>
+                <div class="text-danger">
+                <a title="Download template" href="{% static 'assets/media/misc/farmer_template.xlsx' %}" download class="btn btn-icon">
+                    <i class="far fa-file-excel icon-lg" style="font-size: 25px;"></i>
+                </a>
                 </div>
                 <!--end::Search-->
             </div>
@@ -63,6 +67,9 @@ Upload Data
 
                 </div>
                 <!--end::Toolbar-->
+                <button hx-get="{% url 'farmer_admin:bulk_upload_edit_email_list' %}"  class="btn btn-light ms-4" hx-target="#outbound_request_container">
+                    Email List
+                </button>
             </div>
             <!--end::Card toolbar-->
         </div>
@@ -104,7 +111,7 @@ Upload Data
                                 <span class="badge badge-primary">{{document.status}}</span>
                             {% elif document.status == document.ERROR %}
                                 <span class="badge badge-danger">{{document.status}}</span>
-                            {% elif document.status == document.COMPLETED %}
+                            {% elif document.status == document.SUCCESS %}
                                 <span class="badge badge-success">{{document.status}}</span>
                             {% elif document.status == document.CANCELLED %}
                                 <span class="badge badge-info">{{document.status}}</span>
@@ -123,11 +130,54 @@ Upload Data
 <!--end::Post-->
 {% endblock content %}
 
+{% block modals %}
+{{block.super}}
+
+<div id="outbound_request_modal" class="modal fade">
+    <div id="outbound_request_container" class="modal-dialog" hx-target="this"></div>
+</div>
+
+{% endblock modals %}
+
 {% block js %}
 
 {{block.super}}
 
 <script type="text/javascript">
+
+    $('#kt_table_users').DataTable({
+        "info": false,
+        
+        'order': [],
+        'columnDefs': [
+            { orderable: false, targets: 0 }, // Disable ordering on column 0 (checkbox)
+        ]
+
+    })
+
+
+    const modal = new bootstrap.Modal(document.getElementById("outbound_request_modal"))
+        
+    htmx.on("htmx:afterSwap", (e) => {
+
+        // Response targeting #dialog => show the modal
+        if (e.detail.target.id == "outbound_request_container") {
+            modal.show()
+        }
+    })
+
+    
+    htmx.on("htmx:beforeSwap", (e) => {
+        // Empty response targeting #dialog => hide the modal
+        if (e.detail.target.id == "outbound_request_container" && !e.detail.xhr.response) {
+            modal.hide()
+            e.detail.shouldSwap = false
+        }
+    })
+    
+    htmx.on("hidden.bs.modal", () => {
+        document.getElementById("outbound_request_container").innerHTML = ""
+    })
 
 
 
