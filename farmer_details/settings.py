@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'farmer',
     'farmer_admin',
     'farmer_details_app',
+    'django_celery_results',
 ]
 
 MIDDLEWARE = [
@@ -220,6 +221,13 @@ LOGGING = {
 }
 
 
+
+###################### CELERY SETTINGS ##########################
+
+CELERY_TIMEZONE = 'Asia/Kolkata'
+CELERY_BROKER_URL = "redis://127.0.0.1:6379/1"
+CELERY_RESULT_BACKEND = 'django-db'
+
 ##################### SIMPLE JWT SETTINGS ##########################
 
 SIMPLE_JWT = {
@@ -243,7 +251,6 @@ SIMPLE_JWT = {
 
 }
 
-
 CSRF_TRUSTED_ORIGINS = ['https://theartisanre.com', 'https://www.theartisanre.com', 'http://192.168.0.138:8000', "https://inventoryartisanre.in"]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -251,3 +258,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://192.168.0.138:8000",
     "https://inventoryartisanre.in"
 ]
+
+BULK_UPLOAD_FILE_PATH = 'temporary_files/'
+BULK_UPLOAD_IMAGE_PATH = f'{BULK_UPLOAD_FILE_PATH}product_images/'
+BULK_UPLOAD_ERROR_PATH = 'temporary_files/'
