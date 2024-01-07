@@ -2,38 +2,24 @@
 <table class="table align-middle p-10" id="table_spinning_complete">
     <thead>
         <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0">
-            <th class="min-w-125px">Farmer Name</th>
-            <th class="min-w-125px">RPGF Farmer</th>
+            <th class="min-w-125px">Ginning</th>
             <th class="min-w-125px">Selected Vendor</th>
             <th class="min-w-125px">Quantity</th>
         </tr>
     </thead>
     <tbody class="text-gray-600 fw-semibold">
-        {% for selected_farmer in form_1_data %}
+        {% for selected_ginning in form_1_data %}
         <tr>
             <td class="d-flex align-items-center">
                <p>
-                {% if selected_farmer.farmer is not None %}
-                {{selected_farmer.farmer.user.user_display_name}}
-                {% else %}
-                {{selected_farmer.farmer_name}}
-                {% endif %}
-                </p>
-            </td>
-            <td>
-                <p>
-                    {% if selected_farmer.farmer %}
-                    Yes
-                    {% else %}
-                    No
-                    {% endif %}
+                {{selected_ginning.ginning.vendor}} ({{selected_ginning.ginning.remaining_quantity}} Kg)
                 </p>
             </td>
             <td>
                 <p>{{form_2_data.vendor}}</p>
             </td>
             <td>
-                <p>{{selected_farmer.quantity}}</p>
+                <p>{{selected_ginning.quantity}}</p>
             </td>
         </tr>
         {% endfor %}

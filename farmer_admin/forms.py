@@ -614,7 +614,7 @@ class CustomGinningModelChoiceField(ModelChoiceField):
 class SelectGinningForm(ModelForm):
     ginning = CustomGinningModelChoiceField(required=True, queryset=Ginning.objects.annotate(
         sum_quantity=Coalesce(Sum('selected_ginnings__quantity'), 0.0),
-        remaining_quantity=F('total_quantity') - Coalesce(Sum('selected_ginnings__quantity'), 0.0)).filter(
+        remaining_quantity=F('ginning_outbound__quantity') - Coalesce(Sum('selected_ginnings__quantity'), 0.0)).filter(
         ginning_status__status=GinningStatus.QC_APPROVED, total_quantity__gt=F('sum_quantity')),
         widget=Select(attrs={
             'class': 'form-control'
@@ -673,7 +673,7 @@ class SelectGinningFormSet(BaseFormSet):
         validation_errors = []
         for ginning_pk in distinct_ginning_quantity_mapping.keys():
             ginning = Ginning.objects.annotate(
-                remaining_quantity=F('total_quantity') - Coalesce(Sum('selected_ginnings__quantity'), 0.0)).filter(
+                remaining_quantity=F('ginning_outbound__quantity') - Coalesce(Sum('selected_ginnings__quantity'), 0.0)).filter(
                 pk=ginning_pk, ginning_status__status=GinningStatus.QC_APPROVED).first()
             if round(ginning.remaining_quantity, 2) < distinct_ginning_quantity_mapping[ginning_pk]:
                 validation_errors.append(ValidationError(f"Total quantity entered is greater than the \
@@ -775,14 +775,21 @@ class VendorCreateForm(BaseCreationForm):
         exclude = ['id']
 
 
-class VendorMappingForm(Form):
+class GinningVendorMappingForm(Form):
 
-    vendor = ModelChoiceField(required=True, queryset=Vendor.objects.filter(is_active=True), widget=Select(
+    vendor = ModelChoiceField(required=True, queryset=Vendor.objects.filter(is_active=True, role=Vendor.GINNING_VENDOR), widget=Select(
         attrs={
             'class': 'form-control'
         }
     ))
 
+class SpinningVendorMappingForm(Form):
+
+    vendor = ModelChoiceField(required=True, queryset=Vendor.objects.filter(is_active=True, role=Vendor.SPINNING_VENDOR), widget=Select(
+        attrs={
+            'class': 'form-control'
+        }
+    ))
 
 class SeasonCreateForm(BaseCreationForm):
     class Meta:

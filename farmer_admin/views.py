@@ -32,7 +32,7 @@ from django.views.generic import (
 )
 
 from farmer.models import ContaminationControl, CostOfCultivation, Costs, Farmer, FarmerLand, FarmerOrganicCropPdf, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
-from farmer_admin.forms import BulkUploadEmailListForm, BulkUploadForm, ContaminationControlForm, ContaminationControlFormSet, CostOfCultivationForm, CostOfCultivationFormSet, CostsCreateForm, FarmerCreationForm, FarmerLandDetailsCreationFrom, FarmerNutritionManagementForm, FarmerNutritionManagementFormSet, FarmerOrganicCropDetailForm, FarmerPestDiseaseManagementForm, FarmerPestDiseaseManagementFormSet, FarmerSeedDetailsForm, FarmerSeedDetailsFormSet, FarmerSocialCreationFrom, GinningInProcessForm, GinningOutboundForm, GinningQualityCheckForm, SelectGinningFormSet, SpinningInProcessForm, SpinningOutboundForm, SpinningQualityCheckForm, VendorMappingForm, HarvestAndIncomeDetailForm, HarvestAndIncomeDetailFormSet, OtherFarmerCreationForm, SeasonCreateForm, SelectFarmerFormSet, VendorCreateForm, WeedManagementForm, WeedManagementFormSet
+from farmer_admin.forms import BulkUploadEmailListForm, BulkUploadForm, ContaminationControlForm, ContaminationControlFormSet, CostOfCultivationForm, CostOfCultivationFormSet, CostsCreateForm, FarmerCreationForm, FarmerLandDetailsCreationFrom, FarmerNutritionManagementForm, FarmerNutritionManagementFormSet, FarmerOrganicCropDetailForm, FarmerPestDiseaseManagementForm, FarmerPestDiseaseManagementFormSet, FarmerSeedDetailsForm, FarmerSeedDetailsFormSet, FarmerSocialCreationFrom, GinningInProcessForm, GinningOutboundForm, GinningQualityCheckForm, SelectGinningFormSet, SpinningInProcessForm, SpinningOutboundForm, SpinningQualityCheckForm, SpinningVendorMappingForm, GinningVendorMappingForm, HarvestAndIncomeDetailForm, HarvestAndIncomeDetailFormSet, OtherFarmerCreationForm, SeasonCreateForm, SelectFarmerFormSet, VendorCreateForm, WeedManagementForm, WeedManagementFormSet
 from farmer_admin.mixins import AdminRequiredMixin
 from farmer_admin.tasks import validate_bulk_upload
 from farmer_admin.utils import generate_certificate, get_lookup_fields, get_model_field_names, qs_to_dataset
@@ -869,7 +869,7 @@ class DashboardFarmerView(TemplateView):
 
 
 class GinningMappingCreateWizardView(CustomLoginRequiredMixin, AdminRequiredMixin, SessionWizardView):
-    form_list = [SelectFarmerFormSet, VendorMappingForm, Form]
+    form_list = [SelectFarmerFormSet, GinningVendorMappingForm, Form]
     template_name = 'farmer_admin/ginning_mapping_wizard/ginning_mapping_wizard_base.html'
 
     def get_context_data(self, form, **kwargs):
@@ -1039,7 +1039,7 @@ class GinningQcRequestCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, F
 
 
 class SpinningMappingCreateWizardView(CustomLoginRequiredMixin, AdminRequiredMixin, SessionWizardView):
-    form_list = [SelectGinningFormSet, VendorMappingForm, Form]
+    form_list = [SelectGinningFormSet, SpinningVendorMappingForm, Form]
     template_name = 'farmer_admin/spinning_mapping_wizard/spinning_mapping_wizard_base.html'
 
     def get_context_data(self, form, **kwargs):

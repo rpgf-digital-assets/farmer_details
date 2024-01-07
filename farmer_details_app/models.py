@@ -181,10 +181,10 @@ class GinningOutbound(BaseModel):
     invoice_no = models.CharField(_("Invoice No."), max_length=500)
     product_name = models.CharField(_("Product Name"), max_length=500)
     outward_lot_no = models.CharField(_("Outward Lot No"), max_length=500)
+    quantity = models.FloatField(_("Quantity (Kgs)"), validators = [MinValueValidator(0.0)])
 
     def __str__(self):
         return f"{self.ginning} | {self.quantity}"
-    quantity = models.FloatField(_("Quantity (Kgs)"), validators = [MinValueValidator(0.0)])
 
 
 class SelectedGinning(BaseModel):
