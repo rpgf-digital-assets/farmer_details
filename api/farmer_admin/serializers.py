@@ -64,7 +64,7 @@ class FarmerDetailsSerializer(DynamicFieldsCategorySerializer):
 class CostsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Costs
-        fields = ['lot_no', 'quantity']
+        fields = '__all__'
         
         
         
