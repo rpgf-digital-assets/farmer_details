@@ -203,16 +203,15 @@ class Spinning(BaseModel):
     vendor = models.ForeignKey(Vendor, verbose_name=_(
         "Vendor"), on_delete=models.CASCADE)
 
+    total_quantity = models.FloatField(validators = [MinValueValidator(0.0)])
     timestamp = models.DateTimeField(_("Date"), default=timezone.now)
 
-    @property
-    def total_quantity(self):
-        quantity = 0
-        for selected_farmer in self.selected_ginnings.all():
-            quantity += selected_farmer.quantity
-
-        return quantity
-    
+    def save(self, *args, **kwargs):
+        self.total_quantity = 0
+        for selected_ginning in self.selected_ginnings.all():
+            self.total_quantity += selected_ginning.quantity
+        super(Spinning, self).save(*args, **kwargs)
+        
     def __str__(self):
         return "-".join([selected_ginning.lot_no for selected_ginning in self.selected_ginnings.all()]) + f" ({self.total_quantity})"
     

@@ -514,8 +514,8 @@ class CustomFarmerModelChoiceField(ModelChoiceField):
         if obj.organic_crop:
             cotton_crop = obj.organic_crop.filter(name__iexact="cotton").first()
             if cotton_crop:
-                if cotton_crop.harvest_income:
-                    total_area = cotton_crop.harvest_income.aggregate(total_area=Sum('quantity_sold_fpo'))['total_area']
+                if cotton_crop.harvest_income.all():
+                    total_area = cotton_crop.harvest_income.aggregate(total_area=Sum('quantity_sold_fpo') - Sum('quantity_sold_outside'))['total_area']
                     return f'{obj.user} ({total_area} Kg)'
         return f'{obj.user}'
 

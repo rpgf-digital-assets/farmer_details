@@ -17,6 +17,7 @@ from django.http import HttpResponse
 from django.db.models import Avg
 from django.db.models import Sum
 from django.db.models import Count
+from django.db.models.functions.comparison import Coalesce
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
@@ -864,7 +865,18 @@ class DashboardFarmerView(TemplateView):
         context["pest_bar_graph_data"] = json.dumps(pest_bar_graph_data)
         
         context['year_range'] = [i for i in range(timezone.now().year, timezone.now().year - 10, -1)]
-
+        
+        # Get Raw cotton and ginned cotton data
+        context['raw_cotton'] = Ginning.objects.filter(ginning_status__status=GinningStatus.QC_APPROVED) \
+                .aggregate(raw_cotton=Sum('total_quantity') - Sum('ginning_outbound__quantity'))['raw_cotton']
+                
+        spinned_cotton = Spinning.objects.filter(is_active=True, spinning_status__status=SpinningStatus.QC_APPROVED)\
+                .aggregate(total_quantity=Sum('spinning_outbound__quantity'))
+        context['ginned_cotton'] = Ginning.objects.filter(ginning_status__status=GinningStatus.QC_APPROVED) \
+            .aggregate(ginned_cotton=Sum('ginning_outbound__quantity') - Coalesce(spinned_cotton['total_quantity'], 0.0))['ginned_cotton']
+            
+        context['yarn'] = spinned_cotton['total_quantity'] or 0
+        
         return context
 
 
