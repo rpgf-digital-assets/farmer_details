@@ -844,25 +844,18 @@ class DashboardFarmerView(TemplateView):
         pest_management_compost = PestDiseaseManagement.objects.filter(is_active=True, source_of_input=NutrientManagement.COMPOST) \
                                 .aggregate(total_fertilizer_quantity=Sum('quantity_of_input'), 
                                             total_on_farm_quantity=Sum('quantity_used'), total_off_farm_quantity=Sum('quantity_sourced'))
-        pest_bar_graph_data = [{
-            "year": "On Farm",
-            "vermicompost": pest_management_vermicompost['total_fertilizer_quantity'],
-            "vermicompost-used": pest_management_vermicompost['total_on_farm_quantity'],
-            "compost": pest_management_compost['total_fertilizer_quantity'],
-            "compost-used": pest_management_compost['total_on_farm_quantity'],
-            "FYM": pest_management_fym['total_fertilizer_quantity'],
-            "FYM-used": pest_management_fym['total_on_farm_quantity'],
-        },{
-            "year": "Outsourced",
-            "vermicompost": pest_management_vermicompost['total_fertilizer_quantity'],
-            "vermicompost-used": pest_management_vermicompost['total_off_farm_quantity'],
-            "compost": pest_management_compost['total_fertilizer_quantity'],
-            "compost-used": pest_management_compost['total_off_farm_quantity'],
-            "FYM": pest_management_fym['total_fertilizer_quantity'],
-            "FYM-used": pest_management_fym['total_off_farm_quantity'],
-        }]
-
-        context["pest_bar_graph_data"] = json.dumps(pest_bar_graph_data)
+                                
+        pest_management = PestDiseaseManagement.objects.filter(is_active=True) \
+                                .aggregate(total_fertilizer_quantity=Sum('quantity_of_input'), 
+                                            total_on_farm_quantity=Sum('quantity_used'), total_off_farm_quantity=Sum('quantity_sourced'))
+        
+        pest_piechart_data = [
+            {"value": pest_management["total_fertilizer_quantity"], "category": "Fertilizer"},
+            {"value": pest_management["total_on_farm_quantity"], "category": "On Farm"},
+            {"value": pest_management["total_on_farm_quantity"], "category": "Off Farm"},
+        ]
+        
+        context["pest_piechart_data"] = json.dumps(pest_piechart_data)
         
         context['year_range'] = [i for i in range(timezone.now().year, timezone.now().year - 10, -1)]
         
