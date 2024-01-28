@@ -617,7 +617,7 @@ class CustomGinningModelChoiceField(ModelChoiceField):
 
 
 class SelectGinningForm(ModelForm):
-    ginning = CustomGinningModelChoiceField(required=True, queryset=Ginning.objects.annotate(
+    ginning = CustomGinningModelChoiceField(label="Ginner", required=True, queryset=Ginning.objects.annotate(
         sum_quantity=Coalesce(Sum('selected_ginnings__quantity'), 0.0),
         remaining_quantity=F('ginning_outbound__quantity') - F('sum_quantity')).filter(
         ginning_status__status=GinningStatus.QC_APPROVED, remaining_quantity__gt=0),
