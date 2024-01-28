@@ -45,7 +45,7 @@ class Farmer(models.Model):
     ]
     gender = models.CharField(_("Gender"), max_length=30, choices=GENDER_CHOICES, default=UNDEFINED)
     birth_date = models.DateField(_("BirthDate"))
-    aadhar_number = models.PositiveIntegerField(_("Aadhar Number"))
+    aadhar_number = models.CharField(_("Aadhar Number"), max_length=20)
     registration_number = models.CharField(_("Farmer Tracenet Registration Number"), max_length=255)
     date_of_joining_of_program = models.DateField(_("Date of Joining of Program"))
     village = models.CharField(_("Village"), max_length=255)
