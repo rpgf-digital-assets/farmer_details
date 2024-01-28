@@ -78,23 +78,27 @@ def create_farmer_organic_crop(row, instance_df):
         
         # Check if instance is farmer instance then proceed to check social validation
         if isinstance(farmer, Farmer):
-            farmer_land = FarmerLand.objects.filter(is_active=True, farmer=farmer).first()
-            if farmer_land:
-                organic_crops = OrganicCropDetails.objects.filter(is_active=True, farmer=farmer)
-                total_organic_crop_area = sum([item.area for item in organic_crops])
-                if int(farmer_land.total_organic_land) < int(total_organic_crop_area + row_dict['area']):
-                    return "Farmer land area is less than the organic crop area"
+            non_empty_row = any(row_dict.values())
+            if non_empty_row:
+                farmer_land = FarmerLand.objects.filter(is_active=True, farmer=farmer).first()
+                if farmer_land:
+                    organic_crops = OrganicCropDetails.objects.filter(is_active=True, farmer=farmer)
+                    total_organic_crop_area = sum([item.area for item in organic_crops])
+                    if int(farmer_land.total_organic_land) < int(total_organic_crop_area + row_dict['area']):
+                        return "Farmer land area is less than the organic crop area"
+                    else:
+                        # Create season
+                        season = Season.objects.filter(name__iexact=row_dict['season']).first()
+                        if not season:
+                            return "Season not found"
+                        del row_dict['season']
+                        # Create a new Organic Crop
+                        organic_crop, _created = OrganicCropDetails.objects.get_or_create(is_active=True, farmer=farmer, season=season, defaults=row_dict)
+                        return organic_crop
                 else:
-                    # Create season
-                    season = Season.objects.filter(name__iexact=row_dict['season']).first()
-                    if not season:
-                        return "Season not found"
-                    del row_dict['season']
-                    # Create a new Organic Crop
-                    organic_crop, _created = OrganicCropDetails.objects.get_or_create(is_active=True, farmer=farmer, season=season, defaults=row_dict)
-                    return organic_crop
+                    return "Farmer land not found"
             else:
-                return "Farmer land not found"
+                return None
         return farmer
     except Exception as e:
         return str(e)
