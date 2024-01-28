@@ -144,8 +144,6 @@ class FarmerCreationForm(BaseCreationForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        print(
-            "🐍 File: farmer_admin/forms.py | Line: 178 | clean ~ cleaned_data", cleaned_data)
         validation_errors = []
         first_name = cleaned_data.get('first_name')
         last_name = cleaned_data.get('last_name')
@@ -153,7 +151,6 @@ class FarmerCreationForm(BaseCreationForm):
         birth_date = cleaned_data.get('birth_date')
         aadhar_number = cleaned_data.get('aadhar_number')
         phone = cleaned_data.get('phone')
-        print("🐍 File: farmer_admin/forms.py | Line: 178 | clean ~ phone", phone)
         registration_number = cleaned_data.get('registration_number')
         date_of_joining_of_program = cleaned_data.get(
             'date_of_joining_of_program')
@@ -515,12 +512,14 @@ class CustomFarmerModelChoiceField(ModelChoiceField):
             cotton_crop = obj.organic_crop.filter(name__iexact="cotton").first()
             if cotton_crop:
                 if cotton_crop.harvest_income.all():
-                    total_area = cotton_crop.harvest_income.aggregate(total_area=Sum('quantity_sold_fpo') - Sum('quantity_sold_outside'))['total_area']
-                    return f'{obj.user} ({total_area} Kg)'
+                    total_quantity = cotton_crop.harvest_income.aggregate(total_quantity=Sum('quantity_sold_fpo') - Sum('quantity_sold_outside'))['total_quantity']
+                    total_ginned = Ginning.objects.filter(selected_farmers__farmer__in=[obj]).exclude(ginning_status__status__in=[GinningStatus.QC_REJECTED])\
+                                    .aggregate(total_ginned=Coalesce(Sum('selected_farmers__quantity'), 0.0))['total_ginned']
+                    return f'{obj.user} ({total_quantity - total_ginned} Kg)'
         return f'{obj.user}'
 
 class SelectFarmerForm(ModelForm):
-    farmer = CustomFarmerModelChoiceField(required=False, queryset=Farmer.objects.all(), widget=Select(
+    farmer = CustomFarmerModelChoiceField(required=False, queryset=Farmer.objects.filter(organic_crop__name__iexact="cotton"), widget=Select(
         attrs={
             'class': 'form-control'
         }
@@ -577,24 +576,30 @@ class SelectFarmerFormSet(BaseFormSet):
         if any(self.errors):
             # Don't bother validating the formset unless each form is valid on its own
             return
-        distinct_inbound_quantity_mapping = {}
+        distinct_farmer_quantity_mapping = {}
         for form in self.forms:
             if self.can_delete and self._should_delete_form(form):
                 continue
-            # inbound = form.cleaned_data.get("inbound")
-            # quantity = form.cleaned_data.get("quantity")
-            # if distinct_inbound_quantity_mapping[inbound]:
-            # distinct_inbound_quantity_mapping[inbound] += quantity
-            # else:
-            #     distinct_inbound_quantity_mapping[inbound] = quantity
-
-            # if (inbound, quantity) in selected_inbound_list:
-            #     raise ValidationError(
-            #         "Selected farmers in a set must be distinct.")
-            # selected_inbound_list.append((inbound, quantity))
-            # if not farmer and not farmer_name and not quantity:
-            #     raise ValidationError("Cannot submit an empty form")
-
+            farmer = form.cleaned_data.get("farmer")
+            quantity = form.cleaned_data.get("quantity")
+            if farmer:
+                try:
+                    distinct_farmer_quantity_mapping[str(farmer.pk)] += quantity
+                except KeyError:
+                    distinct_farmer_quantity_mapping[str(farmer.pk)] = quantity
+        validation_errors = []
+        for farmer_pk in distinct_farmer_quantity_mapping.keys():
+            farmer = Farmer.objects.get(pk=farmer_pk)
+            organic_crop = OrganicCropDetails.objects.filter(name__iexact="cotton", farmer__pk=farmer_pk).aggregate(
+                            remaining_quantity=(Coalesce(Sum('harvest_income__quantity_sold_fpo'), 0) - Coalesce(Sum('harvest_income__quantity_sold_outside'), 0))
+                            )
+            total_ginned = Ginning.objects.filter(selected_farmers__farmer__in=[farmer]).exclude(ginning_status__status__in=[GinningStatus.QC_REJECTED])\
+                                    .aggregate(total_ginned=Coalesce(Sum('selected_farmers__quantity'), 0.0))['total_ginned']
+            if (organic_crop['remaining_quantity'] - total_ginned) < distinct_farmer_quantity_mapping[farmer_pk]:
+                validation_errors.append(ValidationError(f"Total quantity entered is greater than the \
+                                                          total quantity available for the Farmer \"{farmer}\""))
+        if validation_errors:
+            raise ValidationError(validation_errors)
 
 
 SelectFarmerFormSet = formset_factory(
@@ -614,8 +619,8 @@ class CustomGinningModelChoiceField(ModelChoiceField):
 class SelectGinningForm(ModelForm):
     ginning = CustomGinningModelChoiceField(required=True, queryset=Ginning.objects.annotate(
         sum_quantity=Coalesce(Sum('selected_ginnings__quantity'), 0.0),
-        remaining_quantity=F('ginning_outbound__quantity') - Coalesce(Sum('selected_ginnings__quantity'), 0.0)).filter(
-        ginning_status__status=GinningStatus.QC_APPROVED, total_quantity__gt=F('sum_quantity')),
+        remaining_quantity=F('ginning_outbound__quantity') - F('sum_quantity')).filter(
+        ginning_status__status=GinningStatus.QC_APPROVED, remaining_quantity__gt=0),
         widget=Select(attrs={
             'class': 'form-control'
         }

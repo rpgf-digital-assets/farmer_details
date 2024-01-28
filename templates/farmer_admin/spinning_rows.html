@@ -29,6 +29,10 @@
     <td>
         <div class="fs-7 text-muted fw-bold">{{spinning.total_quantity}}Kg</div>
     </td>
+    <!--Outbound Quantity-->
+    <td>
+        <div class="fs-7 text-muted fw-bold">{{spinning.spinning_outbound.quantity|default:"0"}}Kg</div>
+    </td>
     <!--Status-->
     <td>
         {% if spinning.spinning_status.status == spinning.spinning_status.INBOUND %}

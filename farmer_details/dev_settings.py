@@ -22,7 +22,7 @@ DEBUG = True
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'farmer_details',
+        'NAME': 'farmer_prod',
         'USER': 'farmer',
         'PASSWORD': POSTGRES_PASSWORD,
         'HOST': 'LOCALHOST'
