@@ -7,9 +7,10 @@ from rest_framework.generics import ListAPIView, RetrieveAPIView, DestroyAPIView
 from api.farmer_admin.serializers import CostsSerializer, FarmerDetailsSerializer, FarmerLandCoordinatesSerializer, FarmerOrganicCropDetailsSerializer, FarmerOrganicCropSerializer, GinningSerializer, SpinningSerializer
 from django.db.models import ProtectedError
 from django.db.models import Count
+from django.db.models.functions import Lower
 from django.db import connection
 from django.db import transaction
-from django.db.models import Sum, Avg, F
+from django.db.models import Sum, Avg, F, Func
 from api.permissions import IsAdminOrSuperUser
 from farmer.models import ContaminationControl, CostOfCultivation, Costs, Farmer, FarmerLand, FarmerOrganicCropPdf, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
 from farmer_admin.utils import generate_certificate
@@ -350,16 +351,63 @@ class CottonDataAPIView(APIView):
             data = {}
             
             # Raw cotton data
-            total_ginning_added = SelectedGinningFarmer.objects.filter(is_active=True).annotate(total_price=F('quantity')*F('price')).aggregate(total_quantity=Sum('quantity'), total_value=Sum('total_price'))
+            total_ginning_added = SelectedGinningFarmer.objects.filter(is_active=True, ginning_mapping__ginning_status__status=GinningStatus.QC_APPROVED)\
+                                    .annotate(total_price=F('quantity')*F('price'))\
+                                    .aggregate(total_quantity=Sum('quantity'), total_value=Sum('total_price'))
             value_for_one = round(total_ginning_added['total_value'] / total_ginning_added['total_quantity'], 2)
             ginning = Ginning.objects.filter(ginning_status__status=GinningStatus.QC_APPROVED) \
                 .aggregate(total_available_quantity=total_ginning_added['total_quantity'] - Sum('ginning_outbound__quantity'), 
                         total_available_value=F('total_available_quantity')*value_for_one)
+                
+            raw_cotton_district = Ginning.objects.filter(ginning_status__status=GinningStatus.QC_APPROVED) \
+                .annotate(ldistrict=Lower('selected_farmers__farmer__district')) \
+                .values('ldistrict') \
+                .order_by('ldistrict') \
+                .annotate(total_available_quantity=Sum('selected_farmers__quantity') - Sum('ginning_outbound__quantity'), 
+                            total_available_value=F('total_available_quantity')*value_for_one)
+            
+            raw_cotton_district_data = {
+                "nagpur": {
+                    "available": {
+                        "quantity": 0,
+                        "value": 0
+                    }
+                },
+                "adilabad": {
+                    "available": {
+                        "quantity": 0,
+                        "value": 0
+                    }
+                },
+                "others": {
+                    "available": {
+                        "quantity": 0,
+                        "value": 0
+                    }
+                }
+            }
+            
+            for raw_cotton in raw_cotton_district:
+                if raw_cotton['ldistrict'] == 'nagpur':
+                    raw_cotton_district_data['nagpur']['available']['quantity'] = raw_cotton['total_available_quantity']
+                    raw_cotton_district_data['nagpur']['available']['value'] = raw_cotton['total_available_value']
+                    
+                elif raw_cotton['ldistrict'] == 'adilabad':
+                    raw_cotton_district_data['adilabad']['available']['quantity'] = raw_cotton['total_available_quantity']
+                    raw_cotton_district_data['adilabad']['available']['value'] = raw_cotton['total_available_value']
+                    
+                else:
+                    raw_cotton_district_data['others']['available']['quantity'] += raw_cotton['total_available_quantity']
+                    raw_cotton_district_data['others']['available']['value'] += raw_cotton['total_available_value']
+                    
+                    
+                
             data['raw_cotton'] = {
                 "available": {
                     "quantity": ginning['total_available_quantity'] or 0,
                     "value": ginning['total_available_value'] or 0,
-                }
+                },
+                "district_based": raw_cotton_district_data
             }
             
             # Lint cotton data
@@ -369,12 +417,54 @@ class CottonDataAPIView(APIView):
             ginning_outbound = Ginning.objects.filter(ginning_status__status=GinningStatus.QC_APPROVED) \
                 .aggregate(total_ginned_quantity=Sum('ginning_outbound__quantity') - Coalesce(spinned_cotton['total_quantity'], 0.0), 
                         total_ginned_value=F('total_ginned_quantity')*value_for_one)
+                
+            ginning_district = Ginning.objects.filter(ginning_status__status=GinningStatus.QC_APPROVED) \
+                .annotate(ldistrict=Lower('selected_farmers__farmer__district')) \
+                .values('ldistrict') \
+                .order_by('ldistrict') \
+                .annotate(total_ginned_quantity=Func(Coalesce(spinned_cotton['total_quantity'], 0.0) - Sum('ginning_outbound__quantity'), function='ABS'), 
+                        total_ginned_value=F('total_ginned_quantity')*value_for_one)
             
+            ginned_district_data = {
+                "nagpur": {
+                    "available": {
+                        "quantity": 0,
+                        "value": 0
+                    }
+                },
+                "adilabad": {
+                    "available": {
+                        "quantity": 0,
+                        "value": 0
+                    }
+                },
+                "others": {
+                    "available": {
+                        "quantity": 0,
+                        "value": 0
+                    }
+                }
+            }
+            
+            for ginned_cotton in ginning_district:
+                if ginned_cotton['ldistrict'] == 'nagpur':
+                    ginned_district_data['nagpur']['available']['quantity'] = ginned_cotton['total_ginned_quantity']
+                    ginned_district_data['nagpur']['available']['value'] = ginned_cotton['total_ginned_value']
+                    
+                elif ginned_cotton['ldistrict'] == 'adilabad':
+                    ginned_district_data['adilabad']['available']['quantity'] = ginned_cotton['total_ginned_quantity']
+                    ginned_district_data['adilabad']['available']['value'] = ginned_cotton['total_ginned_value']
+                    
+                else:
+                    ginned_district_data['others']['available']['quantity'] += ginned_cotton['total_ginned_quantity']
+                    ginned_district_data['others']['available']['value'] += ginned_cotton['total_ginned_value']
+                    
             data['lint_cotton'] = {
                 "available": {
                     "quantity": ginning_outbound['total_ginned_quantity'] or 0,
                     "value": ginning_outbound['total_ginned_value'] or 0
-                }
+                },
+                "district_based": ginned_district_data
             }
             
             # Yarn data

@@ -56,7 +56,7 @@ class FarmerDetailsSerializer(DynamicFieldsCategorySerializer):
     organic_crop = FarmerOrganicCropSerializer(many=True)
     class Meta:
         model = Farmer
-        fields = ('user', 'profile_image', 'village', 'taluka', 'land', 'organic_crop')
+        fields = ('user', 'profile_image', 'district', 'village', 'taluka', 'land', 'organic_crop')
     
     
 
