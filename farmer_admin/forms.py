@@ -29,7 +29,7 @@ from django.forms import (
     FileField,
     formset_factory
 )
-from django.db.models import Sum, F
+from django.db.models import Sum, F, Q, ExpressionWrapper, FloatField as _FloatField
 from django.db.models.functions import Coalesce
 
 from farmer.models import ContaminationControl, CostOfCultivation, Costs, Farmer, FarmerEducation, FarmerLand, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
@@ -617,41 +617,62 @@ class CustomGinningModelChoiceField(ModelChoiceField):
 
 
 class SelectGinningForm(ModelForm):
-    ginning = CustomGinningModelChoiceField(label="Ginner", required=True, queryset=Ginning.objects.annotate(
-        sum_quantity=Coalesce(Sum('selected_ginnings__quantity'), 0.0),
-        remaining_quantity=F('ginning_outbound__quantity') - F('sum_quantity')).filter(
-        ginning_status__status=GinningStatus.QC_APPROVED, remaining_quantity__gt=0),
-        widget=Select(attrs={
-            'class': 'form-control'
-        }
-    ))
+
+    subquery = Ginning.objects.filter(
+        selected_ginnings__spinnings__spinning_status__status=SpinningStatus.QC_REJECTED
+    ).annotate(rejected_quantity=Coalesce(Sum("selected_ginnings__quantity"), 0.0))
+
+    ginning = CustomGinningModelChoiceField(
+        label="Ginner",
+        required=True,
+        queryset=Ginning.objects.filter(
+            ginning_status__status=GinningStatus.QC_APPROVED
+        ).annotate(
+            sum_quantity=Coalesce(Sum("selected_ginnings__quantity"), 0.0),
+            remaining_quantity=ExpressionWrapper(
+                F("ginning_outbound__quantity")
+                - F("sum_quantity")
+                + Coalesce(
+                    Sum(
+                        "selected_ginnings__quantity",
+                        filter=Q(
+                            selected_ginnings__spinnings__spinning_status__status=SpinningStatus.QC_REJECTED
+                        ),
+                    ),
+                    0.0,
+                ),
+                output_field=_FloatField(),
+            ),
+        ),
+        widget=Select(attrs={"class": "form-control"}),
+    )
 
     quantity = PositiveIntegerField(required=True, widget=NumberInput(attrs={
         'class': 'form-control'
     }))
-    
+
     price = PositiveIntegerField(widget=NumberInput(attrs={
         'class': 'form-control'
     }))
-    
+
     invoice_no = CharField(required=True, widget=TextInput(
         attrs={
             'class': 'form-control'
         }
     ))
-    
+
     lot_no = CharField(required=True, widget=TextInput(
         attrs={
             'class': 'form-control'
         }
     ))
-    
+
     lint_cotton_tc_no = CharField(required=True, widget=TextInput(
         attrs={
             'class': 'form-control'
         }
     ))
-    
+
     class Meta:
         model = SelectedGinning
         exclude = ['id']
@@ -678,7 +699,12 @@ class SelectGinningFormSet(BaseFormSet):
         validation_errors = []
         for ginning_pk in distinct_ginning_quantity_mapping.keys():
             ginning = Ginning.objects.annotate(
-                remaining_quantity=F('ginning_outbound__quantity') - Coalesce(Sum('selected_ginnings__quantity'), 0.0)).filter(
+                sum_quantity=Coalesce(Sum('selected_ginnings__quantity'), 0.0),
+                remaining_quantity=ExpressionWrapper(
+                    F('ginning_outbound__quantity') - F('sum_quantity') + Coalesce(Sum('selected_ginnings__quantity', 
+                                                                        filter=Q(selected_ginnings__spinnings__spinning_status__status=SpinningStatus.QC_REJECTED)), 0.0),
+                    output_field=_FloatField()
+                )).filter(
                 pk=ginning_pk, ginning_status__status=GinningStatus.QC_APPROVED).first()
             if round(ginning.remaining_quantity, 2) < distinct_ginning_quantity_mapping[ginning_pk]:
                 validation_errors.append(ValidationError(f"Total quantity entered is greater than the \
@@ -698,7 +724,7 @@ class SpinningInProcessForm(BaseCreationForm):
     class Meta:
         model = SpinningInProcess
         fields = ['name', 'raw_material_qty', 'output_yarn_qty']
-    
+
 
 class SpinningOutboundForm(BaseCreationForm): 
     timestamp = DateTimeField(required=True, label="Outbound Timestamp", widget=DateTimeInput(attrs={
@@ -714,7 +740,6 @@ class SpinningOutboundForm(BaseCreationForm):
         if spinning:
             if quantity > spinning.total_quantity:
                 self.add_error('quantity', ValidationError("Quantity cannot be greater than total ginning quantity"))
-         
 
 
 class SpinningQualityCheckForm(BaseCreationForm):
@@ -739,8 +764,8 @@ class GinningInProcessForm(BaseCreationForm):
     class Meta:
         model = GinningInProcess
         fields = ['name', 'timestamp', 'heap_no', 'consumed_qty', 'lint_qty']
-    
-    
+
+
 class GinningOutboundForm(BaseCreationForm):
         
     timestamp = DateTimeField(required=True, label="Outbound Timestamp", widget=DateTimeInput(attrs={
@@ -756,9 +781,8 @@ class GinningOutboundForm(BaseCreationForm):
         if ginning:
             if quantity > ginning.total_quantity:
                 self.add_error('quantity', ValidationError("Quantity cannot be greater than total ginning quantity"))
-         
-        
-        
+
+
 class GinningQualityCheckForm(BaseCreationForm):
     status = ChoiceField(label="Quality Check Status",
                          choices=[(GinningStatus.QC_APPROVED, "Approved"),
@@ -771,7 +795,6 @@ class GinningQualityCheckForm(BaseCreationForm):
     class Meta:
         model = GinningStatus
         exclude = ['ginning']
-        
 
 
 class VendorCreateForm(BaseCreationForm):
@@ -804,8 +827,8 @@ class CostsCreateForm(BaseCreationForm):
     class Meta:
         model = Costs
         fields = '__all__'
-        
-        
+
+
 class BulkUploadForm(BaseCreationForm):
     upload_document = FileField(required=True, widget=FileInput(attrs={
         'class': 'form-control form-control-solid ps-13'
@@ -813,7 +836,7 @@ class BulkUploadForm(BaseCreationForm):
     class Meta:
         model = BulkUpload
         fields = ['upload_document']
-        
+
 
 class BulkUploadEmailListForm(BaseCreationForm):
     class Meta:
