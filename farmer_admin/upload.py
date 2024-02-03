@@ -21,8 +21,6 @@ def create_farmer(row):
         del row_dict['first_name']
         del row_dict['last_name']
         del row_dict['phone']
-        for field in [f.name for f in Farmer._meta.get_fields() if f.null]:
-            row_dict[field] = None if row_dict[field] == '' else row_dict[field]
         farmer, _created = Farmer.objects.get_or_create(user=user, defaults=row_dict)
         return farmer
     except Exception as e:
