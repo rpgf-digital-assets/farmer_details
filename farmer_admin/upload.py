@@ -21,6 +21,8 @@ def create_farmer(row):
         del row_dict['first_name']
         del row_dict['last_name']
         del row_dict['phone']
+        for field in [f.name for f in Farmer._meta.get_fields() if f.null]:
+            row_dict[field] = None if row_dict[field] == '' else row_dict[field]
         farmer, _created = Farmer.objects.get_or_create(user=user, defaults=row_dict)
         return farmer
     except Exception as e:
@@ -40,6 +42,9 @@ def create_farmer_social(row, instance_df):
                     farmer_education, _created = FarmerEducation.objects.get_or_create(
                         name__iexact=row_dict['education'])
                     del row_dict['education']
+                    for field in [f.name for f in FarmerSocial._meta.get_fields() if f.null]:
+                        row_dict[field] = None if row_dict[field] == '' else row_dict[field]
+                    
                     farmer_social, _created = FarmerSocial.objects.get_or_create(
                         farmer=farmer,education=farmer_education, defaults=row_dict)
                     return farmer_social
@@ -59,7 +64,10 @@ def create_farmer_land(row, instance_df):
         if isinstance(farmer, Farmer):
             non_empty_row = any(row_dict.values())
             if non_empty_row:
-                row_dict['last_conducted'] = None if row_dict['last_conducted'] == '' else row_dict['last_conducted']
+                for field in [f.name for f in FarmerLand._meta.get_fields() if f.null]:
+                    row_dict[field] = None if row_dict[field] == '' else row_dict[field]
+                
+                # row_dict['last_conducted'] = None if row_dict['last_conducted'] == '' else row_dict['last_conducted']
                 farmer_land, _created = FarmerLand.objects.get_or_create(farmer=farmer, defaults=row_dict)
                 return farmer_land
             else:
@@ -93,6 +101,9 @@ def create_farmer_organic_crop(row, instance_df):
                             return "Season not found"
                         del row_dict['season']
                         # Create a new Organic Crop
+                                
+                        for field in [f.name for f in OrganicCropDetails._meta.get_fields() if f.null]:
+                            row_dict[field] = None if row_dict[field] == '' else row_dict[field]
                         organic_crop, _created = OrganicCropDetails.objects.get_or_create(is_active=True, farmer=farmer, season=season, defaults=row_dict)
                         return organic_crop
                 else:
@@ -112,6 +123,8 @@ def create_farmer_organic_seed(row, instance_df):
         if isinstance(organic_crop, OrganicCropDetails):
             non_empty_row = any(row_dict.values())
             if non_empty_row:
+                for field in [f.name for f in SeedDetails._meta.get_fields() if f.null]:
+                    row_dict[field] = None if row_dict[field] == '' else row_dict[field]
                 seed_details = SeedDetails.objects.get_or_create(organic_crop=organic_crop, **row_dict)
                 return seed_details
             else: 
@@ -130,6 +143,8 @@ def create_farmer_organic_nutrient(row, instance_df):
             non_empty_row = any(row_dict.values())
             if non_empty_row:
                 row_dict['type'] = row_dict.pop('nutrient_type')
+                for field in [f.name for f in NutrientManagement._meta.get_fields() if f.null]:
+                    row_dict[field] = None if row_dict[field] == '' else row_dict[field]
                 nutrient = NutrientManagement.objects.get_or_create(organic_crop=organic_crop, **row_dict)
                 return nutrient
             else: 
@@ -147,6 +162,8 @@ def create_farmer_organic_pest_disease(row, instance_df):
         if isinstance(organic_crop, OrganicCropDetails):
             non_empty_row = any(row_dict.values())
             if non_empty_row:
+                for field in [f.name for f in PestDiseaseManagement._meta.get_fields() if f.null]:
+                    row_dict[field] = None if row_dict[field] == '' else row_dict[field]
                 pest_disease = PestDiseaseManagement.objects.get_or_create(organic_crop=organic_crop, **row_dict)
                 return pest_disease
             else: 
@@ -164,6 +181,8 @@ def create_farmer_organic_weed(row, instance_df):
         if isinstance(organic_crop, OrganicCropDetails):
             non_empty_row = any(row_dict.values())
             if non_empty_row:
+                for field in [f.name for f in WeedManagement._meta.get_fields() if f.null]:
+                    row_dict[field] = None if row_dict[field] == '' else row_dict[field]
                 weed = WeedManagement.objects.get_or_create(organic_crop=organic_crop, **row_dict)
                 return weed
             else: 
@@ -182,6 +201,8 @@ def create_farmer_organic_harvest(row, instance_df):
             non_empty_row = any(row_dict.values())
             if non_empty_row:
                 row_dict['type'] = row_dict.pop('harvest_type')
+                for field in [f.name for f in HarvestAndIncomeDetails._meta.get_fields() if f.null]:
+                    row_dict[field] = None if row_dict[field] == '' else row_dict[field]
                 harvest = HarvestAndIncomeDetails.objects.get_or_create(organic_crop=organic_crop, **row_dict)
                 return harvest
             else: 
@@ -199,6 +220,8 @@ def create_farmer_organic_cost(row, instance_df):
         if isinstance(organic_crop, OrganicCropDetails):
             non_empty_row = any(row_dict.values())
             if non_empty_row:
+                for field in [f.name for f in CostOfCultivation._meta.get_fields() if f.null]:
+                    row_dict[field] = None if row_dict[field] == '' else row_dict[field]
                 cost = CostOfCultivation.objects.get_or_create(organic_crop=organic_crop, **row_dict)
                 return cost
             else: 
@@ -216,6 +239,8 @@ def create_farmer_organic_contamination(row, instance_df):
         if isinstance(organic_crop, OrganicCropDetails):
             non_empty_row = any(row_dict.values())
             if non_empty_row:
+                for field in [f.name for f in ContaminationControl._meta.get_fields() if f.null]:
+                    row_dict[field] = None if row_dict[field] == '' else row_dict[field]
                 contamination = ContaminationControl.objects.get_or_create(organic_crop=organic_crop, **row_dict)
                 return contamination
             else: 
