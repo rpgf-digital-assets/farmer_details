@@ -8,21 +8,25 @@ from users.models import User
 def create_farmer(row):
     try:
         row_dict = row.to_dict()
-        phone = f"+91{row_dict['phone']}"
+        registration_number = row_dict['registration_number']
         # user = User.objects.filter(is_active=True, phone=phone).first()
         # if user:
         #     return "User already exists with the same phone number"
-        user, _created = User.objects.get_or_create(phone=phone, 
-                                                    defaults={"role": User.FARMER, 
-                                                              "first_name": row_dict['first_name'], 
-                                                              "last_name": row_dict['last_name'], })
-        user.set_password(settings.DEFAULT_PASSWORD)
-        user.save()
-        del row_dict['first_name']
-        del row_dict['last_name']
-        del row_dict['phone']
-        farmer, _created = Farmer.objects.get_or_create(user=user, defaults=row_dict)
+        try:
+            farmer = Farmer.objects.get(registration_number=registration_number)
+        except Farmer.DoesNotExist:
+            phone = None
+            if row_dict['phone'] != '0' or row_dict['phone'] != None:
+                phone = f"+91{row_dict['phone']}"
+            user = User.objects.create(first_name=row_dict['first_name'], last_name=row_dict['last_name'], role=User.FARMER, phone=phone)
+            user.set_password(settings.DEFAULT_PASSWORD)
+            user.save()
+            del row_dict['first_name']
+            del row_dict['last_name']
+            del row_dict['phone']
+            farmer, _created = Farmer.objects.get_or_create(user=user, defaults=row_dict)
         return farmer
+    
     except Exception as e:
         return str(e)
 
