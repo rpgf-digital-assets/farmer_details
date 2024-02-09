@@ -161,6 +161,7 @@ def validate_bulk_upload(bulk_upload_pk):
                     # Add farmer
                     df = pd.DataFrame(
                         excel_data, columns=HEADER_LIST['FARMER_HEADERS'].keys()).fillna('')
+                    df.replace({np.nan: None}, inplace = True)
                     instances = df.apply(lambda row: create_farmer(
                         row), axis=1)  # Returns a pandas series
                     for index, instance in instances.items():
@@ -174,6 +175,7 @@ def validate_bulk_upload(bulk_upload_pk):
                     if is_valid:
                         # Add farmer social
                         df = pd.DataFrame(excel_data, columns=HEADER_LIST['FARMER_SOCIAL_HEADERS'].keys()).fillna('')
+                        df.replace({np.nan: None}, inplace = True)
                         instances = df.apply(lambda row: create_farmer_social(
                             row, instance_df), axis=1)  # Returns a pandas series
                         for index, instance in instances.items():
@@ -186,6 +188,7 @@ def validate_bulk_upload(bulk_upload_pk):
 
                         # Add farmer land
                         df = pd.DataFrame(excel_data, columns=HEADER_LIST['FARMER_LAND_HEADERS'].keys()).fillna('')
+                        df.replace({np.nan: None}, inplace = True)
                         instances = df.apply(lambda row: create_farmer_land(
                             row, instance_df), axis=1)  # Returns a pandas series
                         for index, instance in instances.items():
@@ -198,6 +201,7 @@ def validate_bulk_upload(bulk_upload_pk):
                         
                         # Add farmer organic crop
                         df = pd.DataFrame(excel_data, columns=HEADER_LIST['ORGANIC_CROP_HEADERS'].keys()).fillna('')
+                        df.replace({np.nan: None}, inplace = True)
                         instances = df.apply(lambda row: create_farmer_organic_crop(row, instance_df), axis=1)  # Returns a pandas 
                         for index, instance in instances.items():
                             if isinstance(instance, str):
@@ -211,10 +215,9 @@ def validate_bulk_upload(bulk_upload_pk):
                             # Proceed to add organic crop details
                             # Add Seed details
                             df = pd.DataFrame(excel_data, columns=HEADER_LIST['SEED_DETAILS_HEADERS'].keys()).fillna('')
-                            print("🐍 File: farmer_admin/tasks.py | Line: 173 | validate_bulk_upload ~ error_df 1",error_df)
+                            df.replace({np.nan: None}, inplace = True)
                             
                             instances = df.apply(lambda row: create_farmer_organic_seed(row, instance_df), axis=1)  # Returns a pandas 
-                            print("🐍 File: farmer_admin/tasks.py | Line: 219 | validate_bulk_upload ~ instances",instances)
                             
                             for index, instance in instances.items():
                                 if isinstance(instance, str):
@@ -227,6 +230,8 @@ def validate_bulk_upload(bulk_upload_pk):
                             
                             # Add nutrient details
                             df = pd.DataFrame(excel_data, columns=HEADER_LIST['NUTRIENT_HEADERS'].keys()).fillna('')
+                            df.replace({np.nan: None}, inplace = True)
+                            
                             instances = df.apply(lambda row: create_farmer_organic_nutrient(row, instance_df), axis=1)  # Returns a pandas 
                             for index, instance in instances.items():
                                 if isinstance(instance, str):
@@ -238,6 +243,7 @@ def validate_bulk_upload(bulk_upload_pk):
                             
                             # Add Pest disease
                             df = pd.DataFrame(excel_data, columns=HEADER_LIST['PEST_DISEASE_HEADERS'].keys()).fillna('')
+                            df.replace({np.nan: None}, inplace = True)
                             instances = df.apply(lambda row: create_farmer_organic_pest_disease(row, instance_df), axis=1)  # Returns a pandas 
                             for index, instance in instances.items():
                                 if isinstance(instance, str):
@@ -249,6 +255,7 @@ def validate_bulk_upload(bulk_upload_pk):
                             
                             # Add Weed
                             df = pd.DataFrame(excel_data, columns=HEADER_LIST['WEED_HEADERS'].keys()).fillna('')
+                            df.replace({np.nan: None}, inplace = True)
                             instances = df.apply(lambda row: create_farmer_organic_weed(row, instance_df), axis=1)  # Returns a pandas 
                             for index, instance in instances.items():
                                 if isinstance(instance, str):
@@ -260,6 +267,7 @@ def validate_bulk_upload(bulk_upload_pk):
                             
                             # Add Harvest
                             df = pd.DataFrame(excel_data, columns=HEADER_LIST['HARVEST_HEADERS'].keys()).fillna('')
+                            df.replace({np.nan: None}, inplace = True)
                             instances = df.apply(lambda row: create_farmer_organic_harvest(row, instance_df), axis=1)  # Returns a pandas 
                             for index, instance in instances.items():
                                 if isinstance(instance, str):
@@ -271,6 +279,7 @@ def validate_bulk_upload(bulk_upload_pk):
                             
                             # Add Cost
                             df = pd.DataFrame(excel_data, columns=HEADER_LIST['COST_HEADERS'].keys()).fillna('')
+                            df.replace({np.nan: None}, inplace = True)
                             instances = df.apply(lambda row: create_farmer_organic_cost(row, instance_df), axis=1)  # Returns a pandas 
                             for index, instance in instances.items():
                                 if isinstance(instance, str):
@@ -282,6 +291,7 @@ def validate_bulk_upload(bulk_upload_pk):
                             
                             # Add Contamination
                             df = pd.DataFrame(excel_data, columns=HEADER_LIST['CONTAMINATION_HEADERS'].keys()).fillna('')
+                            df.replace({np.nan: None}, inplace = True)
                             instances = df.apply(lambda row: create_farmer_organic_contamination(row, instance_df), axis=1)  # Returns a pandas 
                             for index, instance in instances.items():
                                 if isinstance(instance, str):
