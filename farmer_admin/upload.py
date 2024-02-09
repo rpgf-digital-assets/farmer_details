@@ -103,7 +103,7 @@ def create_farmer_organic_crop(row, instance_df):
                             return "Season not found"
                         del row_dict['season']
                         # Create a new Organic Crop
-                        organic_crop, _created = OrganicCropDetails.objects.get_or_create(is_active=True, farmer=farmer, season=season, defaults=row_dict)
+                        organic_crop, _created = OrganicCropDetails.objects.get_or_create(is_active=True, farmer=farmer, season=season, name=row_dict['name'], defaults=row_dict)
                         return organic_crop
                 else:
                     return "Farmer land not found"
