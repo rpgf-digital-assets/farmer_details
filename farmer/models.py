@@ -424,7 +424,7 @@ class HarvestAndIncomeDetails(BaseModel):
 class CostOfCultivation(BaseModel):
     organic_crop = models.ForeignKey(OrganicCropDetails, related_name='cost_of_cultivation', on_delete=models.PROTECT)
     # area = models.FloatField(verbose_name=_('Crop Area (Ha)'))
-    input_source = models.CharField(verbose_name=_('Source of Input'), max_length=500, choices=NutrientManagement.TYPE_CHOICES)
+    input_source = models.CharField(verbose_name=_('Source of Input'), max_length=500, null=True, blank=True)
     manure_preparation_cost = models.PositiveIntegerField(verbose_name=_('Cost of Manure Preparation'))
     biofertilizer_preparation_cost = models.PositiveIntegerField(verbose_name=_('Cost of Biofertilizer Preparation'))
     biopesticide_preparation_cost = models.PositiveIntegerField(verbose_name=_('Cost of Bio pesticide Preparation'))

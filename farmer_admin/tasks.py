@@ -1,5 +1,6 @@
 import csv
 import os
+import numpy as np
 import pandas as pd
 import sib_api_v3_sdk
 
@@ -142,6 +143,7 @@ def validate_bulk_upload(bulk_upload_pk):
         error_df = pd.DataFrame()
         for header_name, header in HEADER_LIST.items():
             df = pd.DataFrame(excel_data, columns=header.keys()).fillna('')
+            df.replace({np.nan: None}, inplace = True)
             validation_errors = df.apply(lambda row: validate_row(
                 row, header_name), axis=1)  # Returns a pandas series
             for index, validation_error in validation_errors.items():
