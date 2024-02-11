@@ -846,13 +846,15 @@ class DashboardFarmerView(TemplateView):
                                             total_on_farm_quantity=Sum('quantity_used'), total_off_farm_quantity=Sum('quantity_sourced'))
                                 
         pest_management = PestDiseaseManagement.objects.filter(is_active=True) \
-                                .aggregate(total_fertilizer_quantity=Sum('quantity_of_input'), 
-                                            total_on_farm_quantity=Sum('quantity_used'), total_off_farm_quantity=Sum('quantity_sourced'))
+                                .aggregate(
+                                    # total_fertilizer_quantity=Sum('quantity_of_input'), 
+                                    total_on_farm_quantity=Sum('quantity_used'), 
+                                    total_off_farm_quantity=Sum('quantity_sourced'))
         
         pest_piechart_data = [
-            {"value": pest_management["total_fertilizer_quantity"], "category": "Fertilizer"},
+            # {"value": pest_management["total_fertilizer_quantity"], "category": "Fertilizer"},
             {"value": pest_management["total_on_farm_quantity"], "category": "On Farm"},
-            {"value": pest_management["total_on_farm_quantity"], "category": "Off Farm"},
+            {"value": pest_management["total_off_farm_quantity"], "category": "Off Farm"},
         ]
         
         context["pest_piechart_data"] = json.dumps(pest_piechart_data)
