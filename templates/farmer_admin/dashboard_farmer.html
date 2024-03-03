@@ -12,6 +12,9 @@ Farmers Geotagging
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
 integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
 crossorigin=""/>
+<style>
+    .google-visualization-tooltip { pointer-events: none; }
+</style>
 
 
 {% endblock css %}
@@ -303,6 +306,9 @@ crossorigin=""/>
 {% block js %}
 {{block.super}}
 <!-- Make sure you put this AFTER Leaflet's CSS -->
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
 integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
 crossorigin=""></script>
@@ -669,7 +675,45 @@ crossorigin=""></script>
 
         // Pie chart initialization
         var piechart = {{piechart|safe}}
-        am5.ready(function () {
+
+        google.load('visualization', '1', {
+            packages: ['corechart', 'bar', 'line']
+        });
+        
+        var options = {
+            legend: 'none',
+            pieSliceText: 'percentage',
+            pieStartAngle: -50,
+        };
+        var options_1 = {
+            ...options,
+            colors: ['#376C72', '#37B067',]
+        }
+        var options_2 = {
+            ...options,
+            colors: ['#EB6672', '#8263B1', '#EDB40D', '#9F765E']
+        }
+        var options_3 = {
+            ...options_2,
+            width: 250,
+            height: 250,
+        }
+        var options_4 = {
+            ...options,
+            colors: ['#4B877A', '#27CB0C', '#EB6672', '#C75E0C', '#F19900', '#8263B1']
+        }
+
+        // Overall Yarn
+        google.setOnLoadCallback(function () {
+            var data = google.visualization.arrayToDataTable([
+                ['Category', 'Quantity'],
+                ...piechart,
+            ]);
+            var chart = new google.visualization.PieChart(document.getElementById('kt_amcharts_3'));
+            chart.draw(data, options_4);
+        });
+
+        {% comment %} am5.ready(function () {
             // Create root element
             // https://www.amcharts.com/docs/v5/getting-started/#Root_element
             var root = am5.Root.new("kt_amcharts_3");
@@ -734,7 +778,7 @@ crossorigin=""></script>
             // https://www.amcharts.com/docs/v5/concepts/animations/#Animation_of_series
             series.appear(1000, 100);
 
-        }); // end am5.ready()
+        }); // end am5.ready() {% endcomment %}
 
 
         am5.ready(function () {

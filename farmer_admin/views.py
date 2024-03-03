@@ -797,11 +797,11 @@ class DashboardFarmerView(TemplateView):
         
         # Total Organic crop data
         total_organic_crop_area = OrganicCropDetails.objects.filter(is_active=True).aggregate(total_area=Sum('area'))['total_area']
-        context["total_organic_crop_area"] = total_organic_crop_area
+        context["total_organic_crop_area"] = round(total_organic_crop_area, 3)
         
         # Piechart data
         piechart_data = OrganicCropDetails.objects.filter(is_active=True).values('name').annotate(category=Count("name"), value=Sum('area')).order_by()
-        piechart_data = [{"value": chart['value'], "category": chart['name']} for chart in piechart_data]
+        piechart_data = [[chart['name'], chart['value']] for chart in piechart_data]
         context["piechart"] = json.dumps(piechart_data)
 
         # Nutrition Bar graph data

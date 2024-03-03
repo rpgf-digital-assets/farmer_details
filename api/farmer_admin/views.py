@@ -1,24 +1,37 @@
 
 import io
+
 from django.core.files import File
+from django.db import connection, transaction
+from django.db.models import Avg, Count, F, Func, Sum
+from django.db.models.functions import Lower
+from django.db.models.functions.comparison import Coalesce
+from rest_framework.generics import (DestroyAPIView, ListAPIView,
+                                     RetrieveAPIView)
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView, RetrieveAPIView, DestroyAPIView
-from api.farmer_admin.serializers import CostsSerializer, FarmerDetailsSerializer, FarmerLandCoordinatesSerializer, FarmerOrganicCropDetailsSerializer, FarmerOrganicCropSerializer, GinningSerializer, SpinningSerializer
-from django.db.models import ProtectedError
-from django.db.models import Count
-from django.db.models.functions import Lower
-from django.db import connection
-from django.db import transaction
-from django.db.models import Sum, Avg, F, Func
+from rest_framework_api_key.permissions import HasAPIKey
+
+from api.farmer_admin.serializers import (CostsSerializer,
+                                          FarmerDetailsSerializer,
+                                          FarmerLandCoordinatesSerializer,
+                                          GinningSerializer,
+                                          SpinningSerializer)
 from api.permissions import IsAdminOrSuperUser
-from farmer.models import ContaminationControl, CostOfCultivation, Costs, Farmer, FarmerLand, FarmerOrganicCropPdf, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, OtherFarmer, PestDiseaseManagement, Season, SeedDetails, WeedManagement
+
+from farmer.models import (ContaminationControl, CostOfCultivation, Costs,
+                           Farmer, FarmerLand, FarmerOrganicCropPdf,
+                           HarvestAndIncomeDetails, NutrientManagement,
+                           OrganicCropDetails, OtherFarmer,
+                           PestDiseaseManagement, Season, SeedDetails,
+                           WeedManagement)
 from farmer_admin.utils import generate_certificate
-from farmer_details_app.models import Ginning, GinningStatus, SelectedGinningFarmer, Spinning, SpinningStatus, Vendor
+from farmer_details_app.models import (Ginning, GinningStatus,
+                                       SelectedGinningFarmer, Spinning,
+                                       SpinningStatus, Vendor)
 from users.models import User
 from utils.cursor_fetch import dictfetchall
-from django.db.models.functions.comparison import Coalesce
-from rest_framework_api_key.permissions import HasAPIKey
+
 
 class DeleteBaseAPIView(DestroyAPIView):
     permission_classes = [IsAdminOrSuperUser]
@@ -232,9 +245,15 @@ class GetCropDetailsFromNameAPIView(APIView):
         year = request.data.get('year')
         organic_crops = OrganicCropDetails.objects.filter(is_active=True, name=crop_name, year=year)\
         .values('area', 'expected_yield', 'expected_productivity')\
-        .aggregate(total_area=Sum('area'),
-                    total_expected_yield=Sum('expected_yield'),
-                    total_expected_productivity=Sum('expected_productivity'))
+        .aggregate(total_area=Coalesce(Sum('area'), 0.0),
+                    total_expected_yield=Coalesce(Sum('expected_yield'), 0.0))
+        
+        organic_crops['total_area'] = round(organic_crops['total_area'], 3)
+        if organic_crops['total_area'] <= 0:
+            organic_crops['total_expected_productivity'] = round(organic_crops['total_expected_yield'], 3)
+        else:
+            organic_crops['total_expected_productivity'] = round(organic_crops['total_expected_yield'] / organic_crops['total_area'], 3)
+            
 
         organic_crop_ids = OrganicCropDetails.objects.filter(is_active=True, name=crop_name, year=year).values_list('id', flat=True)
         total_crop_harvested = HarvestAndIncomeDetails.objects.filter(is_active=True, organic_crop__in=organic_crop_ids)\
