@@ -414,6 +414,12 @@ class HarvestAndIncomeDetails(BaseModel):
     payment_reference_number = models.PositiveIntegerField(verbose_name=_('Payment Reference number '))
     unsold_quantity = models.PositiveIntegerField(_('Quantity of organic harvest unsold/Balance (kg)'))
     
+    def save(self, *args, **kwargs):
+        if self.first_harvest and self.second_harvest and self.third_harvest:
+            self.total_crop_harvested = self.first_harvest + self.second_harvest + self.third_harvest
+        self.total_crop_harvested = self.first_harvest
+        super(HarvestAndIncomeDetails, self).save(*args, **kwargs)
+        
     # @property
     # def total_crop_harvested(self):
     #     if self.first_harvest and self.second_harvest and self.third_harvest:
