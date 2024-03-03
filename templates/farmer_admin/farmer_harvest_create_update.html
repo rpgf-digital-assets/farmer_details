@@ -55,21 +55,24 @@ Farmer Harvest Details {% if farmer_seed_object %} Edit {% else %} Create {% end
             sum = sum + parseInt($('#' + field).val() || 0)
         })
         $('#id_total_price_received_fpo').val(sum)
+        $('#id_total_price_received_fpo').trigger('change')
     }
     
-    const income_fpo_fields = ['id_quantity_sold_fpo', 'id_price_paid_fpo']
 
     $('#id_quantity_sold_fpo').on('change', () => {
         update_total_income_fpo()
         update_unsold()
     })
 
+    $('#id_total_price_received_fpo').on('change', () => {
+        update_total_income_fpo()
+    })
+
+    const income_fpo_fields = ['id_quantity_sold_fpo', 'id_total_price_received_fpo']
+    
     const update_total_income_fpo = () => {
-        sum = 1
-        income_fpo_fields.forEach((field) => {
-            sum = sum * parseInt($('#' + field).val() || 0)
-        })
-        $('#id_total_organic_sale_fpo').val(sum)
+        let total = $('#id_quantity_sold_fpo').val() * $('#id_total_price_received_fpo').val() || 0
+        $('#id_total_organic_sale_fpo').val(total).trigger('change')
     }
     
     
@@ -93,19 +96,20 @@ Farmer Harvest Details {% if farmer_seed_object %} Edit {% else %} Create {% end
         $('#id_total_price_received_outside').val(sum).trigger('change')
     }
 
-    const income_other_fields = ['id_quantity_sold_outside', 'id_price_paid_outside']
+    const income_other_fields = ['id_quantity_sold_outside', 'id_total_price_received_outside']
 
     $('#id_quantity_sold_outside').on('change', () => {
         update_total_income_others()
         update_unsold()
     })
+    $('#id_total_price_received_outside').on('change', () => {
+        update_total_income_others()
+    })
+
 
     const update_total_income_others = () => {
-        sum = 1
-        income_other_fields.forEach((field) => {
-            sum = sum * parseInt($('#' + field).val() || 0)
-        })
-        $('#id_total_organic_sale_outside').val(sum).trigger('change')
+        let total = $('#id_quantity_sold_outside').val() * $('#id_total_price_received_outside').val() || 0
+        $('#id_total_organic_sale_outside').val(total).trigger('change')
     }
     
     // Gross Income field
