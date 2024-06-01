@@ -1,5 +1,7 @@
 from django.conf import settings
 from django.db import transaction
+from django.db.models import Sum
+from django.db.models.functions import Coalesce
 
 from farmer.models import ContaminationControl, CostOfCultivation, Farmer, FarmerEducation, FarmerLand, FarmerSocial, HarvestAndIncomeDetails, NutrientManagement, OrganicCropDetails, PestDiseaseManagement, Season, SeedDetails, WeedManagement
 from users.models import User
@@ -91,16 +93,19 @@ def create_farmer_organic_crop(row, instance_df):
             non_empty_row = any(row_dict.values())
             if non_empty_row:
                 farmer_land = FarmerLand.objects.filter(is_active=True, farmer=farmer).first()
+                season = Season.objects.filter(name__iexact=row_dict['season']).first()
+                if not season:
+                    return "Season not found"
                 if farmer_land:
-                    organic_crops = OrganicCropDetails.objects.filter(is_active=True, farmer=farmer)
-                    total_organic_crop_area = sum([item.area for item in organic_crops])
+                    total_organic_crop_area = OrganicCropDetails.objects.filter(
+                        is_active=True, season=season, year=row_dict['year'], farmer=farmer
+                    ).aggregate(
+                        total_organic_crop_area=Coalesce(Sum('area'), 0.0)
+                    )['total_organic_crop_area']
+                    # total_organic_crop_area = sum([item.area for item in organic_crops])
                     if int(farmer_land.total_organic_land) < int(total_organic_crop_area + row_dict['area']):
                         return "Farmer land area is less than the organic crop area"
                     else:
-                        # Create season
-                        season = Season.objects.filter(name__iexact=row_dict['season']).first()
-                        if not season:
-                            return "Season not found"
                         del row_dict['season']
                         # Create a new Organic Crop
                         organic_crop, _created = OrganicCropDetails.objects.get_or_create(is_active=True, farmer=farmer, season=season, name=row_dict['name'], defaults=row_dict)

@@ -254,8 +254,13 @@ class FarmerOrganicCropDetailCreateView(CustomLoginRequiredMixin, AdminRequiredM
         form.instance.farmer = farmer
         self.object = form.save(commit=False)
         farmer_land = FarmerLand.objects.get(farmer=farmer)
-        organic_crops = OrganicCropDetails.objects.filter(is_active=True, farmer=farmer)
-        total_organic_crop_area = sum([item.area for item in organic_crops])
+        total_organic_crop_area = OrganicCropDetails.objects.filter(
+            is_active=True, season=cleaned_data['season'], year=cleaned_data['year'], 
+            farmer=farmer
+        ).aggregate(
+            total_organic_crop_area=Coalesce(Sum('area'), 0.0)
+        )['total_organic_crop_area']
+        # total_organic_crop_area = sum([item.area for item in organic_crops])
         if int(farmer_land.total_organic_land) < int(total_organic_crop_area + cleaned_data['area']):
             form.add_error('area', ValidationError("Farmer land area is less than the organic crop area"))
             return super().form_invalid(form)   
