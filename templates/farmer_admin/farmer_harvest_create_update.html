@@ -30,7 +30,7 @@ Farmer Harvest Details {% if farmer_seed_object %} Edit {% else %} Create {% end
     const update_total_harvest = () => {
         sum = 0
         total_harvest_fields.forEach((field) => {
-            sum = sum + parseInt($('#' + field).val() || 0)
+            sum = sum + parseFloat($('#' + field).val() || 0)
         })
         $('#id_total_crop_harvested').val(sum).trigger('change')
     }
@@ -52,7 +52,7 @@ Farmer Harvest Details {% if farmer_seed_object %} Edit {% else %} Create {% end
     const update_total_fpo = () => {
         sum = 0
         fpo_fields.forEach((field) => {
-            sum = sum + parseInt($('#' + field).val() || 0)
+            sum = sum + parseFloat($('#' + field).val() || 0)
         })
         $('#id_total_price_received_fpo').val(sum)
         $('#id_total_price_received_fpo').trigger('change')
@@ -91,7 +91,7 @@ Farmer Harvest Details {% if farmer_seed_object %} Edit {% else %} Create {% end
     const update_total_others = () => {
         sum = 0
         other_fields.forEach((field) => {
-            sum = sum + parseInt($('#' + field).val() || 0)
+            sum = sum + parseFloat($('#' + field).val() || 0)
         })
         $('#id_total_price_received_outside').val(sum).trigger('change')
     }
@@ -125,7 +125,7 @@ Farmer Harvest Details {% if farmer_seed_object %} Edit {% else %} Create {% end
     const update_gross_income = () => {
         sum = 0
         gross_income_fields.forEach((field) => {
-            sum = sum + parseInt($('#' + field).val() || 0)
+            sum = sum + parseFloat($('#' + field).val() || 0)
         })
         $('#id_gross_income').val(sum)
     }
@@ -137,7 +137,7 @@ Farmer Harvest Details {% if farmer_seed_object %} Edit {% else %} Create {% end
     })
 
     const update_unsold = () => {
-        const unsold = parseInt($('#id_total_crop_harvested').val()) - $('#id_quantity_sold_fpo').val() - $('#id_quantity_sold_outside').val()
+        const unsold = parseFloat($('#id_total_crop_harvested').val()) - $('#id_quantity_sold_fpo').val() - $('#id_quantity_sold_outside').val()
         console.log(unsold)
         $('#id_unsold_quantity').val(unsold)
     }

@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from datetime import date
 from simple_history.models import HistoricalRecords
 
-from django.core.validators import MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 from users.models import User
 from users.validators import validate_positive_number
@@ -386,33 +386,33 @@ class HarvestAndIncomeDetails(BaseModel):
         (MULTIPLE, 'Multiple'),
     ]
     type = models.CharField(verbose_name=_('Type of harvest (Single/multiple)'), max_length=100, choices=TYPE_CHOICES)
-    first_harvest = models.PositiveIntegerField(verbose_name=_('First harvest'))
+    first_harvest = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('First harvest'))
     first_harvest_date = models.DateField(verbose_name=_('First harvest date'))
-    second_harvest = models.PositiveIntegerField(verbose_name=_('Second harvest'), null=True, blank=True)
+    second_harvest = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Second harvest'), null=True, blank=True)
     second_harvest_date = models.DateField(verbose_name=_('Second harvest date'), null=True, blank=True)
-    third_harvest = models.PositiveIntegerField(verbose_name=_('Third harvest'), null=True, blank=True)
+    third_harvest = models.FloatField(validators=[MinValueValidator(0.0)],verbose_name=_('Third harvest'), null=True, blank=True)
     third_harvest_date = models.DateField(verbose_name=_('Third harvest date'), null=True, blank=True)
-    total_crop_harvested = models.PositiveIntegerField(verbose_name=_('Total crop harvested'), null=True, blank=True)
-    actual_crop_production = models.PositiveIntegerField(_('Actual organic crop productivity (kg/ha)'))
+    total_crop_harvested = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Total crop harvested'), null=True, blank=True)
+    actual_crop_production = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Actual organic crop productivity (kg/ha)'))
     
-    quantity_sold_fpo = models.PositiveIntegerField(_('Quantity Sold through FPO (Kg)'))
+    quantity_sold_fpo = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Quantity Sold through FPO (Kg)'))
     buyer_name = models.CharField(verbose_name=_('Name of Buyer'), max_length=500)
-    price_paid_fpo = models.PositiveIntegerField(_('Unit Sale Price paid by FPO Rs/kg'))
-    premium_paid_fpo = models.PositiveIntegerField(_('Premium paid by FPO(Rs/kg)'))
-    total_price_received_fpo = models.PositiveIntegerField(_('Total price received (Rs/Kg) including premium'))
-    total_organic_sale_fpo = models.PositiveIntegerField(_('Total income from sale of organic product through FPO'))
+    price_paid_fpo = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Unit Sale Price paid by FPO Rs/kg'))
+    premium_paid_fpo = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Premium paid by FPO(Rs/kg)'))
+    total_price_received_fpo = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Total price received (Rs/Kg) including premium'))
+    total_organic_sale_fpo = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Total income from sale of organic product through FPO'))
     
-    quantity_sold_outside = models.PositiveIntegerField(_('Quantity Sold Outside (Kg)'))
+    quantity_sold_outside = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Quantity Sold Outside (Kg)'))
     outside_buyer_name = models.CharField(verbose_name=_('Name of Buyer outside'), max_length=500)
-    price_paid_outside = models.PositiveIntegerField(_('Unit Sale Price outside Rs/kg'))
-    premium_paid_outside = models.PositiveIntegerField(_('Premium paid outside (Rs/kg)'))
-    total_price_received_outside = models.PositiveIntegerField(_('Total price received (Rs/Kg) including premium'))
-    total_organic_sale_outside = models.PositiveIntegerField(_('Total income from sale of organic product outside'))
+    price_paid_outside = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Unit Sale Price outside Rs/kg'))
+    premium_paid_outside = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Premium paid outside (Rs/kg)'))
+    total_price_received_outside = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Total price received (Rs/Kg) including premium'))
+    total_organic_sale_outside = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Total income from sale of organic product outside'))
     
-    gross_income = models.PositiveIntegerField(_('Gross Income from sale of Organic crop (Rs) {sum of column U & P)'))
+    gross_income = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Gross Income from sale of Organic crop (Rs) {sum of column U & P)'))
     payment_mode = models.CharField(verbose_name=_('Mode of payment'), max_length=500)
-    payment_reference_number = models.PositiveIntegerField(verbose_name=_('Payment Reference number '))
-    unsold_quantity = models.PositiveIntegerField(_('Quantity of organic harvest unsold/Balance (kg)'))
+    payment_reference_number = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Payment Reference number '))
+    unsold_quantity = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Quantity of organic harvest unsold/Balance (kg)'))
     
     def save(self, *args, **kwargs):
         if self.first_harvest and self.second_harvest and self.third_harvest:

@@ -459,6 +459,7 @@ class HarvestAndIncomeDetailForm(BaseCreationForm):
                 self.add_error('second_harvest', ValidationError(
                     "Second harvest is required if type is multiple"))
                 
+        print("🐍 File: farmer_admin/forms.py | Line: 463 | clean ~ total_crop_harvested", (quantity_sold_fpo + quantity_sold_outside + unsold_quantity), total_crop_harvested)
         if total_crop_harvested != (quantity_sold_fpo + quantity_sold_outside + unsold_quantity):
             validation_errors.append(ValidationError(
                     "Total crop harvested should be sum of all the quantities."))
@@ -529,11 +530,11 @@ class SelectFarmerForm(ModelForm):
             'class': 'form-control'
         }
     ))
-    quantity = PositiveIntegerField(widget=NumberInput(attrs={
+    quantity = FloatField(widget=NumberInput(attrs={
         'class': 'form-control'
     }))
     
-    price = PositiveIntegerField(widget=NumberInput(attrs={
+    price = FloatField(widget=NumberInput(attrs={
         'class': 'form-control'
     }))
     
@@ -647,11 +648,11 @@ class SelectGinningForm(ModelForm):
         widget=Select(attrs={"class": "form-control"}),
     )
 
-    quantity = PositiveIntegerField(required=True, widget=NumberInput(attrs={
+    quantity = FloatField(required=True, widget=NumberInput(attrs={
         'class': 'form-control'
     }))
 
-    price = PositiveIntegerField(widget=NumberInput(attrs={
+    price = FloatField(widget=NumberInput(attrs={
         'class': 'form-control'
     }))
 
