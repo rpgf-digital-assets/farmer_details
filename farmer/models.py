@@ -298,12 +298,15 @@ class NutrientManagement(BaseModel):
     FYM = 'FYM'
     COMPOST = 'COMPOST'
     VERMICOMPOST = 'VERMICOMPOST'
+    OTHER = 'OTHER'
     TYPE_CHOICES = [
         (FYM, 'FYM'),
         (COMPOST, 'Compost'),
         (VERMICOMPOST, 'Vermicompost'),
+        (OTHER, 'Other'),
     ]
     type = models.CharField(_("Type of fertiliser used"), max_length=100, choices=TYPE_CHOICES)
+    custom_type = models.CharField(_("Other fertiliser used"), max_length=100, null=True, blank=True)
     
     ON_FARM = 'ON_FARM'
     OUTSOURCED = 'OUTSOURCED'

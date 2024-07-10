@@ -312,6 +312,10 @@ FarmerSeedDetailsFormSet = formset_factory(
 class FarmerNutritionManagementForm(BaseCreationForm):
     source_field_name = 'souce_of_fertilizer'
 
+    custom_type = CharField(required=False, widget=TextInput(attrs={
+        'class': 'custom-type-input'
+    }))
+    
     type_of_raw_material = CharField(required=False, widget=TextInput(attrs={
         'class': 'on-farm-input'
     }))
@@ -363,7 +367,9 @@ class FarmerNutritionManagementForm(BaseCreationForm):
         validation_errors = []
 
         source_field_name = cleaned_data.get(self.source_field_name)
-
+        
+        type = cleaned_data.get('type')
+        custom_type = cleaned_data.get('custom_type')
         type_of_raw_material = cleaned_data.get('type_of_raw_material')
         quantity_used = cleaned_data.get('quantity_used')
         starting_date = cleaned_data.get('starting_date')
@@ -374,6 +380,9 @@ class FarmerNutritionManagementForm(BaseCreationForm):
         quantity_sourced = cleaned_data.get('quantity_sourced')
         supplier_name = cleaned_data.get('supplier_name')
 
+        if type != NutrientManagement.OTHER:
+            cleaned_data["custom_type"] = None
+            
         if source_field_name == NutrientManagement.ON_FARM:
             if ('' in [type_of_raw_material, quantity_used, starting_date, date_of_manure, quantity_obtained, no_of_workdays_used]):
                 validation_errors.append(ValidationError(

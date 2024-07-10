@@ -819,6 +819,10 @@ class DashboardFarmerView(TemplateView):
         nutrient_management_compost = NutrientManagement.objects.filter(is_active=True, type=NutrientManagement.COMPOST) \
                                 .aggregate(total_fertilizer_quantity=Sum('quantity_of_fertilizer'), 
                                             total_on_farm_quantity=Sum('quantity_used'), total_off_farm_quantity=Sum('quantity_sourced'))
+                                
+        nutrient_management_other = NutrientManagement.objects.filter(is_active=True, type=NutrientManagement.OTHER) \
+                                .aggregate(total_fertilizer_quantity=Sum('quantity_of_fertilizer'), 
+                                            total_on_farm_quantity=Sum('quantity_used'), total_off_farm_quantity=Sum('quantity_sourced'))
         nutrition_bar_graph_data = [{
             "year": "On Farm",
             "vermicompost": nutrient_management_vermicompost['total_fertilizer_quantity'],
@@ -827,6 +831,8 @@ class DashboardFarmerView(TemplateView):
             "compost-used": nutrient_management_compost['total_on_farm_quantity'],
             "FYM": nutrient_management_fym['total_fertilizer_quantity'],
             "FYM-used": nutrient_management_fym['total_on_farm_quantity'],
+            "other": nutrient_management_other['total_fertilizer_quantity'],
+            "other-used": nutrient_management_other['total_on_farm_quantity'],
         },{
             "year": "Outsourced",
             "vermicompost": nutrient_management_vermicompost['total_fertilizer_quantity'],
@@ -835,6 +841,8 @@ class DashboardFarmerView(TemplateView):
             "compost-used": nutrient_management_compost['total_off_farm_quantity'],
             "FYM": nutrient_management_fym['total_fertilizer_quantity'],
             "FYM-used": nutrient_management_fym['total_off_farm_quantity'],
+            "other": nutrient_management_other['total_fertilizer_quantity'],
+            "other-used": nutrient_management_other['total_off_farm_quantity'],
         }]
 
         context["nutrition_bar_graph_data"] = json.dumps(nutrition_bar_graph_data)

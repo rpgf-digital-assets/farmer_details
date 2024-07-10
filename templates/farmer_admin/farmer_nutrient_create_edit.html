@@ -21,9 +21,28 @@ Farmer Nutrient Management {% if farmer_seed_object %} Edit {% else %} Create {%
             let sourcing = $(this).find(":selected").val()
             toggleSourcingFields(sourcing)
         })
+        
+        var initialType = $(`#id_type`).val()
+        toggleFertilizerFields(initialType)
+
+        $(`#id_type`).on('change', function(element) {
+            let fertilizer = $(this).find(":selected").val()
+            toggleFertilizerFields(fertilizer)
+        })
 
         
     })
+
+    const toggleFertilizerFields = (fertilizer) => {
+        console.log('fertilizer', fertilizer)
+        if (fertilizer === 'OTHER'){
+            $('.custom-type-input').parent().css('display', 'block')
+        }
+        else{
+            // hide both
+            $('.custom-type-input').parent().css('display', 'none')
+        }
+    }
 
     const toggleSourcingFields = (sourcing) => {
         console.log('sourcing', sourcing)
