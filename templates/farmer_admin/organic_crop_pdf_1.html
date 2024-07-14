@@ -1,0 +1,862 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artisan:re</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <style>
+        /* CSS styles */
+        @page {
+            size: A4 landscape;
+            margin: 4px;
+        }
+
+        @page small-margin {
+            size: A4 landscape;
+            margin: 2px;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f8f8;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .head-title {
+            font-size: 60px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #fff;
+            text-align: left;
+            margin-left: 30px;
+            padding: 5px;
+        }
+
+        .headreport {
+            background-color: #fff;
+            color: #5C3C24;
+        }
+
+        .head2 {
+            background-color: #1A4442;
+            height: 50px;
+        }
+
+        .head-title2 {
+            font-size: 35px;
+            font-weight: 600;
+            text-transform: none;
+            color: #fff;
+            text-align: center;
+            margin-left: 30px;
+            padding: 5px;
+        }
+
+        .head3 {
+            background-color: #5C3C24;
+            height: 50px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #2c7d98;
+        }
+
+        h1 {
+            font-size: 32px;
+        }
+
+        .highlight {
+            background-color: #e6f2f5;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        table {
+            table-layout: fixed;
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            page-break-inside: auto;
+        }
+
+        th,
+        td {
+            overflow-wrap: break-word;
+            padding: 13px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .break-word {
+            overflow-wrap: break-word;
+            width: 20px;
+        }
+
+        th {
+            background-color: lightgreen;
+            border-left: 4px solid #fff;
+        }
+
+        .column2 {
+            background-color: #aad4aa;
+        }
+
+        .colu-clr {
+            background-color: #d5ffd5;
+            border-bottom: 3px solid #fff;
+            border-left: 3px solid #fff;
+            border-top: 3px solid #fff;
+        }
+
+        .col-clrr {
+            background-color: #f5f0f0;
+            border-bottom: 3px solid #fff;
+            border-left: 3px solid #fff;
+            border-top: 3px solid #fff;
+
+        }
+
+        .container {
+            position: relative;
+            /* max-width: 100%; */
+            overflow: hidden;
+        }
+
+        .td1 {
+            vertical-align: middle;
+            width: 30%;
+            height: 90px;
+            background: #f0f0fb;
+            padding: 18px;
+            font-size: 16px;
+        }
+
+        .tbl {
+            background-color: #73B46E;
+            border: 3px solid #fff;
+            font-weight: 600;
+            color: #000;
+
+        }
+
+        .tbll {
+
+            background-color: #8FE89E;
+            border: 3px solid #fff;
+            color: #000;
+
+        }
+
+        .section1 {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .vendorListHeading {
+            background-color: #FFF;
+            color: white;
+            -webkit-print-color-adjust: exact;
+        }
+
+        .head-title1 {
+            font-size: 35px;
+            font-weight: 600;
+            text-transform: none;
+            color: #fff;
+            text-align: left;
+            margin-left: 30px;
+            padding: 5px;
+        }
+
+        .arti-table {
+            border: solid 2px #DDEEEE;
+            border-collapse: collapse;
+            border-spacing: 0;
+            font: normal 14px Roboto, sans-serif;
+        }
+
+        .arti-table thead th {
+            background-color: #DDEFEF;
+            border: solid 1px #99b8b8;
+            color: #336B6B;
+            padding: 3px;
+            text-align: left;
+            text-shadow: 1px 1px 1px #fff;
+        }
+
+        .arti-table tbody td {
+            overflow-wrap: break-word;
+            border: solid 1px #DDEEEE;
+            color: #333;
+            padding: 10px;
+            text-shadow: 1px 1px 1px #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container vendorListHeading">
+        <div class="head2">
+            <h3 class="head-title2">artisan:re</h3>
+        </div>
+        <!-- Intro-->
+        <section class="section1">
+            <div>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td class="tbl">Full Name</td>
+                            <td class="tbll">{{farmer.user.user_display_name}}</td>
+                            <td class="tbl">Gender </td>
+                            <td class="tbll"> {{farmer.gender}}</td>
+
+                        </tr>
+                        <tr>
+                            <td class="tbl">BirthDate</td>
+                            <td class="tbll">{{farmer.birth_date}}</td>
+                            <td class="tbl">Aadhar Number</td>
+                            <td class="tbll">{{farmer.aadhar_number}}</td>
+                        </tr>
+                        <tr>
+                            <td class="tbl">Farmer Tracenet Registration Number</td>
+                            <td class="tbll">{{farmer.registration_number}}</td>
+                            <td class="tbl">Date of Joining of Program</td>
+                            <td class="tbll">{{farmer.date_of_joining_of_program}}</td>
+                        </tr>
+                        <tr>
+                            <td class="tbl">Village</td>
+                            <td class="tbll">{{farmer.village}}</td>
+                            <td class="tbl">Taluka</td>
+                            <td class="tbll">{{farmer.taluka}}</td>
+                        </tr>
+                        <tr>
+                            <td class="tbl">District</td>
+                            <td class="tbll">{{farmer.district}}</td>
+                            <td class="tbl">State </td>
+                            <td class="tbll">{{farmer.state}}</td>
+                        </tr>
+                        <tr>
+                            <td class="tbl">Country</td>
+                            <td class="tbll">{{farmer.country}}</td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </section>
+
+        {% if farmer_land %}
+        <!-- Farmer Land Details -->
+        <section class="section1">
+            <div class="head2">
+                <h3 class="head-title1">Farmer Land Details </h3>
+            </div>
+            <table class="arti-table">
+                <thead>
+                    <tr>
+                        <th>Farmer</th>
+                        <th>Owned land in Hectare</th>
+                        <th>Leased land in Hectare</th>
+                        <th>Land under irrigation in Hectare</th>
+                        <th>Main source of irrigation</th>
+                        <th>Type of <br>irregation</th>
+                        <th>Total organic Land in hectares</th>
+                        <th>Number of plots under organic management</th>
+                        <th>Current Production <br>system</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{farmer.user.user_display_name}}</td>
+                        <td>{{farmer_land.owned_land}}</td>
+                        <td>{{farmer_land.leased_land}}</td>
+                        <td>{{farmer_land.land_under_irrigation}}</td>
+                        <td>{{farmer_land.main_source_of_irrigation}}</td>
+                        <td>{{farmer_land.type_of_irrigation}}</td>
+                        <td>{{farmer_land.total_organic_land}}</td>
+                        <td>{{farmer_land.number_of_plots_under_organic}}</td>
+                        <td>{{farmer_land.present_production_system}}</td>
+                    </tr>
+
+                </tbody>
+            </table>
+            <table class="arti-table">
+                <thead>
+                    <tr>
+                        <th>Organ Farming Start Year</th>
+                        <th>Latitude of land</th>
+                        <th>Longitude of land</th>
+                        <th>Survey Number</th>
+                        <th>Is soil testing done?</th>
+                        <th>Last Soil test conducted in year</th>
+                        <th>Soil type</th>
+                        <th>Soil texture</th>
+                        <th>Soil organic matter</th>
+                        <th>Soil ph</th>
+                        <th>Soil drainage</th>
+                        <th>Soil Pressure</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{farmer_land.organic_farming_start_year}}</td>
+                        <td>{{farmer_land.latitude}}</td>
+                        <td>{{farmer_land.longitude}}</td>
+                        <td>{{farmer_land.survey_number}}</td>
+                        <td>{{farmer_land.soil_test_conducted}}</td>
+                        <td>{{farmer_land.last_conducted}}</td>
+                        <td>{{farmer_land.soil_type}}</td>
+                        <td>{{farmer_land.soil_texture}}</td>
+                        <td>{{farmer_land.soil_organic_matter}}</td>
+                        <td>{{farmer_land.soil_ph}}</td>
+                        <td>{{farmer_land.soil_drainage}}</td>
+                        <td>{{farmer_land.soil_moisture}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        {% endif %}
+
+
+        {% if farmer.organic_crop %}
+        <!--Organic Crop Details -->
+        <section class="section1">
+            <div class="head2">
+                <h3 class="head-title1">Organic Crop Details</h3>
+            </div>
+            <table class="arti-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type of crop</th>
+                        <th>Area of land in hectare</th>
+                        <th>Date of sowing of crop</th>
+                        <th>Expected date of harvest</th>
+                        <th>Expected yield in kg</th>
+                        <th>Expected Productivity </th>
+                        <th>Season</th>
+                        <th>Season Year</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for crop in crops %}
+                    {% if crop.is_active %}
+                    <tr>
+                        <td>{{crop.name}}</td>
+                        <td>{{crop.type}}</td>
+                        <td>{{crop.area}}</td>
+                        <td>{{crop.date_of_sowing}}</td>
+                        <td>{{crop.expected_date_of_harvesting}}</td>
+                        <td>{{crop.expected_yield}}</td>
+                        <td>{{crop.expected_productivity}}</td>
+                        <td>{{crop.season}}</td>
+                        <td>{{crop.year}}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+        {% endif %}
+
+        <!--Seed Details -->
+        <section class="section1">
+            <div class="head2">
+                <h3 class="head-title1">Seed Details</h3>
+            </div>
+            <table class="arti-table">
+                <thead>
+                    <tr>
+                        <th>organic crop</th>
+                        <th>Date of purchase</th>
+                        <th>Name of supplier</th>
+                        <th>Amount of seed used for sowing (Kg)</th>
+                        <th>Name of variety</th>
+                        <th>Seed Type</th>
+                        <th>Main Source of Seed </th>
+                        <th>Details of seed treatment</th>
+                        <th>No of plants (Perennial crops)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for crop in crops %}
+                    {% for seed_detail in crop.seed.all %}
+                    {% if seed_detail.is_active %}
+                    <tr>
+                        <td>{{seed_detail.organic_crop}}</td>
+                        <td>{{seed_detail.date_of_purchase}}</td>
+                        <td>{{seed_detail.name_of_supplier}}</td>
+                        <td>{{seed_detail.seed_for_sowing}}</td>
+                        <td>{{seed_detail.variety}}</td>
+                        <td>{{seed_detail.seed_type}}</td>
+                        <td>{{seed_detail.source_of_seed}}</td>
+                        <td>{{seed_detail.treatment}}</td>
+                        <td>{{seed_detail.no_of_plants}}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+        </section>
+
+        <!--Nutrition Management -->
+        <section class="section1">
+            <div class="head2">
+                <h3 class="head-title1">Nutrition Management</h3>
+            </div>
+            <table class="arti-table">
+                <thead>
+                    <tr>
+                        <th>organic crop</th>
+                        <th>Type of fertiliser used</th>
+                        <th>Source of fertiliser</th>
+                        <th>Qty of fertiliser applied(Kg)</th>
+                        <th>Date of application</th>
+                        <th>Type of application</th>
+                        <th>No of work<br> days required<br> for activity </th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for crop in crops %}
+                    {% for nutrition in crop.nutrient.all %}
+                    {% if nutrition.is_active %}
+                    <tr>
+                        <td>{{nutrition.organic_crop}}</td>
+                        <td>{{nutrition.type}}</td>
+                        <td>{{nutrition.source_of_fertilizer}}</td>
+                        <td>{{nutrition.quantity_of_fertilizer}}</td>
+                        <td>{{nutrition.date_of_application}}</td>
+                        <td>{{nutrition.type_of_application}}</td>
+                        <td>{{nutrition.no_of_workdays_required}}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+            <table class="arti-table">
+                <thead>
+                    <tr>
+                        <th>Type of raw material used</th>
+                        <th>Quantity used</th>
+                        <th>Starting date of preparation</th>
+                        <th>Date of manure ready</th>
+                        <th>Qty obtained(Kg)</th>
+                        <th>No of work<br> days used for<br> activity</th>
+                        <th>Date of sourcing</th>
+                        <th>Qty sourced(Kg)</th>
+                        <th>Name of supplier</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for crop in crops %}
+                    {% for nutrition in crop.nutrient.all %}
+                    {% if nutrition.is_active %}
+                    <tr>
+                        <td>{{nutrition.type_of_raw_material}}</td>
+                        <td>{{nutrition.quantity_used}}</td>
+                        <td>{{nutrition.starting_date}}</td>
+                        <td>{{nutrition.date_of_manure}}</td>
+                        <td>{{nutrition.quantity_obtained}}</td>
+                        <td>{{nutrition.no_of_workdays_used}}</td>
+                        <td>{{nutrition.sourcing_date}}</td>
+                        <td>{{nutrition.quantity_sourced}}</td>
+                        <td>{{nutrition.supplier_name}}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+        </section>
+
+        <!--Pest Disease Management -->
+        <section class="section1">
+            <div class="head2">
+                <h3 class="head-title1">Pest Disease Management</h3>
+            </div>
+            <table class="arti-table">
+                <thead>
+                    <tr>
+                        <th>organic crop</th>
+                        <th>Name of input used</th>
+                        <th>Qty of input used (Kg or lit)</th>
+                        <th>Source of input</th>
+                        <th>Date of application</th>
+                        <th>Type of application</th>
+                        <th>Targeted pest/disease</th>
+                        <th>Type of raw material used</th>
+                        <th>No of work days required for activity</th>
+                        <th>Starting date of preparation</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for crop in crops %}
+                    {% for pest_disease in crop.pest_disease.all %}
+                    {% if pest_disease.is_active %}
+                    <tr>
+                        <td>{{pest_disease.organic_crop}}</td>
+                        <td>{{pest_disease.name_of_input}}</td>
+                        <td>{{pest_disease.quantity_of_input}}</td>
+                        <td>{{pest_disease.source_of_input}}</td>
+                        <td>{{pest_disease.date_of_application}}</td>
+                        <td>{{pest_disease.type_of_application}}</td>
+                        <td>{{pest_disease.targeted_pest_diseases}}</td>
+                        <td>{{pest_disease.type_of_raw_material}}</td>
+                        <td>{{pest_disease.quantity_used}}</td>
+                        <td>{{pest_disease.starting_date}}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+
+            <table class="arti-table">
+                <thead>
+                    <tr>
+                        <th>Date of manure ready</th>
+                        <th>Qty obtained(Kg)</th>
+                        <th>No of work days used for activity</th>
+                        <th>Date of sourcing</th>
+                        <th>Qty sourced(Kg)</th>
+                        <th>Name of supplier</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for crop in crops %}
+                    {% for pest_disease in crop.pest_disease.all %}
+                    {% if pest_disease.is_active %}
+                    <tr>
+                        <td>{{pest_disease.date_of_manure}}</td>
+                        <td>{{pest_disease.quantity_obtained}}</td>
+                        <td>{{pest_disease.no_of_workdays_used}}</td>
+                        <td>{{pest_disease.sourcing_date}}</td>
+                        <td>{{pest_disease.quantity_sourced}}</td>
+                        <td>{{pest_disease.supplier_name}}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+        </section>
+
+        <!--Weed Management -->
+        <section class="section1">
+            <div class="head2">
+                <h3 class="head-title1">Weed Management</h3>
+            </div>
+            <table class="arti-table">
+                <thead>
+                    <tr>
+                        <th>organic crop</th>
+                        <th>Name of activity carried out</th>
+                        <th>Date of activity</th>
+                        <th>Method of activity</th>
+                        <th>No of workdays utilized for activity</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for crop in crops %}
+                    {% for weed in crop.weed.all %}
+                    {% if weed.is_active %}
+                    <tr>
+                        <td>{{weed.organic_crop}}</td>
+                        <td>{{weed.activity_name}}</td>
+                        <td>{{weed.date_of_activity}}</td>
+                        <td>{{weed.method}}</td>
+                        <td>{{weed.workdays_utilized}}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        </section>
+
+        <!--Harvest and Income Details -->
+        <section class="section1">
+            <div class="head2">
+                <h3 class="head-title1">Harvest and Income Details</h3>
+            </div>
+            <!-- 1st table -->
+            <table class="arti-table">
+                <thead>
+                    <tr>
+                        <th>organic crop</th>
+                        <th>Type of <br>harvest (Single/<br>multiple)</th>
+                        <th>First harvest</th>
+                        <th>First harvest date</th>
+                        <th>Second harvest</th>
+                        <th>Second harvest date</th>
+                        <th>Third harvest</th>
+                        <th>Third harvest date</th>
+                        <th>Total crop harvested</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for crop in crops %}
+                    {% for harvest_income in crop.harvest_income.all %}
+                    {% if harvest_income.is_active %}
+                    <tr>
+                        <td>{{harvest_income.organic_crop}}</td>
+                        <td>{{harvest_income.type}}</td>
+                        <td>{{harvest_income.first_harvest}}</td>
+                        <td>{{harvest_income.first_harvest_date}}</td>
+                        <td>{{harvest_income.second_harvest}}</td>
+                        <td>{{harvest_income.second_harvest_date}}</td>
+                        <td>{{harvest_income.third_harvest}}</td>
+                        <td>{{harvest_income.third_harvest_date}}</td>
+                        <td>{{harvest_income.total_crop_harvested}}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <table class="arti-table">
+                <thead>
+                    <tr>
+                        <th>Actual organic crop productivity (kg/ha)</th>
+                        <th>Quantity Sold through FPO(Kg)</th>
+                        <th>Name of Buyer</th>
+                        <th>Unit Sale Price paid by FPORs/kg</th>
+                        <th>Premium paid by FPO(Rs/kg)</th>
+                        <th>Total price received (Rs/Kg) including premium</th>
+                        <th>Total income from sale of organic product through FPO</th>
+                        <th>Quantity Sold Outside(Kg)</th>
+                        <th>Name of Buyer outside</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for crop in crops %}
+                    {% for harvest_income in crop.harvest_income.all %}
+                    {% if harvest_income.is_active %}
+                    <tr>
+                        <td>{{harvest_income.actual_crop_production}}</td>
+                        <td>{{harvest_income.quantity_sold_fpo}}</td>
+                        <td>{{harvest_income.buyer_name}}</td>
+                        <td>{{harvest_income.price_paid_fpo}}</td>
+                        <td>{{harvest_income.premium_paid_fpo}}</td>
+                        <td>{{harvest_income.total_price_received_fpo}}</td>
+                        <td>{{harvest_income.total_organic_sale_fpo}}</td>
+                        <td>{{harvest_income.quantity_sold_outside}}</td>
+                        <td>{{harvest_income.outside_buyer_name}}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+            <table class="arti-table">
+                <thead>
+                    <tr>
+                        <th>Unit Sale Price outside Rs/kg</th>
+                        <th>Premium paid outside (Rs/kg)</th>
+                        <th>Total price received (Rs/Kg) including premium</th>
+                        <th>Total income from sale of organic product outside</th>
+                        <th>Gross Income from sale of Organic crop (Rs)(sum of columnU&P)</th>
+                        <th>Mode of payment</th>
+                        <th>Payment Reference number</th>
+                        <th>Quantity of organic harvest unsold/Balance(kg)</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    {% for crop in crops %}
+                    {% for harvest_income in crop.harvest_income.all %}
+                    {% if harvest_income.is_active %}
+                    <tr>
+                        <td>{{harvest_income.price_paid_outside}}</td>
+                        <td>{{harvest_income.premium_paid_outside}}</td>
+                        <td>{{harvest_income.total_price_received_outside}}</td>
+                        <td>{{harvest_income.total_organic_sale_outside}}</td>
+                        <td>{{harvest_income.gross_income}}</td>
+                        <td>{{harvest_income.payment_mode}}</td>
+                        <td>{{harvest_income.payment_reference_number}}</td>
+                        <td>{{harvest_income.unsold_quantity}}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        </section>
+
+        <!--Cost Of Cultivation Details-->
+        <section class="section1">
+            <div class="head2">
+                <h3 class="head-title1">Cost Of Cultivation Details</h3>
+            </div>
+            <table class="arti-table">
+                <thead>
+                    <tr>
+                        <th>organic crop</th>
+                        <th>Source of Input</th>
+                        <th>Cost of Manure Preparation</th>
+                        <th>Cost of Bio-<br>fertilizer Preparation</th>
+                        <th>Cost of Bio-<br>pesticide Preparation</th>
+                        <th>Seed Purchase Costs</th>
+                        <th>Irrigation Costs</th>
+                        <th>Machinery charges - owned & Hired</th>
+                        <th>Input Costs</th>
+                        <th>Animal labour cost - owned & hired</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    {% for crop in crops %}
+                    {% for cost_of_cultivation in crop.cost_of_cultivation.all %}
+                    {% if cost_of_cultivation.is_active %}
+                    <tr>
+                        <td>{{cost_of_cultivation.organic_crop}}</td>
+                        <td>{{cost_of_cultivation.input_source}}</td>
+                        <td>{{cost_of_cultivation.manure_preparation_cost}}</td>
+                        <td>{{cost_of_cultivation.biofertilizer_preparation_cost}}</td>
+                        <td>{{cost_of_cultivation.biopesticide_preparation_cost}}</td>
+                        <td>{{cost_of_cultivation.seed_purchase_cost}}</td>
+                        <td>{{cost_of_cultivation.irrigation_cost}}</td>
+                        <td>{{cost_of_cultivation.machinery_cost}}</td>
+                        <td>{{cost_of_cultivation.input_cost}}</td>
+                        <td>{{cost_of_cultivation.animal_labour_cost}}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+            <table class="arti-table">
+                <thead>
+                    <tr>
+                        <th>Labour Cost for land preparation</th>
+                        <th>Labour Cost for Sowing</th>
+                        <th>Labour<br> Cost for<br> Weed management</th>
+                        <th>Labour Cost for Manure Application</th>
+                        <th>Labour Cost for Bio-<br>fertilizer Application</th>
+                        <th>Labour Cost for Bio-<br>pesticide Application</th>
+                        <th>Labour Cost for Harvest</th>
+                        <th>Total Labour Hiring Costs</th>
+                        <th>Other Costs (E.g<br>Transport <br>to Gin,<br>Equipment Purchase etc.)</th>
+                        <th>Total Cost</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+
+                    {% for crop in crops %}
+                    {% for cost_of_cultivation in crop.cost_of_cultivation.all %}
+                    {% if cost_of_cultivation.is_active %}
+                    <tr>
+                        <td>{{cost_of_cultivation.land_preparation_labour_cost}}</td>
+                        <td>{{cost_of_cultivation.sowing_labour_cost}}</td>
+                        <td>{{cost_of_cultivation.weed_management_labour_cost}}</td>
+                        <td>{{cost_of_cultivation.manure_application_labour_cost}}</td>
+                        <td>{{cost_of_cultivation.biofertilizer_application_labour_cost}}</td>
+                        <td>{{cost_of_cultivation.biopesticide_application_labour_cost}}</td>
+                        <td>{{cost_of_cultivation.harvest_labour_cost}}</td>
+                        <td>{{cost_of_cultivation.total_labour_hiring_cost}}</td>
+                        <td>{{cost_of_cultivation.other_cost}}</td>
+                        <td>{{cost_of_cultivation.total_cost}}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+        </section>
+
+        <!--Contamination Control Details -->
+        <section class="section1">
+            <div class="head2">
+                <h3 class="head-title1">Contamination Control Details</h3>
+            </div>
+            <table class="arti-table">
+                <thead>
+                    <tr>
+                        <th>organic crop</th>
+                        <th>Chances of contamination</th>
+                        <th>Details of contamination</th>
+                        <th>Details of Preventive measure taken</th>
+                        <th>Details of control measures taken</th>
+                        <th>Remark</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    {% for crop in crops %}
+                    {% for contamination_control in crop.contamination_control.all %}
+                    {% if contamination_control.is_active %}
+                    <tr>
+                        <td>{{contamination_control.organic_crop}}</td>
+                        <td>{{contamination_control.chances}}</td>
+                        <td>{{contamination_control.details}}</td>
+                        <td>{{contamination_control.preventive_measure_details}}</td>
+                        <td>{{contamination_control.control_measures_details}}</td>
+                        <td>{{contamination_control.remark}}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </section>
+
+    </div>
+</body>
+
+</html>
