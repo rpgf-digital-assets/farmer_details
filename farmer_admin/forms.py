@@ -576,10 +576,12 @@ class SelectFarmerForm(ModelForm):
         exclude = ['id']
 
     def clean(self):
+        print("🐍 File: farmer_admin/forms.py | Line: 579 | clean")
         cleaned_data = super().clean()
         validation_errors = []
 
         farmer = cleaned_data.get('farmer')
+        print("🐍 File: farmer_admin/forms.py | Line: 583 | clean ~ farmer",farmer)
         farmer_name = cleaned_data.get('farmer_name')
 
         if not farmer and not farmer_name:
@@ -595,6 +597,7 @@ class SelectFarmerForm(ModelForm):
 
 class SelectFarmerFormSet(BaseFormSet):
     def clean(self):
+        print("🐍 File: farmer_admin/forms.py | Line: 600 | SelectFarmerFormSet clean")
         """Checks that no two selected ginning farmer are same."""
         if any(self.errors):
             # Don't bother validating the formset unless each form is valid on its own
@@ -611,6 +614,8 @@ class SelectFarmerFormSet(BaseFormSet):
                 except KeyError:
                     distinct_farmer_quantity_mapping[str(farmer.pk)] = quantity
         validation_errors = []
+        print("🐍 File: farmer_admin/forms.py | Line: 600 | distinct_farmer_quantity_mapping", distinct_farmer_quantity_mapping)
+        
         for farmer_pk in distinct_farmer_quantity_mapping.keys():
             print("🐍 File: farmer_admin/forms.py | Line: 615 | clean ~ farmer_pk",farmer_pk)
             farmer = Farmer.objects.get(pk=farmer_pk)
