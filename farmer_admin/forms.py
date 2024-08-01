@@ -519,21 +519,34 @@ class CustomFarmerModelChoiceField(ModelChoiceField):
 
     def label_from_instance(self, obj):
         if obj.organic_crop:
-            cotton_crop = obj.organic_crop.filter(name__iexact="cotton").first()
-            if cotton_crop:
-                if cotton_crop.harvest_income.all():
-                    total_quantity = cotton_crop.harvest_income.aggregate(total_quantity=Sum('quantity_sold_fpo') - Sum('quantity_sold_outside'))['total_quantity']
-                    total_ginned = Ginning.objects.filter(selected_farmers__farmer__in=[obj]).exclude(ginning_status__status__in=[GinningStatus.QC_REJECTED])\
-                                    .aggregate(total_ginned=Coalesce(Sum('selected_farmers__quantity'), 0.0))['total_ginned']
-                    return f'{obj.user} ({total_quantity - total_ginned} Kg)'
-        return f'{obj.user}'
+            cotton_crop = obj.organic_crop.filter(name__iexact="cotton")
+            if cotton_crop.exists():
+                total_quantity = HarvestAndIncomeDetails.objects.filter(
+                    organic_crop__in=cotton_crop
+                ).aggregate(
+                    total_quantity=Sum("quantity_sold_fpo")
+                    - Sum("quantity_sold_outside")
+                )[
+                    "total_quantity"
+                ]
+                total_ginned = (
+                    Ginning.objects.filter(selected_farmers__farmer__in=[obj])
+                    .exclude(ginning_status__status__in=[GinningStatus.QC_REJECTED])
+                    .aggregate(
+                        total_ginned=Coalesce(Sum("selected_farmers__quantity"), 0.0)
+                    )["total_ginned"]
+                )
+
+                return f"{obj.user} ({total_quantity - total_ginned} Kg)"
+        return f"{obj.user}"
+
 
 class SelectFarmerForm(ModelForm):
-    farmer = CustomFarmerModelChoiceField(required=False, queryset=Farmer.objects.filter(organic_crop__name__iexact="cotton"), widget=Select(
-        attrs={
-            'class': 'form-control'
-        }
-    ))
+    farmer = CustomFarmerModelChoiceField(
+        required=False,
+        queryset=Farmer.objects.filter(organic_crop__name__iexact="cotton"),
+        widget=Select(attrs={"class": "form-control"}),
+    )
     farmer_name = CharField(required=False, widget=TextInput(
         attrs={
             'class': 'form-control'
@@ -542,11 +555,11 @@ class SelectFarmerForm(ModelForm):
     quantity = FloatField(widget=NumberInput(attrs={
         'class': 'form-control'
     }))
-    
+
     price = FloatField(widget=NumberInput(attrs={
         'class': 'form-control'
     }))
-    
+
     slip_no = CharField(required=True, widget=TextInput(
         attrs={
             'class': 'form-control'
@@ -601,7 +614,7 @@ class SelectFarmerFormSet(BaseFormSet):
         for farmer_pk in distinct_farmer_quantity_mapping.keys():
             farmer = Farmer.objects.get(pk=farmer_pk)
             organic_crop = OrganicCropDetails.objects.filter(name__iexact="cotton", farmer__pk=farmer_pk).aggregate(
-                            remaining_quantity=(Coalesce(Sum('harvest_income__quantity_sold_fpo'), 0) - Coalesce(Sum('harvest_income__quantity_sold_outside'), 0))
+                            remaining_quantity=(Coalesce(Sum('harvest_income__quantity_sold_fpo'), 0.0) - Coalesce(Sum('harvest_income__quantity_sold_outside'), 0.0))
                             )
             total_ginned = Ginning.objects.filter(selected_farmers__farmer__in=[farmer]).exclude(ginning_status__status__in=[GinningStatus.QC_REJECTED])\
                                     .aggregate(total_ginned=Coalesce(Sum('selected_farmers__quantity'), 0.0))['total_ginned']
