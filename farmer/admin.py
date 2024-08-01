@@ -12,7 +12,7 @@ class BaseModelAdmin(admin.ModelAdmin):
 
 
 class FarmerAdmin(admin.ModelAdmin):
-    search_fields = ["user__first_name"]
+    search_fields = ["user__id", "user__first_name"]
 
 
 for model in app_models:

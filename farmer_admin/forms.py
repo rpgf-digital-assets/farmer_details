@@ -612,6 +612,7 @@ class SelectFarmerFormSet(BaseFormSet):
                     distinct_farmer_quantity_mapping[str(farmer.pk)] = quantity
         validation_errors = []
         for farmer_pk in distinct_farmer_quantity_mapping.keys():
+            print("🐍 File: farmer_admin/forms.py | Line: 615 | clean ~ farmer_pk",farmer_pk)
             farmer = Farmer.objects.get(pk=farmer_pk)
             organic_crop = OrganicCropDetails.objects.filter(name__iexact="cotton", farmer__pk=farmer_pk).aggregate(
                             remaining_quantity=(Coalesce(Sum('harvest_income__quantity_sold_fpo'), 0.0) - Coalesce(Sum('harvest_income__quantity_sold_outside'), 0.0))
