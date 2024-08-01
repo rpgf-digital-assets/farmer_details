@@ -544,7 +544,7 @@ class CustomFarmerModelChoiceField(ModelChoiceField):
 class SelectFarmerForm(ModelForm):
     farmer = CustomFarmerModelChoiceField(
         required=False,
-        queryset=Farmer.objects.filter(organic_crop__name__iexact="cotton"),
+        queryset=Farmer.objects.filter(organic_crop__name__iexact="cotton").distinct(),
         widget=Select(attrs={"class": "form-control"}),
     )
     farmer_name = CharField(required=False, widget=TextInput(
