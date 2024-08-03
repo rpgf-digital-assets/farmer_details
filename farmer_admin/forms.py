@@ -468,7 +468,6 @@ class HarvestAndIncomeDetailForm(BaseCreationForm):
                 self.add_error('second_harvest', ValidationError(
                     "Second harvest is required if type is multiple"))
                 
-        print("🐍 File: farmer_admin/forms.py | Line: 463 | clean ~ total_crop_harvested", (quantity_sold_fpo + quantity_sold_outside + unsold_quantity), total_crop_harvested)
         if total_crop_harvested != (quantity_sold_fpo + quantity_sold_outside + unsold_quantity):
             validation_errors.append(ValidationError(
                     "Total crop harvested should be sum of all the quantities."))
