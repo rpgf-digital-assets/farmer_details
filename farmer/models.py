@@ -251,6 +251,14 @@ class OrganicCropDetails(BaseModel):
         ("MIXED_CROP", 'Mixed crop'),
     ]
     type = models.CharField(_("Type of crop"), max_length=100, choices=TYPE_CHOICES)
+    
+    ORGANIC_STATUS_CHOICES = [
+        ("IC-1", 'IC-1'),
+        ("IC-2", 'IC-2'),
+        ("IC-3", 'IC-3'),
+        ("ORG", 'ORG'),
+    ]
+    organic_status = models.CharField(_("Organic status"), max_length=40, choices=ORGANIC_STATUS_CHOICES, null=True, blank=True)
     area = models.FloatField(_("Area of land in hectare"))
     date_of_sowing = models.DateField(_("Date of sowing of crop"))
     expected_date_of_harvesting = models.DateField(_("Expected date of harvest"))
@@ -265,7 +273,7 @@ class OrganicCropDetails(BaseModel):
     def save(self, *args, **kwargs):
         self.expected_productivity = self.expected_yield
         if self.area > 0:
-            self.expected_productivity = self.expected_yield / self.area
+            self.expected_productivity = round((self.expected_yield / self.area), 2)
         
         super(OrganicCropDetails, self).save(*args, **kwargs)
 
@@ -405,6 +413,8 @@ class HarvestAndIncomeDetails(BaseModel):
     total_price_received_fpo = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Total price received (Rs/Kg) including premium'))
     total_organic_sale_fpo = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Total income from sale of organic product through FPO'))
     
+    purchase_document_number = models.CharField(max_length=100, verbose_name=_('Purchase Document Number '), null=True, blank=True)
+    
     quantity_sold_outside = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Quantity Sold Outside (Kg)'))
     outside_buyer_name = models.CharField(verbose_name=_('Name of Buyer outside'), max_length=500)
     price_paid_outside = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Unit Sale Price outside Rs/kg'))
@@ -412,15 +422,16 @@ class HarvestAndIncomeDetails(BaseModel):
     total_price_received_outside = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Total price received (Rs/Kg) including premium'))
     total_organic_sale_outside = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Total income from sale of organic product outside'))
     
-    gross_income = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Gross Income from sale of Organic crop (Rs) {sum of column U & P)'))
+    gross_income = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Gross Income from sale of Organic crop (Rs)'))
     payment_mode = models.CharField(verbose_name=_('Mode of payment'), max_length=500)
-    payment_reference_number = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Payment Reference number '))
+    payment_reference_number = models.CharField(max_length=100, verbose_name=_('Payment Reference number '))
     unsold_quantity = models.FloatField(validators=[MinValueValidator(0.0)], verbose_name=_('Quantity of organic harvest unsold/Balance (kg)'))
     
     def save(self, *args, **kwargs):
-        if self.first_harvest and self.second_harvest and self.third_harvest:
+        if self.type == self.SINGLE:
+            self.total_crop_harvested = self.first_harvest
+        else:
             self.total_crop_harvested = self.first_harvest + self.second_harvest + self.third_harvest
-        self.total_crop_harvested = self.first_harvest
         super(HarvestAndIncomeDetails, self).save(*args, **kwargs)
         
     # @property

@@ -9,6 +9,8 @@ Farmer Harvest Details {% if farmer_seed_object %} Edit {% else %} Create {% end
 {% block js %}
 {{block.super}}
 <script>
+    $("#id_total_crop_harvested").prop('disabled', true);
+
     $("#id_date_of_purchase").daterangepicker({
         singleDatePicker: true,
         showDropdowns: true,
@@ -71,7 +73,7 @@ Farmer Harvest Details {% if farmer_seed_object %} Edit {% else %} Create {% end
     const income_fpo_fields = ['id_quantity_sold_fpo', 'id_total_price_received_fpo']
     
     const update_total_income_fpo = () => {
-        let total = $('#id_quantity_sold_fpo').val() * $('#id_total_price_received_fpo').val() || 0
+        let total = Math.round($('#id_quantity_sold_fpo').val() * $('#id_total_price_received_fpo').val()) || 0
         $('#id_total_organic_sale_fpo').val(total).trigger('change')
     }
     
@@ -108,7 +110,7 @@ Farmer Harvest Details {% if farmer_seed_object %} Edit {% else %} Create {% end
 
 
     const update_total_income_others = () => {
-        let total = $('#id_quantity_sold_outside').val() * $('#id_total_price_received_outside').val() || 0
+        let total = Math.round($('#id_quantity_sold_outside').val() * $('#id_total_price_received_outside').val()) || 0
         $('#id_total_organic_sale_outside').val(total).trigger('change')
     }
     
@@ -130,8 +132,6 @@ Farmer Harvest Details {% if farmer_seed_object %} Edit {% else %} Create {% end
         $('#id_gross_income').val(sum)
     }
 
-    unsold_fields = ['id_total_crop_harvested', 'id_quantity_sold_fpo', 'id_quantity_sold_outside']
-
     $('#id_total_crop_harvested').on('change', () => {
         update_unsold()
     })
@@ -142,6 +142,20 @@ Farmer Harvest Details {% if farmer_seed_object %} Edit {% else %} Create {% end
         $('#id_unsold_quantity').val(unsold)
     }
 
+
+    // Actual Organic crop productivity field
+
+    $('#id_total_crop_harvested').on('change', () => {
+        update_actual_organic_crop_productivity()
+    })
+
+    var area_of_land = `{{ area_of_land }}`
+    
+    const update_actual_organic_crop_productivity = () => {
+        console.log('total crop harvested', $('#id_total_crop_harvested').val())
+        actual_organic_crop_productivity = parseFloat($('#id_total_crop_harvested').val() / area_of_land ).toFixed(2) || 0
+        $('#id_actual_crop_production').val(actual_organic_crop_productivity)
+    }
 
 </script>
 {% endblock js %}

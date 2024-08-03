@@ -530,6 +530,11 @@ class FarmerHarvestIncomeCreateView(CustomLoginRequiredMixin, AdminRequiredMixin
     model = HarvestAndIncomeDetails
     template_name = 'farmer_admin/farmer_harvest_create_update.html'
     form_class = HarvestAndIncomeDetailForm
+    
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["area_of_land"] = OrganicCropDetails.objects.get(id=self.kwargs['pk']).area
+        return context
 
 
 class FarmerHarvestIncomeUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin, BaseFarmerDetailsUpdateView):
@@ -537,6 +542,11 @@ class FarmerHarvestIncomeUpdateView(CustomLoginRequiredMixin, AdminRequiredMixin
     template_name = 'farmer_admin/farmer_harvest_create_update.html'
     form_class = HarvestAndIncomeDetailForm
     context_object_name = 'farmer_harvest_object'
+    
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["area_of_land"] = self.get_object().organic_crop.area
+        return context
 
 
 class FarmerCostOfCultivationCreateView(CustomLoginRequiredMixin, AdminRequiredMixin, BaseFarmerDetailsCreateView):
